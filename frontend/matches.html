@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PatchDB - Match Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="dashboard.html">PatchDB</a>
+            <div class="navbar-nav ms-auto">
+                <a href="dashboard.html" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
+                <button class="btn btn-outline-light btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10">
+                
+                <!-- Your Uploaded Patch -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h2 class="h5 mb-0">Your Uploaded Patch</h2>
+                    </div>
+                    <div class="card-body text-center">
+                        <img id="uploadedImage" class="image-preview mb-3" style="max-height: 200px;">
+                    </div>
+                </div>
+
+                <!-- No Matches Found -->
+                <div id="noMatches" class="card d-none">
+                    <div class="card-body text-center py-5">
+                        <svg class="mb-3 text-muted" width="64" height="64" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
+                        </svg>
+                        <h3 class="h5">You don't own this patch yet!</h3>
+                        <p class="text-muted mb-4">This appears to be a new patch for your collection.</p>
+                        
+                        <div class="row justify-content-center">
+                            <div class="col-12 col-sm-6">
+                                <div class="mb-3">
+                                    <label for="newPatchName" class="form-label">Patch Name</label>
+                                    <input type="text" class="form-control" id="newPatchName" placeholder="Enter the name of this patch" required>
+                                </div>
+                                <button class="btn btn-dark w-100" onclick="createNewPatch()">
+                                    <span class="spinner-border spinner-border-sm d-none me-2" id="createSpinner"></span>
+                                    Add to Collection
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Matches Found -->
+                <div id="matchesFound" class="d-none">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h2 class="h5 mb-0">Possible Matches</h2>
+                            <small class="text-muted">We found similar patches in your collection. Select the correct match or create a new patch.</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="matchesList">
+                                <!-- Matches will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12 col-md-6 mb-3">
+                                    <h4 class="h6">Found a match?</h4>
+                                    <button class="btn btn-dark w-100" onclick="addToSelectedGroup()" id="addToGroupBtn" disabled>
+                                        <span class="spinner-border spinner-border-sm d-none me-2" id="addSpinner"></span>
+                                        Add to Selected Group
+                                    </button>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <h4 class="h6">This is not the same patch?</h4>
+                                    <div class="mb-2">
+                                        <input type="text" class="form-control" id="newGroupName" placeholder="Enter new patch name" required>
+                                    </div>
+                                    <button class="btn btn-outline-dark w-100" onclick="createNewGroup()">
+                                        <span class="spinner-border spinner-border-sm d-none me-2" id="newGroupSpinner"></span>
+                                        Create New Patch
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error/Success Messages -->
+                <div id="errorContainer"></div>
+                <div id="successContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+    <script>
+        let userId;
+        let uploadResult;
+        let selectedMatch = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            userId = requireAuth();
+            if (!userId) return;
+
+            // Get upload result from session storage
+            const resultData = sessionStorage.getItem('uploadResult');
+            if (!resultData) {
+                showError('No upload data found. Please upload a patch first.');
+                setTimeout(() => window.location.href = 'upload.html', 2000);
+                return;
+            }
+
+            uploadResult = JSON.parse(resultData);
+            displayResults();
+        });
+
+        function displayResults() {
+            // Show uploaded image
+            const uploadedImage = document.getElementById('uploadedImage');
+            uploadedImage.src = formatImagePath(uploadResult.patch.path);
+
+            // Check if there are matches
+            const hasMatches = uploadResult.matches && uploadResult.matches.length > 0;
+            const hasUngroupedMatches = uploadResult.ungrouped_matches && uploadResult.ungrouped_matches.length > 0;
+
+            if (!hasMatches && !hasUngroupedMatches) {
+                // No matches found
+                document.getElementById('noMatches').classList.remove('d-none');
+            } else {
+                // Matches found
+                document.getElementById('matchesFound').classList.remove('d-none');
+                displayMatches();
+            }
+        }
+
+        function displayMatches() {
+            const matchesList = document.getElementById('matchesList');
+            let matchesHtml = '';
+
+            // Display grouped matches
+            if (uploadResult.matches && uploadResult.matches.length > 0) {
+                uploadResult.matches.forEach(match => {
+                    const confidence = Math.round(match.score * 100);
+                    matchesHtml += `
+                        <div class="col-12 col-sm-6 col-lg-4 mb-3">
+                            <div class="match-item card cursor-pointer" onclick="selectMatch(${match.group_id}, '${match.group_name}', this)">
+                                <div class="patch-item">
+                                    <img src="${formatImagePath(match.path)}" alt="${match.group_name}" class="card-img-top">
+                                </div>
+                                <div class="card-body p-3">
+                                    <h5 class="card-title h6 mb-1">${match.group_name}</h5>
+                                    <p class="card-text small text-muted mb-2">${confidence}% match</p>
+                                    <div class="badge bg-secondary">Grouped Patch</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Display ungrouped matches
+            if (uploadResult.ungrouped_matches && uploadResult.ungrouped_matches.length > 0) {
+                uploadResult.ungrouped_matches.forEach(match => {
+                    const confidence = Math.round(match.score * 100);
+                    matchesHtml += `
+                        <div class="col-12 col-sm-6 col-lg-4 mb-3">
+                            <div class="match-item card cursor-pointer" onclick="selectUngroupedMatch(${match.id}, this)">
+                                <div class="patch-item">
+                                    <img src="${formatImagePath(match.path)}" alt="Ungrouped patch" class="card-img-top">
+                                </div>
+                                <div class="card-body p-3">
+                                    <h5 class="card-title h6 mb-1">Ungrouped Patch</h5>
+                                    <p class="card-text small text-muted mb-2">${confidence}% match</p>
+                                    <div class="badge bg-warning text-dark">Ungrouped</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            matchesList.innerHTML = matchesHtml;
+        }
+
+        function selectMatch(groupId, groupName, element) {
+            // Remove previous selection
+            document.querySelectorAll('.match-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            // Select current item
+            element.classList.add('selected');
+            selectedMatch = { type: 'group', groupId, groupName };
+
+            // Enable the "Add to Group" button
+            document.getElementById('addToGroupBtn').disabled = false;
+        }
+
+        function selectUngroupedMatch(patchId, element) {
+            // Remove previous selection
+            document.querySelectorAll('.match-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            // Select current item
+            element.classList.add('selected');
+            selectedMatch = { type: 'ungrouped', patchId };
+
+            // Enable the "Add to Group" button but change text
+            const btn = document.getElementById('addToGroupBtn');
+            btn.disabled = false;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm d-none me-2" id="addSpinner"></span>Group with Selected Patch';
+        }
+
+        async function addToSelectedGroup() {
+            if (!selectedMatch) {
+                showError('Please select a match first.');
+                return;
+            }
+
+            const btn = document.getElementById('addToGroupBtn');
+            const spinner = document.getElementById('addSpinner');
+
+            try {
+                btn.disabled = true;
+                spinner.classList.remove('d-none');
+
+                if (selectedMatch.type === 'group') {
+                    // Add to existing group
+                    await addPatchToGroup(userId, uploadResult.patch.id, selectedMatch.groupId);
+                    showSuccess(`Patch added to "${selectedMatch.groupName}" group!`);
+                } else {
+                    // Create new group with ungrouped patch - need to implement this logic
+                    showError('Grouping with ungrouped patches requires creating a new group name.');
+                    return;
+                }
+
+                // Clear session storage and redirect
+                sessionStorage.removeItem('uploadResult');
+                setTimeout(() => window.location.href = 'dashboard.html', 1500);
+
+            } catch (error) {
+                showError('Failed to add patch: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('d-none');
+            }
+        }
+
+        async function createNewGroup() {
+            const groupName = document.getElementById('newGroupName').value.trim();
+            if (!groupName) {
+                showError('Please enter a name for the new patch.');
+                return;
+            }
+
+            const btn = event.target;
+            const spinner = document.getElementById('newGroupSpinner');
+
+            try {
+                btn.disabled = true;
+                spinner.classList.remove('d-none');
+
+                await createPatchGroup(userId, uploadResult.patch.id, groupName);
+                showSuccess(`New patch "${groupName}" created successfully!`);
+
+                // Clear session storage and redirect
+                sessionStorage.removeItem('uploadResult');
+                setTimeout(() => window.location.href = 'dashboard.html', 1500);
+
+            } catch (error) {
+                showError('Failed to create new patch: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('d-none');
+            }
+        }
+
+        async function createNewPatch() {
+            const patchName = document.getElementById('newPatchName').value.trim();
+            if (!patchName) {
+                showError('Please enter a name for the patch.');
+                return;
+            }
+
+            const btn = document.getElementById('createBtn') || event.target;
+            const spinner = document.getElementById('createSpinner');
+
+            try {
+                btn.disabled = true;
+                spinner.classList.remove('d-none');
+
+                await createPatchGroup(userId, uploadResult.patch.id, patchName);
+                showSuccess(`Patch "${patchName}" added to your collection!`);
+
+                // Clear session storage and redirect
+                sessionStorage.removeItem('uploadResult');
+                setTimeout(() => window.location.href = 'dashboard.html', 1500);
+
+            } catch (error) {
+                showError('Failed to add patch: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('d-none');
+            }
+        }
+    </script>
+</body>
+</html>

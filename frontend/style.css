@@ -1,0 +1,200 @@
+/* Mobile-first CSS with minimal colors */
+:root {
+    --primary-color: #212529;
+    --secondary-color: #6c757d;
+    --light-gray: #f8f9fa;
+    --border-color: #dee2e6;
+    --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--light-gray);
+}
+
+/* Cards and containers */
+.card {
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    border-radius: 0.5rem;
+}
+
+/* Navigation */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+/* Image upload area */
+.upload-area {
+    border: 2px dashed var(--border-color);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    background-color: white;
+}
+
+.upload-area:hover {
+    border-color: var(--secondary-color);
+}
+
+.upload-area.dragover {
+    border-color: var(--primary-color);
+    background-color: var(--light-gray);
+}
+
+/* Image preview */
+.image-preview {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.375rem;
+    box-shadow: var(--shadow);
+}
+
+/* Patch grid */
+.patch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.patch-item {
+    aspect-ratio: 1;
+    border-radius: 0.375rem;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease;
+}
+
+.patch-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.patch-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Match items */
+.match-item {
+    border: 2px solid transparent;
+    border-radius: 0.5rem;
+    transition: border-color 0.3s ease;
+}
+
+.match-item:hover {
+    border-color: var(--primary-color);
+}
+
+.match-item.selected {
+    border-color: var(--primary-color);
+    background-color: rgba(33, 37, 41, 0.05);
+}
+
+/* Stats cards */
+.stat-card {
+    text-align: center;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Camera controls */
+.camera-container {
+    position: relative;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: black;
+}
+
+.camera-controls {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.capture-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid white;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+    transition: transform 0.2s ease;
+}
+
+.capture-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Responsive adjustments */
+@media (min-width: 576px) {
+    .patch-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+}
+
+@media (min-width: 768px) {
+    .patch-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+}
+
+/* Utility classes */
+.min-vh-100 {
+    min-height: 100vh;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.btn-outline-dark:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Loading states */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
