@@ -143,6 +143,32 @@ async function getUserPatches(userId) {
     return await response.json();
 }
 
+async function deletePatch(userId, patchId) {
+    const response = await fetch(`${API_BASE_URL}/${userId}/patch/${patchId}`, {
+        method: 'DELETE'
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete patch');
+    }
+
+    return await response.json();
+}
+
+async function deletePatchGroup(userId, groupId) {
+    const response = await fetch(`${API_BASE_URL}/${userId}/group/${groupId}`, {
+        method: 'DELETE'
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete patch group');
+    }
+
+    return await response.json();
+}
+
 // Image utilities
 function resizeImage(file, maxWidth = 800, maxHeight = 600, quality = 0.8) {
     return new Promise((resolve) => {
