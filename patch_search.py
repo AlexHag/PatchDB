@@ -1,5 +1,4 @@
 import os
-import json
 import torch
 import clip
 import faiss
@@ -115,41 +114,3 @@ def search_patch(db: DbRepo, user_id, patch_id, path):
         "matches": list(patch_groups.values()),
         "ungrouped_matches": ungrouped_matches
     }
-
-def upload_patch(db: DbRepo, user_id, path):
-    patch_id = db.insert_patch(user_id, path)
-    search_results = search_patch(db, user_id, patch_id, path)
-    print(json.dumps(search_results, indent=4))
-
-    patch_id = search_results["patch"]["id"]
-
-    if search_results["matches"]:
-        confirmed = input("Found matches. Enter group ID to add the patch to: ")
-        if confirmed.isdigit():
-            group_id = int(confirmed)
-            db.update_patch_group(patch_id, group_id)
-            print(f"Added patch to group ID {group_id}")
-            return
-
-    new_group_name = input("Enter new group name: ")
-    if new_group_name:
-        group_id = db.insert_patch_group(user_id, new_group_name)
-        db.update_patch_group(patch_id, group_id)
-        print(f"Created group '{new_group_name}' with ID {group_id}")
-
-
-def get_or_create_user(db: DbRepo, user_name="alex"):
-    db.create_tables()
-    existing = db.get_user_by_username(user_name)
-    return existing["id"] if existing else db.insert_user(user_name)
-
-
-def main():
-    db = DbRepo("database.db")
-    user_id = get_or_create_user(db)
-    path = "./images/apple_1.png"
-    upload_patch(db, user_id, path)
-
-
-if __name__ == "__main__":
-    main()
