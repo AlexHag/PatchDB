@@ -2,3 +2,6 @@
 *.jpg
 *.png
 __pycache__
+faiss_indexes
+images
+database.db
