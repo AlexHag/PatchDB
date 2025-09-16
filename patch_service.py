@@ -29,7 +29,8 @@ def handle_patch_upload(user_id, image, filename):
             return {'error': 'User not found'}, 404
 
         path = save_image(user_id, image, filename)
-        result = search_patch(db, user_id, path)
+        patch_id = db.insert_patch(user_id, path)
+        result = search_patch(db, user_id, patch_id, path)
 
         return result, 200
     except Exception as e:
