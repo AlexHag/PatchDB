@@ -15,8 +15,14 @@ def _save_image(user_id, image, filename):
     return path
 
 def _get_extension(filename):
-    if '.' in filename:
-        return filename.rsplit('.', 1)[1].lower()
+    basename = os.path.basename(filename)
+
+    if '.' in basename:
+        ext = basename.rsplit('.', 1)[1].lower()
+        allowed = {'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'}
+        if ext in allowed:
+            return ext
+
     return ''
 
 def handle_patch_upload(user_id, image, filename):
@@ -123,4 +129,52 @@ def get_user_patches(user_id):
         return response, 200
     except Exception as e:
         print(f"Error in get_user_patch_groups: {e}")
+        return {'error': "Oops something went wrong"}, 500
+
+def delete_patch(user_id, patch_id):
+    try:
+        db = DbRepo("database.db")
+
+        patch = db.get_patch_by_id(patch_id)
+
+        if not patch:
+            return {'error': 'Patch not found'}, 404
+    
+        if str(patch['user_id']) != str(user_id):
+            return {'error': 'Unauthorized'}, 403
+
+        if os.path.exists(patch['path']):
+            os.remove(patch['path'])
+        
+        db.delete_patch_by_id(patch_id)
+
+        return {'message': 'Patch deleted successfully'}, 200
+    except Exception as e:
+        print(f"Error in delete_patch: {e}")
+        return {'error': "Oops something went wrong"}, 500
+
+def delete_patch_group(user_id, group_id):
+    try:
+        db = DbRepo("database.db")
+
+        group = db.get_patch_group_by_id(group_id)
+
+        if not group:
+            return {'error': 'Patch group not found'}, 404
+    
+        if str(group['user_id']) != str(user_id):
+            return {'error': 'Unauthorized'}, 403
+    
+        patches = db.get_all_patches_by_group_id(group_id)
+
+        for patch in patches:
+            if os.path.exists(patch['path']):
+                os.remove(patch['path'])
+            
+            db.delete_patch_by_id(patch['id'])
+
+        db.delete_patch_group_by_id(group_id)
+        return {'message': 'Patch group deleted successfully'}, 200
+    except Exception as e:
+        print(f"Error in delete_patch_group: {e}")
         return {'error': "Oops something went wrong"}, 500

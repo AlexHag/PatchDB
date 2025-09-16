@@ -108,6 +108,31 @@ class DbRepo:
             "patch_group_id": patch[3]
         } if patch else None
 
+    def get_all_patches_by_group_id(self, group_id):
+        self.cursor.execute(
+            "SELECT * FROM patches WHERE patch_group_id = ?",
+            (group_id,)
+        )
+
+        patches = self.cursor.fetchall()
+
+        return [
+            {
+                "id": patch[0],
+                "user_id": patch[1],
+                "path": patch[2],
+                "patch_group_id": patch[3]
+            } for patch in patches
+        ] if patches else []
+
+    def delete_patch_by_id(self, patch_id):
+        self.cursor.execute(
+            "DELETE FROM patches WHERE id = ?",
+            (patch_id,)
+        )
+
+        self.conn.commit()
+
     # ------------ Patch Group ------------------
 
     def insert_patch_group(self, user_id, name):
@@ -150,3 +175,11 @@ class DbRepo:
                 "group_name": patch[3]
             } for patch in patches
         ] if patches else []
+
+    def delete_patch_group_by_id(self, group_id):
+        self.cursor.execute(
+            "DELETE FROM patch_group WHERE id = ?",
+            (group_id,)
+        )
+
+        self.conn.commit()

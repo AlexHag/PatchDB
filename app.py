@@ -112,3 +112,21 @@ def get_user_patches(user_id):
     except Exception as e:
         print(f"Error in /get-patches: {e}")
         return jsonify({'error': "Oops something went wrong"}), 500
+
+@app.route("/<user_id>/group/<group_id>", methods=["DELETE"])
+def delete_patch_group(user_id, group_id):
+    try:
+        response, status_code = patch_service.delete_patch_group(user_id, group_id)
+        return jsonify(response), status_code
+    except Exception as e:
+        print(f"Error in /delete-patch: {e}")
+        return jsonify({'error': "Oops something went wrong"}), 500
+
+@app.route("/<user_id>/patch/<patch_id>", methods=["DELETE"])
+def delete_patch(user_id, patch_id):
+    try:
+        response, status_code = patch_service.delete_patch(user_id, patch_id)
+        return jsonify(response), status_code
+    except Exception as e:
+        print(f"Error in /delete-patch: {e}")
+        return jsonify({'error': "Oops something went wrong"}), 500

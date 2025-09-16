@@ -126,6 +126,18 @@ Response
 }
 ```
 
+## Delete patch
+Request
+```
+DELETE /<user_id>/patch/<patch_id>
+```
+
+## Delete group and all patches in it
+Request
+```
+DELETE /<user_id>/group/<group_id>
+```
+
 # Deploy
 
 ## Install nginx

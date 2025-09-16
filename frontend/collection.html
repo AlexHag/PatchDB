@@ -102,6 +102,16 @@
                     <img id="modalImage" class="img-fluid rounded" style="max-height: 400px;">
                     <div id="modalInfo" class="mt-3"></div>
                 </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" id="deletePatchBtn" onclick="confirmDeletePatch()">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-1">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                        </svg>
+                        Delete Patch
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -112,6 +122,7 @@
         let userId;
         let allPatches = { patches: [], ungrouped_patches: [] };
         let patchModal;
+        let currentPatchId = null;
 
         document.addEventListener('DOMContentLoaded', async function() {
             userId = requireAuth();
@@ -176,7 +187,15 @@
                         <div class="col-12">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h2 class="h5 mb-0">${group.name}</h2>
-                                <span class="badge bg-secondary">${imageCount} image${imageCount > 1 ? 's' : ''}</span>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-secondary me-2">${imageCount} image${imageCount > 1 ? 's' : ''}</span>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="confirmDeleteGroup(${group.id}, '${group.name.replace(/'/g, "\\'")}')" title="Delete group">
+                                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="col-12">
@@ -185,7 +204,7 @@
                 
                 group.images.forEach((image, index) => {
                     html += `
-                        <div class="patch-item cursor-pointer" onclick="showPatchDetail('${image.path}', '${group.name}', 'Group ${index + 1} of ${imageCount}')">
+                        <div class="patch-item cursor-pointer" onclick="showPatchDetail('${image.path}', '${group.name}', 'Group ${index + 1} of ${imageCount}', ${image.id})">
                             <img src="${formatImagePath(image.path)}" alt="${group.name}" loading="lazy">
                         </div>
                     `;
@@ -215,7 +234,7 @@
             let html = '';
             patches.forEach(patch => {
                 html += `
-                    <div class="patch-item cursor-pointer ungrouped-patch" onclick="showPatchDetail('${patch.path}', 'Ungrouped Patch', 'This patch hasn\\'t been organized yet')">
+                    <div class="patch-item cursor-pointer ungrouped-patch" onclick="showPatchDetail('${patch.path}', 'Ungrouped Patch', 'This patch hasn\\'t been organized yet', ${patch.id})">
                         <img src="${formatImagePath(patch.path)}" alt="Ungrouped patch" loading="lazy">
                     </div>
                 `;
@@ -224,7 +243,8 @@
             container.innerHTML = html;
         }
 
-        function showPatchDetail(imagePath, title, subtitle) {
+        function showPatchDetail(imagePath, title, subtitle, patchId) {
+            currentPatchId = patchId;
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('modalImage').src = formatImagePath(imagePath);
             document.getElementById('modalInfo').innerHTML = `<p class="text-muted mb-0">${subtitle}</p>`;
@@ -300,6 +320,48 @@
             // Only hide if we're showing search results, not empty state
             if (allPatches.patches.length > 0 || allPatches.ungrouped_patches.length > 0) {
                 displayGroupedPatches(allPatches.patches);
+            }
+        }
+
+        async function confirmDeletePatch() {
+            if (!currentPatchId) {
+                showError('No patch selected for deletion');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete this patch? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                showLoading();
+                await deletePatch(userId, currentPatchId);
+                patchModal.hide();
+                showSuccess('Patch deleted successfully');
+                await loadCollection(); // Reload the collection
+            } catch (error) {
+                console.error('Error deleting patch:', error);
+                showError('Failed to delete patch: ' + error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function confirmDeleteGroup(groupId, groupName) {
+            if (!confirm(`Are you sure you want to delete the group "${groupName}" and all patches in it? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                showLoading();
+                await deletePatchGroup(userId, groupId);
+                showSuccess(`Group "${groupName}" deleted successfully`);
+                await loadCollection(); // Reload the collection
+            } catch (error) {
+                console.error('Error deleting group:', error);
+                showError('Failed to delete group: ' + error.message);
+            } finally {
+                hideLoading();
             }
         }
 
