@@ -1,0 +1,6 @@
+server {
+    listen 80;
+
+    server_name patchdb.se;
+    return 301 https://patchdb.se$request_uri;
+}
