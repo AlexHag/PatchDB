@@ -158,6 +158,7 @@ sudo ln -s /etc/nginx/sites-available/patch_db_https /etc/nginx/sites-enabled/
 
 ## Move static files
 ```
+sudo mkdir /var/www/patch_db_https
 sudo cp -r frontend/* /var/www/patch_db_https
 ```
 
@@ -189,3 +190,19 @@ source .venv/bin/activate
 pip install -r requirements.txt
 python3 -m flask run > output.log 2>&1 &
 ```
+
+## Deploy through proxy
+Generate self signed cerificate on backend
+```
+sudo openssl req -x509 -nodes -days 3650 \
+  -newkey rsa:4096 \
+  -keyout backend.key \
+  -out backend.crt \
+  -subj "/CN=deploy.cloud.cbh.kth.se"
+
+sudo mkdir -p /etc/nginx/ssl
+sudo mv backend.crt /etc/nginx/ssl/backend.crt
+sudo mv backend.key /etc/nginx/ssl/backend.key
+```
+
+Copy certificate to the proxy server
