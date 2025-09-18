@@ -20,9 +20,9 @@ A mobile-first web application for managing and organizing patch collections usi
 
 ### 2. Dashboard (`dashboard.html`)
 - User greeting and collection statistics
-- Quick action cards for uploading and viewing patches
-- Recent patches preview
-- Navigation to other pages
+- Quick action card for uploading patches
+- Full patch collection with search and filtering
+- Group management and organization features
 
 ### 3. Upload (`upload.html`)
 - Multiple upload methods: camera, file upload, drag & drop
@@ -36,21 +36,15 @@ A mobile-first web application for managing and organizing patch collections usi
 - Options to add to existing group or create new patch
 - Confidence scores for matches
 
-### 5. Collection (`collection.html`)
-- Grid view of all patches organized by groups
-- Search functionality to filter patches
-- Modal view for detailed patch inspection
-- Separate section for ungrouped patches
 
 ## Files Structure
 
 ```
 frontend/
 ├── index.html      # Login/Authentication page
-├── dashboard.html  # Main dashboard
+├── dashboard.html  # Main dashboard with integrated collection
 ├── upload.html     # Patch upload interface
 ├── matches.html    # Duplicate detection results
-├── collection.html # Patch collection grid
 ├── style.css      # Mobile-first styles
 ├── app.js         # JavaScript utilities and API calls
 └── README.md      # This file
