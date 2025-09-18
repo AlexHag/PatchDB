@@ -132,6 +132,26 @@ def add_patch_to_group(user_id, patch_id, group_id):
         print(f"Error in add_patch_to_group: {e}")
         return {'error': "Oops something went wrong"}, 500
 
+def update_patch_group_favorite(user_id, group_id, is_favorite):
+    try:
+        db = DbRepo("database.db")
+        user = db.get_user_by_id(user_id)
+
+        if not user:
+            return {'error': 'User not found'}, 404
+        
+        group = db.get_patch_group_by_id(group_id)
+
+        if not group:
+            return {'error': 'Patch group not found'}, 404
+        
+        db.update_is_favorite(group_id, is_favorite)
+        msg = "Patch group marked as favorite" if is_favorite else "Patch group removed from favorite"
+        return {'message': msg}, 200
+    except Exception as e:
+        print(f"Error in update_patch_group_favorite: {e}")
+        return {'error': "Oops something went wrong"}, 500
+
 def get_user_patches(user_id):
     try:
         db = DbRepo("database.db")
@@ -145,7 +165,8 @@ def get_user_patches(user_id):
                 grouped_patches[str(patch['group_id'])].append({
                     'id': patch['id'],
                     'path': patch['path'],
-                    'group_name': patch['group_name']
+                    'group_name': patch['group_name'],
+                    'is_favorite': patch['is_favorite']
                 })
             else:
                 ungrouped_patches.append({
@@ -162,6 +183,7 @@ def get_user_patches(user_id):
             group = {
                 'id': int(group_id),
                 'name': patch_list[0]['group_name'],
+                'is_favorite': patch_list[0]['is_favorite'],
                 'images': [{'id': p['id'], 'path': p['path']} for p in patch_list]
             }
     

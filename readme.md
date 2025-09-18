@@ -104,7 +104,8 @@ Response
                     "path": "./images/2/4800987c-c5b8-44d2-9a61-801a47db04ad.jpg"
                 }
             ],
-            "name": "My Cool Patch"
+            "name": "My Cool Patch",
+            "is_favorite": 0
         },
         {
             "id": 2,
@@ -114,7 +115,8 @@ Response
                     "path": "./images/2/fcd6d76f-cbdd-4a09-9079-f59fac216ab6.jpg"
                 }
             ],
-            "name": "Another Patch"
+            "name": "Another Patch",
+            "is_favorite": 1
         }
     ],
     "ungrouped_patches": [
@@ -136,6 +138,18 @@ DELETE /<user_id>/patch/<patch_id>
 Request
 ```
 DELETE /<user_id>/group/<group_id>
+```
+
+## Add a patch group to favorites
+Request
+```
+PUT /<user_id>/group/<group_id>/favorite
+```
+
+## Remove a patch group from favorites
+Request
+```
+DELETE /<user_id>/group/<group_id>/favorite
 ```
 
 # Deploy

@@ -29,7 +29,8 @@ class DbRepo:
         CREATE TABLE IF NOT EXISTS patch_group (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
-            name TEXT
+            name TEXT,
+            is_favorite BIT DEFAULT 0
         )
         """)
 
@@ -59,7 +60,7 @@ class DbRepo:
             "id": user[0],
             "username": user[1]
         } if user else None
-    
+
     def get_user_by_id(self, user_id):
         self.cursor.execute(
             "SELECT * FROM users WHERE id = ?",
@@ -156,12 +157,13 @@ class DbRepo:
         return {
             "id": group[0],
             "user_id": group[1],
-            "name": group[2]
+            "name": group[2],
+            "is_favorite": group[3]
         } if group else None
 
     def get_all_patches_by_user_id(self, user_id):
         self.cursor.execute(
-            "SELECT p.id, p.path, p.patch_group_id, pg.name FROM patches p LEFT JOIN patch_group pg ON p.patch_group_id=pg.id WHERE p.user_id = ?",
+            "SELECT p.id, p.path, p.patch_group_id, pg.name, pg.is_favorite FROM patches p LEFT JOIN patch_group pg ON p.patch_group_id=pg.id WHERE p.user_id = ?",
             (user_id,)
         )
 
@@ -172,7 +174,8 @@ class DbRepo:
                 "id": patch[0],
                 "path": patch[1],
                 "group_id": patch[2],
-                "group_name": patch[3]
+                "group_name": patch[3],
+                "is_favorite": patch[4]
             } for patch in patches
         ] if patches else []
 
@@ -180,6 +183,14 @@ class DbRepo:
         self.cursor.execute(
             "DELETE FROM patch_group WHERE id = ?",
             (group_id,)
+        )
+
+        self.conn.commit()
+    
+    def update_is_favorite(self, group_id, is_favorite):
+        self.cursor.execute(
+            "UPDATE patch_group SET is_favorite = ? WHERE id = ?",
+            (is_favorite, group_id)
         )
 
         self.conn.commit()

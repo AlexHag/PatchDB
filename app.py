@@ -88,6 +88,24 @@ def add_patch_to_group(user_id):
         print(f"Error in /add-patch-to-group: {e}")
         return jsonify({'error': "Oops something went wrong"}), 500
 
+@app.route("/<user_id>/group/<group_i>/favorite", methods=["PUT"])
+def favorite_patch_group(user_id, group_i):
+    try:
+        response, status_code = patch_service.update_patch_group_favorite(user_id, group_i, True)
+        return jsonify(response), status_code
+    except Exception as e:
+        print(f"Error in favorite_patch_group: {e}")
+        return jsonify({'error': "Oops something went wrong"}), 500
+
+@app.route("/<user_id>/group/<group_i>/favorite", methods=["DELETE"])
+def unfavorite_patch_group(user_id, group_i):
+    try:
+        response, status_code = patch_service.update_patch_group_favorite(user_id, group_i, False)
+        return jsonify(response), status_code
+    except Exception as e:
+        print(f"Error in favorite_patch_group: {e}")
+        return jsonify({'error': "Oops something went wrong"}), 500
+
 @app.route("/<user_id>/group", methods=["POST"])
 def create_patch_group(user_id):
     try:
