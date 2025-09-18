@@ -4,13 +4,12 @@ import clip
 import faiss
 import numpy as np
 from PIL import Image
-from db_repo import DbRepo
 
 DEVICE = "cpu"
 MODEL, PREPROCESS = clip.load("RN50", device=DEVICE, jit=False)
 MODEL.eval()
 
-class PatchSearch:
+class PatchIndex:
     def __init__(self, index_id):
         self.device = DEVICE
         self.model = MODEL
@@ -33,7 +32,7 @@ class PatchSearch:
     def _add_to_index(self, emb, id):
         if self.index is None:
             base_index = faiss.IndexFlatIP(emb.shape[1])
-            self.index = faiss.IndexIDMap(base_index)
+            self.index = faiss.IndexIDMap2(base_index)
 
         self.index.add_with_ids(emb, np.array([id]))
 
@@ -70,47 +69,8 @@ class PatchSearch:
         self._add_to_index(emb, id)
         return self.k_search(emb, id)
 
-def search_patch(db: DbRepo, user_id, patch_id, path):
-    index = PatchSearch(user_id)
-    result = index.index_patch(path, patch_id)
-
-    patch_groups = {}
-    ungrouped_matches = []
-
-    for rid, score in result:
-        matching_patch = db.get_patch_by_id(rid)
-        if not matching_patch:
-            print(f"Warning: matching patch not found for ID={rid}")
-            continue
-
-        if matching_patch["patch_group_id"]:
-            current = patch_groups.get(matching_patch["patch_group_id"])
-            if current and current["score"] > score:
-                continue
-
-            group = db.get_patch_group_by_id(matching_patch["patch_group_id"])
-
-            patch_groups[matching_patch["patch_group_id"]] = {
-                "id": matching_patch["id"],
-                "group_id": matching_patch["patch_group_id"],
-                "group_name": group["name"] if group else "Unknown Group",
-                "path": matching_patch["path"],
-                "score": score
-            }
-        else:
-            ungrouped_matches.append({
-                "id": matching_patch["id"],
-                "group_id": None,
-                "group_name": None,
-                "path": matching_patch["path"],
-                "score": score
-            })
-
-    return {
-        "patch": {
-            "id": patch_id,
-            "path": path
-        },
-        "matches": list(patch_groups.values()),
-        "ungrouped_matches": ungrouped_matches
-    }
+    def remove_from_index(self, id):
+        if self.index is not None:
+            self.index.remove_ids(np.array([id], dtype=np.int64))
+            path = f"./faiss_indexes/{self.index_id}.index"
+            faiss.write_index(self.index, path)

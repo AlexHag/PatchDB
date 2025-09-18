@@ -1,7 +1,7 @@
 import uuid
 import os
 from db_repo import DbRepo
-from patch_search import search_patch
+from patch_index import PatchIndex
 from collections import defaultdict
 
 def _save_image(user_id, image, filename):
@@ -36,9 +36,50 @@ def handle_patch_upload(user_id, image, filename):
 
         path = _save_image(user_id, image, filename)
         patch_id = db.insert_patch(user_id, path)
-        result = search_patch(db, user_id, patch_id, path)
 
-        return result, 200
+        index = PatchIndex(user_id)
+        result = index.index_patch(path, patch_id)
+
+        patch_groups = {}
+        ungrouped_matches = []
+
+        for rid, score in result:
+            matching_patch = db.get_patch_by_id(rid)
+            if not matching_patch:
+                print(f"Warning: matching patch not found for ID={rid}")
+                continue
+
+            if matching_patch["patch_group_id"]:
+                current = patch_groups.get(matching_patch["patch_group_id"])
+                if current and current["score"] > score:
+                    continue
+
+                group = db.get_patch_group_by_id(matching_patch["patch_group_id"])
+
+                patch_groups[matching_patch["patch_group_id"]] = {
+                    "id": matching_patch["id"],
+                    "group_id": matching_patch["patch_group_id"],
+                    "group_name": group["name"] if group else "Unknown Group",
+                    "path": matching_patch["path"],
+                    "score": score
+                }
+            else:
+                ungrouped_matches.append({
+                    "id": matching_patch["id"],
+                    "group_id": None,
+                    "group_name": None,
+                    "path": matching_patch["path"],
+                    "score": score
+                })
+
+        return {
+            "patch": {
+                "id": patch_id,
+                "path": path
+            },
+            "matches": list(patch_groups.values()),
+            "ungrouped_matches": ungrouped_matches
+        }, 200
     except Exception as e:
         print(f"Error in handle_patch_upload: {e}")
         return {'error': "Oops something went wrong"}, 500
@@ -147,6 +188,8 @@ def delete_patch(user_id, patch_id):
             os.remove(patch['path'])
         
         db.delete_patch_by_id(patch_id)
+        index = PatchIndex(user_id)
+        index.remove_from_index(patch_id)
 
         return {'message': 'Patch deleted successfully'}, 200
     except Exception as e:
@@ -166,12 +209,14 @@ def delete_patch_group(user_id, group_id):
             return {'error': 'Unauthorized'}, 403
     
         patches = db.get_all_patches_by_group_id(group_id)
+        index = PatchIndex(user_id)
 
         for patch in patches:
             if os.path.exists(patch['path']):
                 os.remove(patch['path'])
             
             db.delete_patch_by_id(patch['id'])
+            index.remove_from_index(patch['id'])
 
         db.delete_patch_group_by_id(group_id)
         return {'message': 'Patch group deleted successfully'}, 200
