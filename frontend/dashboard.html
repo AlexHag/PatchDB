@@ -74,7 +74,12 @@
                     </div>
             <div class="col-12 col-md-6">
                 <div class="input-group">
-                    <input type="text" class="form-control" id="searchInput" placeholder="Search patches..." onkeyup="filterPatches()">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search grouped patches..." onkeyup="filterPatches()">
+                    <button class="btn btn-outline-secondary" type="button" id="clearSearchBtn" onclick="clearSearch()" title="Clear search">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                        </svg>
+                    </button>
                     <span class="input-group-text">
                         <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                             <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
@@ -100,6 +105,17 @@
             <h3 class="h5">No Patches Yet</h3>
             <p class="text-muted mb-3">Start building your patch collection by uploading your first patch!</p>
             <a href="upload.html" class="btn btn-dark">Add Your First Patch</a>
+        </div>
+
+        <!-- No Results Message (for search) -->
+        <div id="noResultsMessage" class="d-none">
+            <div class="text-center py-5">
+                <svg class="mb-3 text-muted" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                </svg>
+                <h3 class="h6" id="noResultsTitle">No patches match your search</h3>
+                <p class="text-muted small" id="noResultsHint">Try adjusting your search term or filter</p>
+            </div>
         </div>
 
         <!-- Grouped Patches -->
@@ -256,8 +272,7 @@
             // Add keyboard shortcut for search
             document.getElementById('searchInput').addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
-                    this.value = '';
-                    filterPatches();
+                    clearSearch();
                 }
             });
         }
@@ -477,6 +492,7 @@
         function filterPatches() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const filterType = document.getElementById('filterSelect').value;
+            const hasSearchTerm = searchTerm.trim() !== '';
             
             // Filter grouped patches
             const groupedPatches = document.querySelectorAll('.patch-group');
@@ -484,8 +500,9 @@
             
             groupedPatches.forEach(group => {
                 const groupName = group.dataset.name;
-                const matchesSearch = groupName.includes(searchTerm);
-                const shouldShow = (filterType === 'all' || filterType === 'grouped') && matchesSearch;
+                const matchesSearch = !hasSearchTerm || groupName.includes(searchTerm);
+                const matchesFilter = filterType === 'all' || filterType === 'grouped';
+                const shouldShow = matchesSearch && matchesFilter;
                 
                 group.style.display = shouldShow ? 'block' : 'none';
                 if (shouldShow) visibleGroupedCount++;
@@ -496,24 +513,33 @@
             let visibleUngroupedCount = 0;
             
             ungroupedPatches.forEach(patch => {
-                const shouldShow = filterType === 'all' || filterType === 'ungrouped';
+                // Ungrouped patches can't be searched by name, so hide them if there's a search term
+                const matchesSearch = !hasSearchTerm;
+                const matchesFilter = filterType === 'all' || filterType === 'ungrouped';
+                const shouldShow = matchesSearch && matchesFilter;
+                
                 patch.style.display = shouldShow ? 'block' : 'none';
                 if (shouldShow) visibleUngroupedCount++;
             });
             
             // Show/hide ungrouped section
             const ungroupedSection = document.getElementById('ungroupedSection');
-            if (filterType === 'grouped' || (filterType === 'ungrouped' && visibleUngroupedCount === 0)) {
-                ungroupedSection.classList.add('d-none');
-            } else if (allPatches.ungrouped_patches.length > 0) {
+            const shouldShowUngroupedSection = visibleUngroupedCount > 0 && 
+                (filterType === 'all' || filterType === 'ungrouped') && 
+                allPatches.ungrouped_patches.length > 0;
+                
+            if (shouldShowUngroupedSection) {
                 ungroupedSection.classList.remove('d-none');
+            } else {
+                ungroupedSection.classList.add('d-none');
             }
             
-            // Show empty state if nothing is visible
-            const hasVisibleContent = visibleGroupedCount > 0 || 
-                (visibleUngroupedCount > 0 && (filterType === 'all' || filterType === 'ungrouped'));
+            // Show/hide no results message only for searches, not filter-only operations  
+            const hasVisibleContent = visibleGroupedCount > 0 || visibleUngroupedCount > 0;
+            const isSearchActive = hasSearchTerm;
             
-            if (!hasVisibleContent && (allPatches.patches.length > 0 || allPatches.ungrouped_patches.length > 0)) {
+            // Only show "no results" for active searches, not for filter-only operations
+            if (!hasVisibleContent && isSearchActive && (allPatches.patches.length > 0 || allPatches.ungrouped_patches.length > 0)) {
                 showNoResults();
             } else {
                 hideNoResults();
@@ -525,25 +551,39 @@
             document.getElementById('groupedPatches').innerHTML = '';
             document.getElementById('ungroupedSection').classList.add('d-none');
             document.getElementById('searchFilterSection').style.display = 'none';
+            document.getElementById('noResultsMessage').classList.add('d-none');
         }
 
         function showNoResults() {
-            const container = document.getElementById('groupedPatches');
-            container.innerHTML = `
-                <div class="text-center py-5">
-                    <svg class="mb-3 text-muted" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                    </svg>
-                    <h3 class="h6">No patches match your search</h3>
-                    <p class="text-muted small">Try adjusting your search term or filter</p>
-                </div>
-            `;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+            const hasSearchTerm = searchTerm !== '';
+            
+            let message = 'No patches match your search';
+            let hint = 'Try adjusting your search term or filter';
+            
+            if (hasSearchTerm && allPatches.ungrouped_patches.length > 0) {
+                hint = 'Note: Ungrouped patches are hidden during search. Try clearing your search to see them.';
+            }
+            
+            document.getElementById('noResultsTitle').textContent = message;
+            document.getElementById('noResultsHint').textContent = hint;
+            document.getElementById('noResultsMessage').classList.remove('d-none');
+            document.getElementById('groupedPatches').style.display = 'none';
         }
 
         function hideNoResults() {
-            // Only hide if we're showing search results, not empty state
-            if (allPatches.patches.length > 0 || allPatches.ungrouped_patches.length > 0) {
+            document.getElementById('noResultsMessage').classList.add('d-none');
+            document.getElementById('groupedPatches').style.display = 'block';
+            
+            // Ensure grouped patches content is restored if needed
+            const groupedContainer = document.getElementById('groupedPatches');
+            if (groupedContainer.innerHTML.trim() === '' && allPatches.patches.length > 0) {
                 displayGroupedPatches(allPatches.patches);
+            }
+            
+            // Also ensure ungrouped patches are properly displayed if needed
+            if (allPatches.ungrouped_patches.length > 0) {
+                displayUngroupedPatches(allPatches.ungrouped_patches);
             }
         }
 
@@ -587,6 +627,12 @@
             } finally {
                 hideLoading();
             }
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterSelect').value = 'all';
+            filterPatches();
         }
 
         // Initialize dashboard on page load
