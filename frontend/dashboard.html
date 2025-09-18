@@ -113,7 +113,7 @@
                     <p class="text-muted small">These patches haven't been organized into groups yet.</p>
                 </div>
             </div>
-            <div class="patch-grid mb-4" id="ungroupedPatches"></div>
+            <div class="patch-grid mb-4" id="ungroupedPatchesContainer"></div>
         </div>
 
         <!-- Error/Success Messages -->
@@ -348,7 +348,7 @@
 
         function displayUngroupedPatches(patches) {
             const section = document.getElementById('ungroupedSection');
-            const container = document.getElementById('ungroupedPatches');
+            const container = document.getElementById('ungroupedPatchesContainer');
             
             if (patches.length === 0) {
                 section.classList.add('d-none');
