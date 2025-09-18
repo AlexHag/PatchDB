@@ -236,3 +236,18 @@ body {
     from { opacity: 0; }
     to { opacity: 1; }
 }
+
+/* Favorite star styling */
+.btn-link {
+    text-decoration: none;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-link:hover {
+    text-decoration: none;
+    transform: scale(1.1);
+}
+
+.btn-link:focus {
+    box-shadow: none;
+}

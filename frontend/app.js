@@ -169,6 +169,33 @@ async function deletePatchGroup(userId, groupId) {
     return await response.json();
 }
 
+// Favorite API functions
+async function addGroupToFavorites(userId, groupId) {
+    const response = await fetch(`${API_BASE_URL}/${userId}/group/${groupId}/favorite`, {
+        method: 'PUT'
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to add group to favorites');
+    }
+
+    return await response.json();
+}
+
+async function removeGroupFromFavorites(userId, groupId) {
+    const response = await fetch(`${API_BASE_URL}/${userId}/group/${groupId}/favorite`, {
+        method: 'DELETE'
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to remove group from favorites');
+    }
+
+    return await response.json();
+}
+
 // Image utilities
 function resizeImage(file, maxWidth = 800, maxHeight = 600, quality = 0.8) {
     return new Promise((resolve) => {

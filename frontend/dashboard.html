@@ -92,6 +92,7 @@
                     <option value="all">All Patches</option>
                     <option value="grouped">Grouped Only</option>
                     <option value="ungrouped">Ungrouped Only</option>
+                    <option value="favorites">Favorites Only</option>
                 </select>
             </div>
         </div>
@@ -323,11 +324,23 @@
             patches.forEach(group => {
                 const imageCount = group.images.length;
                 
+                const isFavorite = group.is_favorite === 1;
+                const starIcon = isFavorite 
+                    ? '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/></svg>'
+                    : '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288L8 2.223l1.847 3.658a.525.525 0 0 0 .393.288l4.052.576-2.906 2.77a.565.565 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"/></svg>';
+                
                 html += `
-                    <div class="row mb-4 patch-group" data-name="${group.name.toLowerCase()}">
+                    <div class="row mb-4 patch-group" data-name="${group.name.toLowerCase()}" data-is-favorite="${isFavorite}">
                         <div class="col-12">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h2 class="h5 mb-0">${group.name}</h2>
+                                <div class="d-flex align-items-center">
+                                    <h2 class="h5 mb-0 me-2">${group.name}</h2>
+                                    <button class="btn btn-link p-0 me-2 ${isFavorite ? 'text-warning' : 'text-muted'}" 
+                                            onclick="toggleFavorite(${group.id}, '${group.name.replace(/'/g, "\\'")}', this)" 
+                                            title="${isFavorite ? 'Remove from favorites' : 'Add to favorites'}">
+                                        ${starIcon}
+                                    </button>
+                                </div>
                                 <div class="d-flex align-items-center">
                                     <span class="badge bg-secondary me-2">${imageCount} image${imageCount > 1 ? 's' : ''}</span>
                                     <button class="btn btn-outline-danger btn-sm" onclick="confirmDeleteGroup(${group.id}, '${group.name.replace(/'/g, "\\'")}')" title="Delete group">
@@ -500,8 +513,11 @@
             
             groupedPatches.forEach(group => {
                 const groupName = group.dataset.name;
+                const isFavorite = group.dataset.isFavorite === 'true';
                 const matchesSearch = !hasSearchTerm || groupName.includes(searchTerm);
-                const matchesFilter = filterType === 'all' || filterType === 'grouped';
+                const matchesFilter = filterType === 'all' || 
+                                   filterType === 'grouped' || 
+                                   (filterType === 'favorites' && isFavorite);
                 const shouldShow = matchesSearch && matchesFilter;
                 
                 group.style.display = shouldShow ? 'block' : 'none';
@@ -514,6 +530,7 @@
             
             ungroupedPatches.forEach(patch => {
                 // Ungrouped patches can't be searched by name, so hide them if there's a search term
+                // Also hide ungrouped patches when favorites filter is active
                 const matchesSearch = !hasSearchTerm;
                 const matchesFilter = filterType === 'all' || filterType === 'ungrouped';
                 const shouldShow = matchesSearch && matchesFilter;
@@ -633,6 +650,45 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('filterSelect').value = 'all';
             filterPatches();
+        }
+
+        async function toggleFavorite(groupId, groupName, buttonElement) {
+            try {
+                const currentlyFavorite = buttonElement.classList.contains('text-warning');
+                
+                // Optimistically update the UI
+                const starSvg = currentlyFavorite 
+                    ? '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288L8 2.223l1.847 3.658a.525.525 0 0 0 .393.288l4.052.576-2.906 2.77a.565.565 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"/></svg>'
+                    : '<svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/></svg>';
+
+                buttonElement.innerHTML = starSvg;
+                buttonElement.className = currentlyFavorite 
+                    ? 'btn btn-link p-0 me-2 text-muted'
+                    : 'btn btn-link p-0 me-2 text-warning';
+                buttonElement.title = currentlyFavorite 
+                    ? 'Add to favorites'
+                    : 'Remove from favorites';
+
+                // Update the data attribute on the parent group
+                const groupElement = buttonElement.closest('.patch-group');
+                groupElement.dataset.isFavorite = !currentlyFavorite;
+
+                // Make API call
+                if (currentlyFavorite) {
+                    await removeGroupFromFavorites(userId, groupId);
+                    showSuccess(`"${groupName}" removed from favorites`);
+                } else {
+                    await addGroupToFavorites(userId, groupId);
+                    showSuccess(`"${groupName}" added to favorites`);
+                }
+
+            } catch (error) {
+                console.error('Error toggling favorite:', error);
+                showError('Failed to update favorite status: ' + error.message);
+                
+                // Revert the UI changes on error
+                await loadCollection();
+            }
         }
 
         // Initialize dashboard on page load
