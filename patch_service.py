@@ -60,6 +60,7 @@ def handle_patch_upload(user_id, image, filename):
                     "id": matching_patch["id"],
                     "group_id": matching_patch["patch_group_id"],
                     "group_name": group["name"] if group else "Unknown Group",
+                    "is_favorite": group["is_favorite"] if group else 0,
                     "path": matching_patch["path"],
                     "score": score
                 }

@@ -36,6 +36,7 @@ Response:
     {
       "group_id": 3,
       "group_name": "Apple",
+      "is_favorite": 1
       "id": 9,
       "path": "./images/2/3d670593-1661-4bc7-991e-d7508dac0e03.png",
       "score": 0.8786004185676575
