@@ -5,3 +5,6 @@ __pycache__
 faiss_indexes
 images
 database.db
+stuff
+.cursor
+node_modules

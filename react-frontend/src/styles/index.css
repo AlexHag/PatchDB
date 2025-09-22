@@ -184,7 +184,7 @@ body {
 }
 
 /* Login page background */
-body.bg-light {
+.patch-background {
     background: url('/login_background.jpg') no-repeat center center fixed;
     background-size: cover;
 }

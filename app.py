@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, send_from_directory
+from flask_cors import CORS
 from db_repo import DbRepo
 import patch_service
 import os
@@ -7,6 +8,8 @@ os.makedirs("images", exist_ok=True)
 os.makedirs("faiss_indexes", exist_ok=True)
 
 app = Flask(__name__,  static_folder='images', static_url_path='/images')
+CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
+
 _tmp_db = DbRepo("database.db")
 _tmp_db.create_tables()
 
@@ -37,6 +40,14 @@ _tmp_db.create_tables()
 # @app.route("/upload.html")
 # def upload():
 #     return send_from_directory(app.root_path + '/frontend', 'upload.html')
+
+# @app.route("/login_background.jpg")
+# def login_background():
+#     return send_from_directory(app.root_path + '/frontend', 'login_background.jpg')
+
+# @app.route("/login_background_2.jpg")
+# def login_background_2():
+#     return send_from_directory(app.root_path + '/frontend', 'login_background_2.jpg')
 
 @app.route("/user", methods=["POST"])
 def user():

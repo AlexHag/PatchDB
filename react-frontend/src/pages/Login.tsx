@@ -45,7 +45,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="bg-light">
+    <div className="bg-light patch-background">
       <div className="container-fluid">
         <div className="row justify-content-center min-vh-100 align-items-center">
           <div className="col-12 col-sm-8 col-md-6 col-lg-4">

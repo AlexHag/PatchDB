@@ -1,5 +1,5 @@
 // Custom hook for authentication
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getAuthState, clearAuthState, type AuthState } from '../../api/auth';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,19 +16,19 @@ export function useAuth() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     clearAuthState();
     setAuthState({ userId: null, username: null });
     navigate('/');
-  };
+  }, [navigate]);
 
-  const requireAuth = (): string | null => {
+  const requireAuth = useCallback((): string | null => {
     if (!authState.userId) {
       navigate('/');
       return null;
     }
     return authState.userId;
-  };
+  }, [authState.userId, navigate]);
 
   return {
     ...authState,

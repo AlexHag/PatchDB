@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/hooks/useAuth';
 import Navigation from '../components/Navigation';
@@ -30,14 +30,7 @@ const Dashboard: React.FC = () => {
   const [showAddToGroupModal, setShowAddToGroupModal] = useState(false);
   const [modalData, setModalData] = useState({ title: '', imagePath: '', subtitle: '' });
 
-  useEffect(() => {
-    const effectiveUserId = requireAuth();
-    if (effectiveUserId) {
-      loadDashboard();
-    }
-  }, [requireAuth]);
-
-  const loadDashboard = async () => {
+  const loadDashboard = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -51,7 +44,13 @@ const Dashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      loadDashboard();
+    }
+  }, [userId, loadDashboard]);
 
   const showError = (message: string) => {
     setError(message);

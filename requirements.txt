@@ -6,3 +6,5 @@ tqdm
 clip @ git+https://github.com/openai/CLIP.git
 faiss-cpu
 Flask
+openai
+flask-cors
