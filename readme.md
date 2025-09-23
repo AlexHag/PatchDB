@@ -225,3 +225,4 @@ sudo mv backend.key /etc/nginx/ssl/backend.key
 ```
 
 Copy certificate to the proxy server
+TODO: Document this shit
