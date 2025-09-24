@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchDb.Backend.Core", "PatchDb.Backend.Core\PatchDb.Backend.Core.csproj", "{C9143986-639F-40F8-96F8-8FFF2B19E5B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchDb.Backend.Service", "PatchDb.Backend.Service\PatchDb.Backend.Service.csproj", "{43095EF7-1485-4A9A-BD94-CB484F088A2D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C9143986-639F-40F8-96F8-8FFF2B19E5B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9143986-639F-40F8-96F8-8FFF2B19E5B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9143986-639F-40F8-96F8-8FFF2B19E5B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9143986-639F-40F8-96F8-8FFF2B19E5B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43095EF7-1485-4A9A-BD94-CB484F088A2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43095EF7-1485-4A9A-BD94-CB484F088A2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43095EF7-1485-4A9A-BD94-CB484F088A2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43095EF7-1485-4A9A-BD94-CB484F088A2D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

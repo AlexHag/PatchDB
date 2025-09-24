@@ -8,3 +8,7 @@ database.db
 stuff
 .cursor
 node_modules
+bin
+obj
+*.pem
+*.pfx
