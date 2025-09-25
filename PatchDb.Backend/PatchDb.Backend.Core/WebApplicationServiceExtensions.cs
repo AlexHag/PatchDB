@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using PatchDb.Backend.Core.Authentication;
+using PatchDb.Backend.Core.Exceptions;
 
 namespace PatchDb.Backend.Core;
 
@@ -30,7 +31,7 @@ public static class WebApplicationServiceExtensions
 
     public static WebApplication ConfigureApp(this WebApplication app)
     {
-        // app.UseMiddleware<RestApiExceptionMiddleware>();
+        app.UseMiddleware<RestApiExceptionMiddleware>();
 
         // if (app.Environment.IsDevelopment())
         // {
