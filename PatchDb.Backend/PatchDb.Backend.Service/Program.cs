@@ -7,6 +7,7 @@ using PatchDb.Backend.Core.Configuration;
 using PatchDb.Backend.Service.Authentication;
 using PatchDb.Backend.Service.FileService;
 using PatchDb.Backend.Service.FileService.Configuration;
+using PatchDb.Backend.Service.Patches;
 using PatchDb.Backend.Service.User;
 
 namespace PatchDb.Backend.Service;
@@ -35,6 +36,7 @@ internal static class Program
 
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+        builder.Services.AddScoped<IPatchService, PatchService>();
 
         // builder.Services.AddScoped<IUserRepository, UserRepository>();
         // builder.Services.AddScoped<IUserPasswordRepository, UserPasswordRepository>();
