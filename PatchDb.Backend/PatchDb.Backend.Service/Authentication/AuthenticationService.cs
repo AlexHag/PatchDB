@@ -56,7 +56,7 @@ public class AuthenticationService : IAuthenticationService
 
         // TODO: Create session
 
-        var credentials = _tokenService.GenerateToken(user.Id, AuthenticationMethod.Password, [new Claim("role", user.Role.ToString())]);
+        var credentials = _tokenService.GenerateToken(user.Id, AuthenticationMethod.Password, [new Claim(ClaimTypes.Role, user.Role.ToString())]);
         var userResponse = _userService.ToUserReponse(user);
 
         return new AuthResponse
@@ -90,7 +90,7 @@ public class AuthenticationService : IAuthenticationService
         _dbContext.Users.Add(userEntity);
         await _dbContext.SaveChangesAsync();
 
-        var credentials = _tokenService.GenerateToken(userEntity.Id, AuthenticationMethod.Password, [new Claim("role", userEntity.Role.ToString())]);
+        var credentials = _tokenService.GenerateToken(userEntity.Id, AuthenticationMethod.Password, [new Claim(ClaimTypes.Role, userEntity.Role.ToString())]);
         var userResponse = _userService.ToUserReponse(userEntity);
 
         return new AuthResponse
