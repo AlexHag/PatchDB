@@ -21,13 +21,13 @@ public static class ConfigurationExtensions
 
         if (attribute.Type == ConfigurationType.File)
         {
-            AddFile(instance, attribute.Path, attribute.IsRequired);
+            AddFile(instance, GetConfigPath(attribute.Path), attribute.IsRequired);
         }
 
         if (attribute.Type == ConfigurationType.Secret)
         {
             // TODO: Configure secret manager
-            AddFile(instance, attribute.Path, attribute.IsRequired);
+            AddFile(instance, GetSecretsPath(attribute.Path), attribute.IsRequired);
         }
 
         builder.Services.AddSingleton(instance);
@@ -37,23 +37,21 @@ public static class ConfigurationExtensions
     private static void AddFile<TConfiguration>(TConfiguration instance, string path, bool isRequired)
         where TConfiguration : class
     {
-        var fullPath = GetFullPath(path);
-
-        if (File.Exists(fullPath))
+        if (File.Exists(path))
         {
             var configSection = new ConfigurationBuilder()
-                .AddJsonFile(fullPath)
+                .AddJsonFile(path)
                 .Build();
 
             configSection.Bind(instance);  
         }
         else
         {
-            _ = isRequired ? throw new Exception($"Configuration file not found at {fullPath}") : 0;
+            _ = isRequired ? throw new Exception($"Configuration file not found at {path}") : 0;
         }
     }
 
-    private static string GetFullPath(string path)
+    private static string GetConfigPath(string path)
     {
         if (Environment.GetEnvironmentVariable("IS_CONTAINER_ENVIRONMENT") != null)
         {
@@ -61,5 +59,15 @@ public static class ConfigurationExtensions
         }
 
         return Path.GetFullPath($"../app-config/{path}.json");
+    }
+
+    private static string GetSecretsPath(string path)
+    {
+        if (Environment.GetEnvironmentVariable("IS_CONTAINER_ENVIRONMENT") != null)
+        {
+            return Path.Combine("/app-secrets", $"{path}.json");
+        }
+
+        return Path.GetFullPath($"../app-secrets/{path}.json");
     }
 }
