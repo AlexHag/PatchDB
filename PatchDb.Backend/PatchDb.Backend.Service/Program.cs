@@ -1,6 +1,13 @@
 using MapsterMapper;
+
 using Microsoft.EntityFrameworkCore;
+
 using PatchDb.Backend.Core;
+using PatchDb.Backend.Core.Configuration;
+using PatchDb.Backend.Service.Authentication;
+using PatchDb.Backend.Service.FileService;
+using PatchDb.Backend.Service.FileService.Configuration;
+using PatchDb.Backend.Service.User;
 
 namespace PatchDb.Backend.Service;
 
@@ -21,6 +28,13 @@ internal static class Program
         // builder.AddConfiguration<PasswordResetConfiguration>();
 
         builder.Services.AddScoped<IMapper, Mapper>();
+        builder.AddConfiguration<AwsConfiguration>();
+        builder.AddConfiguration<AwsCredentials>();
+
+        builder.Services.AddSingleton<IS3FileService, S3FileService>();
+
+        builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
         // builder.Services.AddScoped<IUserRepository, UserRepository>();
         // builder.Services.AddScoped<IUserPasswordRepository, UserPasswordRepository>();
