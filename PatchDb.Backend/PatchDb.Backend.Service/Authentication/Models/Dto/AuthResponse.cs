@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 using PatchDb.Backend.Core.Authentication.Models;
 using PatchDb.Backend.Service.User.Models.Dto;
 
-namespace PatchDb.Backend.Service.Authentication.Models;
+namespace PatchDb.Backend.Service.Authentication.Models.Dto;
 
 public class AuthResponse
 {

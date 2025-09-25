@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace PatchDb.Backend.Service.Authentication.Models;
+namespace PatchDb.Backend.Service.Authentication.Models.Dto;
 
 public class LoginRequest
 {

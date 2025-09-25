@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PatchDb.Backend.Core.Authentication;
 using PatchDb.Backend.Core.Authentication.Models;
-using PatchDb.Backend.Service.Authentication.Models;
+using PatchDb.Backend.Service.Authentication.Models.Dto;
 using PatchDb.Backend.Service.User.Models;
 using PatchDb.Backend.Service.User.Models.Dto;
 using PatchDb.Backend.Service.User.Models.Entities;
