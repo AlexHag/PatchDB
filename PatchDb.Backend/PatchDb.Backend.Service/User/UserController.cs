@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PatchDb.Backend.Core.Authentication;
+using PatchDb.Backend.Service.User.Models;
 using PatchDb.Backend.Service.User.Models.Dto;
 
 namespace PatchDb.Backend.Service.User;
@@ -19,7 +20,7 @@ public class UserController : ControllerBase
     [HttpGet]
     [Authorize]
     public async Task<ActionResult<UserResponse>> GetUser()
-        => await _userService.GetUserById(User.UserId());
+        => Ok(await _userService.GetUserById(User.UserId()));
 
     [HttpPut("profile-picture")]
     [Authorize]
@@ -35,4 +36,9 @@ public class UserController : ControllerBase
     [Authorize]
     public async Task<ActionResult<UserResponse>> UpdateBio([FromBody] UpdateBioRequest request)
         => Ok(await _userService.UpdateBio(User.UserId(), request.Bio ?? string.Empty));
+
+    [HttpGet("all")]
+    [Authorize(Roles = nameof(UserRole.Admin))]
+    public async Task<ActionResult> GetAllUsers()
+        => Ok(await _userService.GetAllUsers());
 }

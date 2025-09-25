@@ -1,4 +1,5 @@
 using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
 using PatchDb.Backend.Core.Exceptions;
 using PatchDb.Backend.Service.FileService;
 using PatchDb.Backend.Service.User.Models.Dto;
@@ -13,6 +14,7 @@ public interface IUserService
     Task<UserResponse> UpdateProfilePicture(Guid userId, Guid fileId);
     Task<UserResponse> RemoveProfilePicture(Guid userId);
     Task<UserResponse> UpdateBio(Guid userId, string bio);
+    Task<List<UserEntity>> GetAllUsers();
     UserResponse ToUserReponse(UserEntity user);
 }
 
@@ -126,5 +128,11 @@ public class UserService : IUserService
         }
 
         return response;
+    }
+
+    public Task<List<UserEntity>> GetAllUsers()
+    {
+        var user = _dbContext.Users.ToListAsync();
+        return user;
     }
 }
