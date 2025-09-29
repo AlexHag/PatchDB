@@ -40,18 +40,18 @@ public class AuthenticationService : IAuthenticationService
 
         if (user == null)
         {
-            throw new NotFoundApiException("Username not found", "username-not-found");
+            throw new NotFoundApiException("username-not-found", "Username not found");
         }
 
         if (user.Password == null)
         {
-            throw new BadRequestApiException("Invalid login method", "invalid-login-method");
+            throw new BadRequestApiException("invalid-login-method", "Invalid login method");
         }
 
         if (!_tokenService.VerifyPassword(request.Password, user.Password))
         {
             // TODO: Add brute force protection
-            throw new BadRequestApiException("Wrong password", "wrong-password");
+            throw new BadRequestApiException("wrong-password", "Wrong password");
         }
 
         // TODO: Create session
@@ -72,7 +72,7 @@ public class AuthenticationService : IAuthenticationService
 
         if (user != null)
         {
-            throw new ConflictApiException("Username already exists", "username-already-exists");
+            throw new ConflictApiException("username-already-taken", "Username already taken");
         }
 
         var passwordHash = _tokenService.HashPassword(request.Password);

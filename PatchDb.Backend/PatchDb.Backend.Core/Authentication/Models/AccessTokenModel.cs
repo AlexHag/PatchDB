@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace PatchDb.Backend.Core.Authentication.Models;
 
@@ -14,6 +15,7 @@ public class AccessTokenModel
     public required string RefreshToken { get; set; }
 
     [JsonProperty("method")]
+    [JsonConverter(typeof(StringEnumConverter))]
     public AuthenticationMethod Method { get; set; }
 
     [JsonProperty("expirationTime")]

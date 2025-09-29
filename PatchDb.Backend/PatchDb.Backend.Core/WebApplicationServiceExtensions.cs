@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using PatchDb.Backend.Core.Authentication;
 using PatchDb.Backend.Core.Exceptions;
+using System.Text.Json.Serialization;
 
 namespace PatchDb.Backend.Core;
 
@@ -22,7 +23,13 @@ public static class WebApplicationServiceExtensions
 
         // builder.Services.AddSingleton<IRestApiClientManager, RestApiClientManager>();
 
-        builder.Services.AddControllers().AddControllersAsServices();
+        builder.Services
+            .AddControllers()
+            .AddControllersAsServices()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
 
         builder.AddSwagger(name);
 

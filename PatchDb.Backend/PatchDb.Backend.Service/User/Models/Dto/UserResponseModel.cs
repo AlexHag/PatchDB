@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace PatchDb.Backend.Service.User.Models.Dto;
 
@@ -8,9 +9,11 @@ public class UserResponse
     public Guid Id { get; set; }
 
     [JsonProperty("userState")]
+    [JsonConverter(typeof(StringEnumConverter))]
     public UserState UserState { get; set; }
 
     [JsonProperty("role")]
+    [JsonConverter(typeof(StringEnumConverter))]
     public UserRole Role { get; set; }
 
     [JsonProperty("username")]
