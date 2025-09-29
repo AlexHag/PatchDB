@@ -18,21 +18,27 @@ export function useAuth() {
 
   const logout = useCallback(() => {
     clearAuthState();
-    setAuthState({ userId: null, username: null });
+    setAuthState({ 
+      userId: null, 
+      username: null, 
+      accessToken: null, 
+      refreshToken: null, 
+      user: null 
+    });
     navigate('/');
   }, [navigate]);
 
   const requireAuth = useCallback((): string | null => {
-    if (!authState.userId) {
+    if (!authState.userId || !authState.accessToken) {
       navigate('/');
       return null;
     }
     return authState.userId;
-  }, [authState.userId, navigate]);
+  }, [authState.userId, authState.accessToken, navigate]);
 
   return {
     ...authState,
-    isAuthenticated: !!authState.userId,
+    isAuthenticated: !!authState.userId && !!authState.accessToken,
     logout,
     requireAuth
   };

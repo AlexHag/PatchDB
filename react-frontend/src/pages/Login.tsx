@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loginUser } from '../api/patchdb';
+import { loginUser, registerUser, PatchDBApiError } from '../api/patchdb';
 import { setAuthState, isAuthenticated } from '../api/auth';
 
 const Login: React.FC = () => {
+  const [isLoginMode, setIsLoginMode] = useState(true);
   const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -24,20 +27,50 @@ const Login: React.FC = () => {
       return;
     }
 
+    if (!password.trim()) {
+      showError('Please enter a password');
+      return;
+    }
+
+    if (!isLoginMode && password !== confirmPassword) {
+      showError('Passwords do not match');
+      return;
+    }
+
+    if (!isLoginMode && password.length < 6) {
+      showError('Password must be at least 6 characters long');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
-      const user = await loginUser(username.trim());
-      // Store user data
-      setAuthState(user.id, user.username);
+      let authResponse;
+      
+      if (isLoginMode) {
+        authResponse = await loginUser(username.trim(), password);
+      } else {
+        authResponse = await registerUser(username.trim(), password);
+      }
+
+      // Store user data and credentials
+      setAuthState(authResponse.user, authResponse.credentials);
+      
       // Redirect to dashboard
       navigate('/dashboard');
     } catch (error) {
-      showError(error instanceof Error ? error.message : 'Login failed');
+      showError(error instanceof PatchDBApiError ? error.message : `${isLoginMode ? 'Login' : 'Registration'} failed`);
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleMode = () => {
+    setIsLoginMode(!isLoginMode);
+    setError('');
+    setPassword('');
+    setConfirmPassword('');
   };
 
   const showError = (message: string) => {
@@ -55,7 +88,7 @@ const Login: React.FC = () => {
                   <h1 className="h3 fw-bold text-dark">PatchDB</h1>
                   <p className="text-muted">Track your patch collection</p>
                 </div>
-                
+
                 <form onSubmit={handleSubmit}>
                   <div className="mb-3">
                     <label htmlFor="username" className="form-label">Username</label>
@@ -67,8 +100,39 @@ const Login: React.FC = () => {
                       required
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
+                      disabled={loading}
                     />
                   </div>
+
+                  <div className="mb-3">
+                    <label htmlFor="password" className="form-label">Password</label>
+                    <input 
+                      type="password" 
+                      className="form-control form-control-lg" 
+                      id="password" 
+                      placeholder="Enter your password" 
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={loading}
+                    />
+                  </div>
+
+                  {!isLoginMode && (
+                    <div className="mb-3">
+                      <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+                      <input 
+                        type="password" 
+                        className="form-control form-control-lg" 
+                        id="confirmPassword" 
+                        placeholder="Confirm your password" 
+                        required
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        disabled={loading}
+                      />
+                    </div>
+                  )}
                   
                   <div className="d-grid">
                     <button 
@@ -79,7 +143,7 @@ const Login: React.FC = () => {
                       {loading && (
                         <span className="spinner-border spinner-border-sm me-2"></span>
                       )}
-                      Continue
+                      {isLoginMode ? 'Sign In' : 'Create Account'}
                     </button>
                   </div>
                 </form>
@@ -90,6 +154,21 @@ const Login: React.FC = () => {
                       {error}
                     </div>
                   )}
+                </div>
+
+                {/* Alternative action */}
+                <div className="text-center mt-3">
+                  <button 
+                    type="button"
+                    className="btn btn-link text-muted"
+                    onClick={toggleMode}
+                    disabled={loading}
+                  >
+                    {isLoginMode 
+                      ? "Don't have an account? Create one" 
+                      : "Already have an account? Sign in"
+                    }
+                  </button>
                 </div>
               </div>
             </div>

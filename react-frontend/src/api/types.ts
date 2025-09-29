@@ -1,4 +1,48 @@
 // API types for PatchDB
+
+// Authentication types from swagger.json
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  username: string;
+  password: string;
+}
+
+export interface UserResponse {
+  id: string;
+  userState: number;
+  role: number;
+  username: string;
+  bio?: string;
+  profilePictureUrl?: string;
+  email?: string;
+  phoneNumber?: string;
+  created: string;
+}
+
+export interface AccessTokenModel {
+  sessionId: string;
+  accessToken: string;
+  refreshToken: string;
+  method: number;
+  expirationTime: string;
+  issuedAt: string;
+}
+
+export interface AuthResponse {
+  user: UserResponse;
+  credentials: AccessTokenModel;
+}
+
+export interface ApiErrorResponse {
+  message: string;
+  errorId: string;
+}
+
+// Legacy User interface for backwards compatibility
 export interface User {
   id: string;
   username: string;

@@ -3,34 +3,66 @@ import type {
   User,
   UserPatchesResponse,
   UploadResult,
-  ApiError
+  ApiError,
+  LoginRequest,
+  RegisterRequest,
+  AuthResponse,
+  ApiErrorResponse
 } from './types';
+import { getAuthHeaders } from './auth';
 
 // API Configuration
-// const API_BASE_URL = `${window.location.origin}/patchdb/api`;
-const API_BASE_URL = `http://localhost:5000`;
+// For development, use the local C# backend
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? `${window.location.origin}/api` 
+  : `http://localhost:5064`; // Default HTTPS port for .NET development
 
 
-class PatchDBApiError extends Error {
-  constructor(message: string) {
+export class PatchDBApiError extends Error {
+  constructor(errorId: string, message: string) {
     super(message);
-    this.name = 'PatchDBApiError';
+    this.name = errorId;
   }
 }
 
+// Helper function to handle API errors
+async function handleApiError(response: Response): Promise<never> {
+  const error: ApiErrorResponse = await response.json();
+  throw new PatchDBApiError(error.errorId, error.message ?? "Oops, something went wrong...");
+}
+
 // Authentication functions
-export async function loginUser(username: string): Promise<User> {
-  const response = await fetch(`${API_BASE_URL}/user`, {
+export async function loginUser(username: string, password: string): Promise<AuthResponse> {
+  const loginData: LoginRequest = { username, password };
+  
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ username })
+    body: JSON.stringify(loginData)
   });
 
   if (!response.ok) {
-    const error: ApiError = await response.json();
-    throw new PatchDBApiError(error.error || 'Login failed');
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+export async function registerUser(username: string, password: string): Promise<AuthResponse> {
+  const registerData: RegisterRequest = { username, password };
+  
+  const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(registerData)
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
   }
 
   return await response.json();
@@ -41,14 +73,18 @@ export async function uploadPatch(userId: string, imageFile: File): Promise<Uplo
   const formData = new FormData();
   formData.append('image', imageFile);
 
+  // For FormData, we need to get auth headers but exclude Content-Type
+  const authHeaders = getAuthHeaders();
+  delete authHeaders['Content-Type']; // Let the browser set the content-type with boundary
+
   const response = await fetch(`${API_BASE_URL}/${userId}/upload`, {
     method: 'POST',
+    headers: authHeaders,
     body: formData
   });
 
   if (!response.ok) {
-    const error: ApiError = await response.json();
-    throw new PatchDBApiError(error.error || 'Upload failed');
+    await handleApiError(response);
   }
 
   return await response.json();
@@ -57,9 +93,7 @@ export async function uploadPatch(userId: string, imageFile: File): Promise<Uplo
 export async function addPatchToGroup(userId: string, patchId: number, groupId: number): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/${userId}/group`, {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify({
       patch_id: patchId,
       group_id: groupId
@@ -67,8 +101,7 @@ export async function addPatchToGroup(userId: string, patchId: number, groupId: 
   });
 
   if (!response.ok) {
-    const error: ApiError = await response.json();
-    throw new PatchDBApiError(error.error || 'Failed to add patch to group');
+    await handleApiError(response);
   }
 
   return await response.json();
@@ -77,9 +110,7 @@ export async function addPatchToGroup(userId: string, patchId: number, groupId: 
 export async function createPatchGroup(userId: string, patchId: number, name: string): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/${userId}/group`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify({
       patch_id: patchId,
       name: name
@@ -87,19 +118,19 @@ export async function createPatchGroup(userId: string, patchId: number, name: st
   });
 
   if (!response.ok) {
-    const error: ApiError = await response.json();
-    throw new PatchDBApiError(error.error || 'Failed to create patch group');
+    await handleApiError(response);
   }
 
   return await response.json();
 }
 
 export async function getUserPatches(userId: string): Promise<UserPatchesResponse> {
-  const response = await fetch(`${API_BASE_URL}/${userId}/patches`);
+  const response = await fetch(`${API_BASE_URL}/${userId}/patches`, {
+    headers: getAuthHeaders()
+  });
 
   if (!response.ok) {
-    const error: ApiError = await response.json();
-    throw new PatchDBApiError(error.error || 'Failed to fetch patches');
+    await handleApiError(response);
   }
 
   return await response.json();
@@ -107,12 +138,12 @@ export async function getUserPatches(userId: string): Promise<UserPatchesRespons
 
 export async function deletePatch(userId: string, patchId: number): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/${userId}/patch/${patchId}`, {
-    method: 'DELETE'
+    method: 'DELETE',
+    headers: getAuthHeaders()
   });
 
   if (!response.ok) {
-    const error: ApiError = await response.json();
-    throw new PatchDBApiError(error.error || 'Failed to delete patch');
+    await handleApiError(response);
   }
 
   return await response.json();
@@ -120,12 +151,12 @@ export async function deletePatch(userId: string, patchId: number): Promise<void
 
 export async function deletePatchGroup(userId: string, groupId: number): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/${userId}/group/${groupId}`, {
-    method: 'DELETE'
+    method: 'DELETE',
+    headers: getAuthHeaders()
   });
 
   if (!response.ok) {
-    const error: ApiError = await response.json();
-    throw new PatchDBApiError(error.error || 'Failed to delete patch group');
+    await handleApiError(response);
   }
 
   return await response.json();
@@ -134,12 +165,12 @@ export async function deletePatchGroup(userId: string, groupId: number): Promise
 // Favorite API functions
 export async function addGroupToFavorites(userId: string, groupId: number): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/${userId}/group/${groupId}/favorite`, {
-    method: 'PUT'
+    method: 'PUT',
+    headers: getAuthHeaders()
   });
 
   if (!response.ok) {
-    const error: ApiError = await response.json();
-    throw new PatchDBApiError(error.error || 'Failed to add group to favorites');
+    await handleApiError(response);
   }
 
   return await response.json();
@@ -147,12 +178,12 @@ export async function addGroupToFavorites(userId: string, groupId: number): Prom
 
 export async function removeGroupFromFavorites(userId: string, groupId: number): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/${userId}/group/${groupId}/favorite`, {
-    method: 'DELETE'
+    method: 'DELETE',
+    headers: getAuthHeaders()
   });
 
   if (!response.ok) {
-    const error: ApiError = await response.json();
-    throw new PatchDBApiError(error.error || 'Failed to remove group from favorites');
+    await handleApiError(response);
   }
 
   return await response.json();
