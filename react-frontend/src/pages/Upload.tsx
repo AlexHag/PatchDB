@@ -2,7 +2,8 @@ import React, { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/hooks/useAuth';
 import Navigation from '../components/Navigation';
-import { uploadPatch } from '../api/patchdb';
+import { uploadPatchWithFileId } from '../api/patchdb';
+import { uploadFileWithValidation } from '../api/fileUpload';
 import { initializeCamera, captureImage, resizeImage, isCameraSupported } from '../api/utils';
 
 const Upload: React.FC = () => {
@@ -109,7 +110,7 @@ const Upload: React.FC = () => {
   };
 
   const handleUpload = async () => {
-    if (!selectedFile || !userId) {
+    if (!selectedFile) {
       showError('Please select an image first.');
       return;
     }
@@ -123,10 +124,17 @@ const Upload: React.FC = () => {
         fileToUpload = await resizeImage(selectedFile, 1200, 900, 0.8);
       }
 
-      const result = await uploadPatch(userId, fileToUpload);
+      // Step 1: Upload file to S3 and get fileId
+      const fileId = await uploadFileWithValidation(fileToUpload, {
+        maxSizeMB: 10,
+        allowedTypes: ['image/']
+      });
+      
+      // Step 2: Send fileId to backend for processing
+      const result = await uploadPatchWithFileId(fileId);
       
       // Store upload result for matches page
-      sessionStorage.setItem('uploadResult', JSON.stringify(result));
+      sessionStorage.setItem('patchUploadResult', JSON.stringify(result));
       
       // Redirect to matches page
       navigate('/matches');

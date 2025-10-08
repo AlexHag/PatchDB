@@ -10,14 +10,23 @@ import {
   removeGroupFromFavorites,
   addPatchToGroup,
   createPatchGroup,
-  formatImagePath
+  formatImagePath,
+  getNewUserPatches
 } from '../api/patchdb';
-import type { UserPatchesResponse, PatchGroup, UngroupedPatch } from '../api/types';
+import type { 
+  UserPatchesResponse, 
+  PatchGroup, 
+  UngroupedPatch, 
+  GetUserPatchesResponse, 
+  UserPatchModel,
+  UserPatchUploadModel
+} from '../api/types';
 
 const Dashboard: React.FC = () => {
   const { userId, requireAuth } = useAuth();
   const navigate = useNavigate();
   const [allPatches, setAllPatches] = useState<UserPatchesResponse>({ patches: [], ungrouped_patches: [] });
+  const [newPatches, setNewPatches] = useState<GetUserPatchesResponse>({ patches: [], unmatchesPatches: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -35,8 +44,19 @@ const Dashboard: React.FC = () => {
       setLoading(true);
       setError('');
       
-      const data = await getUserPatches(userId!);
-      setAllPatches(data);
+      // Use the new API
+      const data = await getNewUserPatches();
+      setNewPatches(data);
+      
+      // For backward compatibility, also try to load legacy data
+      // This can be removed once everything is migrated
+      try {
+        const legacyData = await getUserPatches(userId!);
+        setAllPatches(legacyData);
+      } catch (legacyError) {
+        // Legacy API might not work, but that's okay
+        console.log('Legacy API not available:', legacyError);
+      }
       
     } catch (error) {
       console.error('Error loading dashboard:', error);
@@ -64,13 +84,24 @@ const Dashboard: React.FC = () => {
 
   // Calculate stats
   const stats = useMemo(() => {
-    const uniquePatches = allPatches.patches.length + allPatches.ungrouped_patches.length;
-    const totalPatches = allPatches.patches.reduce((total, group) => total + group.images.length, 0) + 
-                       allPatches.ungrouped_patches.length;
-    const ungroupedCount = allPatches.ungrouped_patches.length;
+    // New API stats
+    const newUniquePatches = newPatches.patches.length;
+    const newTotalUploads = newPatches.patches.reduce((total, patch) => total + patch.uploads.length, 0);
+    const newUnmatchedCount = newPatches.unmatchesPatches.length;
+    
+    // Legacy stats (for backward compatibility)
+    const legacyUniquePatches = allPatches.patches.length + allPatches.ungrouped_patches.length;
+    const legacyTotalPatches = allPatches.patches.reduce((total, group) => total + group.images.length, 0) + 
+                              allPatches.ungrouped_patches.length;
+    const legacyUngroupedCount = allPatches.ungrouped_patches.length;
+
+    // Use new API stats if available, otherwise fall back to legacy
+    const uniquePatches = newUniquePatches > 0 ? newUniquePatches : legacyUniquePatches;
+    const totalPatches = newTotalUploads > 0 ? newTotalUploads : legacyTotalPatches;
+    const ungroupedCount = newUnmatchedCount > 0 ? newUnmatchedCount : legacyUngroupedCount;
 
     return { uniquePatches, totalPatches, ungroupedCount };
-  }, [allPatches]);
+  }, [allPatches, newPatches]);
 
   // Filter and search logic
   const filteredData = useMemo(() => {
@@ -333,7 +364,7 @@ const Dashboard: React.FC = () => {
         )}
 
         {/* Empty State */}
-        {allPatches.patches.length === 0 && allPatches.ungrouped_patches.length === 0 && (
+        {newPatches.patches.length === 0 && newPatches.unmatchesPatches.length === 0 && allPatches.patches.length === 0 && allPatches.ungrouped_patches.length === 0 && (
           <div className="text-center py-5">
             <svg className="mb-3 text-muted" width="64" height="64" fill="currentColor" viewBox="0 0 16 16">
               <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
@@ -347,6 +378,101 @@ const Dashboard: React.FC = () => {
             >
               Add Your First Patch
             </button>
+          </div>
+        )}
+
+        {/* New API Patches */}
+        {newPatches.patches.length > 0 && newPatches.patches.map((patch: UserPatchModel, index) => (
+          <div key={patch.userPatchId} className="row mb-4 patch-group">
+            <div className="col-12">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="d-flex align-items-center">
+                  <h2 className="h5 mb-0 me-2">
+                    {patch.matchingPatch.name || `Patch #${patch.matchingPatch.patchNumber}`}
+                  </h2>
+                  {patch.isFavorite && (
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" className="text-warning">
+                      <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+                    </svg>
+                  )}
+                </div>
+                <div className="d-flex align-items-center">
+                  <span className="badge bg-secondary me-2">
+                    {patch.uploads.length} upload{patch.uploads.length > 1 ? 's' : ''}
+                  </span>
+                  {patch.matchingPatch.description && (
+                    <small className="text-muted me-2">{patch.matchingPatch.description}</small>
+                  )}
+                </div>
+              </div>
+              <div className="patch-grid">
+                <div className="patch-item">
+                  <img 
+                    src={patch.matchingPatch.imageUrl} 
+                    alt={patch.matchingPatch.name || `Patch #${patch.matchingPatch.patchNumber}`} 
+                    loading="lazy" 
+                  />
+                  <div className="patch-overlay">
+                    <div className="patch-overlay-text">
+                      <div className="small">Official Patch Image</div>
+                    </div>
+                  </div>
+                </div>
+                {patch.uploads.map((upload: UserPatchUploadModel) => (
+                  <div key={upload.userPatchUploadId} className="patch-item">
+                    <img 
+                      src={upload.imageUrl} 
+                      alt="Your upload" 
+                      loading="lazy"
+                    />
+                    <div className="patch-overlay">
+                      <div className="patch-overlay-text">
+                        <div className="small">Your Upload</div>
+                        <div className="small">{new Date(upload.created).toLocaleDateString()}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {patch.matchingPatch.patchMaker && (
+                <div className="mt-2">
+                  <small className="text-muted">
+                    Maker: {patch.matchingPatch.patchMaker}
+                    {patch.matchingPatch.university && ` • ${patch.matchingPatch.university}`}
+                    {patch.matchingPatch.universitySection && ` • ${patch.matchingPatch.universitySection}`}
+                  </small>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+
+        {/* Unmatched Uploads */}
+        {newPatches.unmatchesPatches.length > 0 && (
+          <div className="row mb-4">
+            <div className="col-12">
+              <h2 className="h5">Unmatched Uploads</h2>
+              <p className="text-muted small mb-3">
+                These uploads haven't been matched to any patches yet. They may be processing or need administrator review.
+              </p>
+              <div className="patch-grid">
+                {newPatches.unmatchesPatches.map((upload: UserPatchUploadModel) => (
+                  <div key={upload.userPatchUploadId} className="patch-item">
+                    <img 
+                      src={upload.imageUrl} 
+                      alt="Unmatched upload" 
+                      loading="lazy"
+                    />
+                    <div className="patch-overlay">
+                      <div className="patch-overlay-text">
+                        <div className="small text-warning">Unmatched</div>
+                        <div className="small">{new Date(upload.created).toLocaleDateString()}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 

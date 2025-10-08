@@ -1,4 +1,4 @@
-// API types for PatchDB
+// API types for PatchDB - Updated to match new backend schema
 
 // Authentication types from swagger.json
 export interface LoginRequest {
@@ -13,8 +13,8 @@ export interface RegisterRequest {
 
 export interface UserResponse {
   id: string;
-  userState: number;
-  role: number;
+  userState: 'Unknown' | 'Active' | 'Locked' | 'Banned' | 'Deleted';
+  role: 'Unknown' | 'User' | 'PatchMaker' | 'Moderator' | 'Admin';
   username: string;
   bio?: string;
   profilePictureUrl?: string;
@@ -27,7 +27,7 @@ export interface AccessTokenModel {
   sessionId: string;
   accessToken: string;
   refreshToken: string;
-  method: number;
+  method: 'Password';
   expirationTime: string;
   issuedAt: string;
 }
@@ -42,7 +42,75 @@ export interface ApiErrorResponse {
   errorId: string;
 }
 
-// Legacy User interface for backwards compatibility
+// File upload types
+export interface FileUploadUrlResponse {
+  fileId: string;
+  url: string;
+}
+
+// New patch types from swagger schema
+export interface PatchResponse {
+  patchNumber: number;
+  imageUrl: string;
+  name?: string;
+  description?: string;
+  patchMaker?: string;
+  university?: string;
+  universitySection?: string;
+  releaseDate?: string;
+  created: string;
+  updated?: string;
+}
+
+export interface UserPatchUploadModel {
+  userPatchUploadId: string;
+  imageUrl: string;
+  created: string;
+}
+
+export interface UserPatchModel {
+  userPatchId: string;
+  matchingPatch: PatchResponse;
+  uploads: UserPatchUploadModel[];
+  isFavorite: boolean;
+  aquiredAt: string;
+}
+
+export interface GetUserPatchesResponse {
+  patches: UserPatchModel[];
+  unmatchesPatches: UserPatchUploadModel[];
+}
+
+export interface NewMatchingPatchesModel {
+  patchNumber: number;
+  imageUrl: string;
+  name?: string;
+  description?: string;
+  patchMaker?: string;
+  university?: string;
+  universitySection?: string;
+  releaseDate?: string;
+  created: string;
+  updated?: string;
+  similarity: number;
+}
+
+export interface OwnedMatchingPatchesModel {
+  userPatchId: string;
+  matchingPatch: PatchResponse;
+  uploads: UserPatchUploadModel[];
+  isFavorite: boolean;
+  aquiredAt: string;
+  similarity: number;
+}
+
+export interface PatchUploadResponse {
+  ownedMatchingPatches: OwnedMatchingPatchesModel[];
+  newMatchingPatches: NewMatchingPatchesModel[];
+  upload: UserPatchUploadModel;
+}
+
+// Legacy types for backward compatibility
 export interface User {
   id: string;
   username: string;

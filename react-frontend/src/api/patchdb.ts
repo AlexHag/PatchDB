@@ -7,7 +7,11 @@ import type {
   LoginRequest,
   RegisterRequest,
   AuthResponse,
-  ApiErrorResponse
+  ApiErrorResponse,
+  GetUserPatchesResponse,
+  PatchUploadResponse,
+  UserPatchModel,
+  FileUploadUrlResponse
 } from './types';
 import { getAuthHeaders } from './auth';
 
@@ -196,4 +200,65 @@ export function formatImagePath(path: string): string {
     return `${API_BASE_URL}/${path.substring(2)}`;
   }
   return `${API_BASE_URL}/images/${path}`;
+}
+
+// NEW API FUNCTIONS for updated backend
+
+// File service functions
+export async function getFileUploadUrl(): Promise<FileUploadUrlResponse> {
+  const response = await fetch(`${API_BASE_URL}/file-service/upload-url`, {
+    method: 'GET',
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+// New user patch functions
+export async function uploadPatchWithFileId(fileId: string): Promise<PatchUploadResponse> {
+  const response = await fetch(`${API_BASE_URL}/user-patches/upload/${fileId}`, {
+    method: 'POST',
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+export async function confirmPatchMatch(
+  userPatchUploadId: string, 
+  matchingPatchNumber: number
+): Promise<UserPatchModel> {
+  const response = await fetch(
+    `${API_BASE_URL}/user-patches/${userPatchUploadId}/matching-patch-number/${matchingPatchNumber}`, 
+    {
+      method: 'PATCH',
+      headers: getAuthHeaders()
+    }
+  );
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+export async function getNewUserPatches(): Promise<GetUserPatchesResponse> {
+  const response = await fetch(`${API_BASE_URL}/user-patches`, {
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
 }
