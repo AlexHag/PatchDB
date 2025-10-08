@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace PatchDb.Backend.Service.Patches.Models.Dto;
+namespace PatchDb.Backend.Service.PatchSubmittion.Models.Dto;
 
 public class UploadPatchRequest
 {

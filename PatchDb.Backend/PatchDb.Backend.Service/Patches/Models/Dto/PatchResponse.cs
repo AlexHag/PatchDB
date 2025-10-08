@@ -4,11 +4,11 @@ namespace PatchDb.Backend.Service.Patches.Models.Dto;
 
 public class PatchResponse
 {
-    [JsonProperty("id")]
-    public Guid Id { get; set; }
+    [JsonProperty("patchNumber")]
+    public int PatchNumber { get; set; }
 
-    [JsonProperty("url")]
-    public required string Url { get; set; }
+    [JsonProperty("imageUrl")]
+    public required string ImageUrl { get; set; }
 
     [JsonProperty("name")]
     public string? Name { get; set; }
@@ -27,9 +27,6 @@ public class PatchResponse
 
     [JsonProperty("releaseDate")]
     public DateTime? ReleaseDate { get; set; }
-
-    [JsonProperty("active")]
-    public bool Active { get; set; }
 
     [JsonProperty("created")]
     public DateTime Created { get; set; }

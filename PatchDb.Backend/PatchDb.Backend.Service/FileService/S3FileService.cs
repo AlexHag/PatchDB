@@ -72,10 +72,24 @@ public class S3FileService : IS3FileService
     {
         throw new NotImplementedException();
     }
-    
-    public Task DownloadFile(string path, Stream stream)
+
+    public async Task DownloadFile(string path, Stream stream)
     {
-        throw new NotImplementedException();
+        var request = new GetObjectRequest
+        {
+            BucketName = _config.BucketName,
+            Key = path
+        };
+
+        using var response = await _s3Client.GetObjectAsync(request);
+
+        if (response.HttpStatusCode != System.Net.HttpStatusCode.OK)
+        {
+            throw new Exception($"Error downloading file from S3. Status code: {response.HttpStatusCode}");
+        }
+
+        await response.ResponseStream.CopyToAsync(stream);
+        stream.Position = 0;
     }
     
     public Task DeleteFile(string path)

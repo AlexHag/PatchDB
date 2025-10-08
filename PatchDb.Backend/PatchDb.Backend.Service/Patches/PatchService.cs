@@ -9,12 +9,8 @@ namespace PatchDb.Backend.Service.Patches;
 
 public interface IPatchService
 {
-    Task<PatchResponse> UpdatePatchAsync(Guid userId, UpdatePatchRequest request);
-    Task<PatchResponse> GetUnclassifiedPatchAsync();
     Task<List<PatchResponse>> GetPatches(int skip, int take);
     Task<List<PatchResponse>> SearchPatches(SearchPatchRequest request);
-
-    Task<PatchResponse> UploadPatchAsync(Guid userId, UploadPatchRequest request);
 }
 
 public class PatchService : IPatchService
@@ -40,7 +36,6 @@ public class PatchService : IPatchService
 
         var patches = await _dbContext.Patches
             .OrderByDescending(p => p.ReleaseDate)
-            .Where(p => p.Active)
             .Skip(skip)
             .Take(take)
             .ToListAsync();
@@ -54,8 +49,6 @@ public class PatchService : IPatchService
         request.Take = Math.Clamp(request.Take, 1, 50);
 
         var query = _dbContext.Patches.AsQueryable();
-
-        query = query.Where(p => p.Active);
 
         if (!string.IsNullOrWhiteSpace(request.Name))
         {
@@ -91,103 +84,10 @@ public class PatchService : IPatchService
         return patches.Select(ToPatchResponse).ToList();
     }
 
-    public async Task<PatchResponse> GetUnclassifiedPatchAsync()
-    {
-        var patch = await _dbContext.Patches.FirstOrDefaultAsync(p => !p.Active);
-
-        if (patch == null)
-        {
-            throw new NotFoundApiException("No unclassified patches found.");
-        }
-
-        return ToPatchResponse(patch);
-    }
-
-    public async Task<PatchResponse> UpdatePatchAsync(Guid userId, UpdatePatchRequest request)
-    {
-        var patch = await _dbContext.Patches.FindAsync(request.Id);
-
-        if (patch == null)
-        {
-            throw new NotFoundApiException($"Patch not found");
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.Name))
-        {
-            patch.Active = true;
-            patch.Name = request.Name;
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.Description))
-        {
-            patch.Description = request.Description;
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.PatchMaker))
-        {
-            patch.PatchMaker = request.PatchMaker;
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.University))
-        {
-            patch.University = request.University;
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.UniversitySection))
-        {
-            patch.UniversitySection = request.UniversitySection;
-        }
-
-        if (request.ReleaseDate.HasValue)
-        {
-            patch.ReleaseDate = request.ReleaseDate.Value;
-        }
-
-        patch.LastUpdatedByUserId = userId;
-
-        await _dbContext.SaveChangesAsync();
-        return ToPatchResponse(patch);
-    }
-
-
-    public async Task<PatchResponse> UploadPatchAsync(Guid userId, UploadPatchRequest request)
-    {
-        var path = $"patches/{request.FileId}";
-
-        if (!await _s3FileService.FileExists(path))
-        {
-            throw new NotFoundApiException("File not found");
-        }
-
-        var patch = new PatchEntity
-        {
-            Id = Guid.NewGuid(),
-            FilePath = $"patches/{request.FileId}",
-            Name = request.Name,
-            Description = request.Description,
-            PatchMaker = request.PatchMaker,
-            University = request.University,
-            UniversitySection = request.UniversitySection,
-            ReleaseDate = request.ReleaseDate,
-            SubmittedByUserId = userId,
-            LastUpdatedByUserId = userId,
-            Active = false
-        };
-
-        if (!string.IsNullOrWhiteSpace(request.Name))
-        {
-            patch.Active = true;
-        }
-
-        _dbContext.Patches.Add(patch);
-        await _dbContext.SaveChangesAsync();
-        return ToPatchResponse(patch);
-    }
-
     private PatchResponse ToPatchResponse(PatchEntity patch)
     {
         var response = _mapper.Map<PatchResponse>(patch);
-        response.Url = _s3FileService.GetDownloadUrl(patch.FilePath);
+        response.ImageUrl = _s3FileService.GetDownloadUrl(patch.FilePath);
         return response;
     }
 }

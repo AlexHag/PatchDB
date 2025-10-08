@@ -8,6 +8,8 @@ using PatchDb.Backend.Service.Authentication;
 using PatchDb.Backend.Service.FileService;
 using PatchDb.Backend.Service.FileService.Configuration;
 using PatchDb.Backend.Service.Patches;
+using PatchDb.Backend.Service.PatchIndexApi;
+using PatchDb.Backend.Service.PatchSubmittion;
 using PatchDb.Backend.Service.User;
 
 namespace PatchDb.Backend.Service;
@@ -32,11 +34,14 @@ internal static class Program
         builder.AddConfiguration<AwsConfiguration>();
         builder.AddConfiguration<AwsCredentials>();
 
+        builder.RegisterPatchIndexApi();
+
         builder.Services.AddSingleton<IS3FileService, S3FileService>();
 
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
         builder.Services.AddScoped<IPatchService, PatchService>();
+        builder.Services.AddScoped<IPatchSubmittionService, PatchSubmittionService>();
 
         // builder.Services.AddScoped<IUserRepository, UserRepository>();
         // builder.Services.AddScoped<IUserPasswordRepository, UserPasswordRepository>();

@@ -2,7 +2,7 @@ namespace PatchDb.Backend.Service.Patches.Models.Entities;
 
 public class PatchEntity
 {
-    public Guid Id { get; set; }
+    public int? PatchNumber { get; set; }
     public required string FilePath { get; set; }
 
     public string? Name { get; set; }
@@ -12,10 +12,7 @@ public class PatchEntity
     public string? UniversitySection { get; set; }
     public DateTime? ReleaseDate { get; set; }
 
-    public bool Active { get; set; }
-
-    public Guid SubmittedByUserId { get; set; }
-    public Guid? LastUpdatedByUserId { get; set; }
+    public Guid PatchSubmittionId { get; set; }
 
     public DateTime Created { get; set; }
     public DateTime? Updated { get; set; }

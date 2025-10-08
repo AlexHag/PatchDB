@@ -1,9 +1,12 @@
 using Newtonsoft.Json;
 
-namespace PatchDb.Backend.Service.Patches.Models.Dto;
+namespace PatchDb.Backend.Service.PatchSubmittion.Models.Dto;
 
 public class UpdatePatchRequest
 {
+    /// <summary>
+    ///     Id of the patch submittion
+    /// </summary>
     [JsonProperty("id")]
     public Guid Id { get; set; }
 
@@ -24,4 +27,7 @@ public class UpdatePatchRequest
 
     [JsonProperty("releaseDate")]
     public DateTime? ReleaseDate { get; set; }
+
+    [JsonProperty("status")]
+    public PatchSubmittionStatus? Status { get; set; }
 }
