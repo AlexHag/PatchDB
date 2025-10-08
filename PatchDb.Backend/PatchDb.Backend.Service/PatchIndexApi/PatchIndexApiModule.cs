@@ -10,7 +10,7 @@ public static class PatchIndexApiModule
             client.BaseAddress = new Uri("http://localhost:5000");
         });
 
-        builder.Services.AddScoped<IPatchIndexingApi, PatchIndexingApi>();
+        builder.Services.AddScoped<IPatchIndexApi, PatchIndexApi>();
         return builder;
     }
 }

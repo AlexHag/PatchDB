@@ -5,19 +5,19 @@ using PatchDb.Backend.Service.PatchIndexApi.Models.Dto;
 
 namespace PatchDb.Backend.Service.PatchIndexApi;
 
-public interface IPatchIndexingApi
+public interface IPatchIndexApi
 {
     Task IndexPatch(int id, string path);
     Task DeleteFromIndex(int id);
     Task<SearchPatchApiResponse> SearchPatch(string path);
 }
 
-public class PatchIndexingApi : IPatchIndexingApi
+public class PatchIndexApi : IPatchIndexApi
 {
     private readonly IS3FileService _s3FileService;
     private readonly HttpClient _httpClient;
 
-    public PatchIndexingApi(
+    public PatchIndexApi(
         IS3FileService s3FileService,
         IHttpClientFactory httpClientFactory)
     {

@@ -21,24 +21,24 @@ public class PatchSubmittionService : IPatchSubmittionService
 {
     private readonly ServiceDbContext _dbContext;
     private readonly IS3FileService _s3FileService;
-    private readonly IPatchIndexingApi _patchIndexingApi;
+    private readonly IPatchIndexApi _patchIndexApi;
     private readonly IMapper _mapper;
 
     public PatchSubmittionService(
         ServiceDbContext dbContext,
         IS3FileService s3FileService,
-        IPatchIndexingApi patchIndexingApi,
+        IPatchIndexApi patchIndexApi,
         IMapper mapper)
     {
         _dbContext = dbContext;
         _s3FileService = s3FileService;
-        _patchIndexingApi = patchIndexingApi;
+        _patchIndexApi = patchIndexApi;
         _mapper = mapper;
     }
 
     public async Task<PatchSubmittionResponse> UploadPatch(Guid userId, UploadPatchRequest request)
     {
-        var path = $"patches/{request.FileId}";
+        var path = $"{userId}/{request.FileId}";
 
         if (!await _s3FileService.FileExists(path))
         {
@@ -140,7 +140,7 @@ public class PatchSubmittionService : IPatchSubmittionService
             _dbContext.Patches.Add(patch);
             await _dbContext.SaveChangesAsync();
 
-            await _patchIndexingApi.IndexPatch(patch.PatchNumber!.Value, patch.FilePath);
+            await _patchIndexApi.IndexPatch(patch.PatchNumber!.Value, patch.FilePath);
 
             patchSubmittion.PatchNumber = patch.PatchNumber;
             await _dbContext.SaveChangesAsync();
