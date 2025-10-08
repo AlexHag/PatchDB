@@ -1,0 +1,45 @@
+index_patch
+curl http://localhost:5000/index -X POST -H 'Content-Type: multipart/form-data' -F "image=@image.png" -F "id=1"
+200
+{
+    "status": "success"
+}
+500
+{
+    "status": "error",
+    "error": "Oops something went wrong"
+}
+
+---
+
+delete_from_index
+curl http://localhost:5000/<id> -X DELETE
+200
+{
+    "status": "success"
+}
+500
+{
+    "status": "error",
+    "error": "Oops something went wrong"
+}
+
+---
+
+search_patch
+curl http://localhost:5000/search -X POST -H 'Content-Type: multipart/form-data' -F "image=@image.png"
+200
+{
+    "status": "success",
+    "matches": [
+        {
+            "id": 1,
+            "score": 0.9068639278411865
+        }
+    ]
+}
+500
+{
+    "status": "error",
+    "error": "Oops something went wrong"
+}
