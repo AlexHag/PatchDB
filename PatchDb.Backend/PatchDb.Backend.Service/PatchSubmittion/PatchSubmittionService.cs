@@ -171,6 +171,7 @@ public class PatchSubmittionService : IPatchSubmittionService
     private PatchSubmittionResponse ToPatchSubmittionResponse(PatchSubmittionEntity entity)
     {
         var response = _mapper.Map<PatchSubmittionResponse>(entity);
+        response.PatchSubmittionId = entity.Id;
         response.ImageUrl = _s3FileService.GetDownloadUrl(entity.FilePath);
         return response;
     }

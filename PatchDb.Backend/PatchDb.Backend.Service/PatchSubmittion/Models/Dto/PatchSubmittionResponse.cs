@@ -9,7 +9,7 @@ public class PatchSubmittionResponse
     ///     Primary key
     /// </summary>
     [JsonProperty("id")]
-    public Guid Id { get; set; }
+    public Guid PatchSubmittionId { get; set; }
 
     /// <summary>
     ///     The patch number if the submittion is accepted

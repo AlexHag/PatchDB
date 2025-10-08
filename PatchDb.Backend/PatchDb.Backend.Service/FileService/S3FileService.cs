@@ -2,6 +2,7 @@ using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
+using Amazon.S3.Transfer;
 using PatchDb.Backend.Service.FileService.Configuration;
 
 namespace PatchDb.Backend.Service.FileService;
@@ -20,12 +21,14 @@ public class S3FileService : IS3FileService
 {
     private readonly AmazonS3Client _s3Client;
     private readonly AwsConfiguration _config;
+    private readonly TransferUtility _transferUtility;
 
     public S3FileService(AwsConfiguration config, AwsCredentials credentials)
     {
         _config = config;
         Console.WriteLine($"AccessKey: {credentials.AccessKey}, SecretAccessKey: {credentials.SecretAccessKey}, Region: {config.Region}, BucketName: {config.BucketName}");
         _s3Client = new AmazonS3Client(new BasicAWSCredentials(credentials.AccessKey, credentials.SecretAccessKey), RegionEndpoint.GetBySystemName(_config.Region));
+        _transferUtility = new TransferUtility(_s3Client);
     }
 
     public string GetUploadUrl(string path) => _s3Client.GetPreSignedURL(
@@ -68,10 +71,8 @@ public class S3FileService : IS3FileService
         }
     }
 
-    public Task UploadFile(string path, Stream stream)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task UploadFile(string path, Stream stream)
+        => await _transferUtility.UploadAsync(stream, _config.BucketName, path);
 
     public async Task DownloadFile(string path, Stream stream)
     {

@@ -31,13 +31,17 @@ public class FileServiceController : ControllerBase
         });
     }
 
+    // Client is not supposed to call this, but should upload the image directly to S3, this is just for testing API through swagger.
     [Authorize]
-    [HttpGet("upload-url/patch")]
-    [Authorize(Roles = $"{nameof(UserRole.Moderator)},{nameof(UserRole.Admin)}")]
-    public ActionResult<FileUploadUrlResponse> GetPatchUploadUrl()
+    [HttpPost("upload")]
+    public async Task<ActionResult<FileUploadUrlResponse>> Upload(IFormFile file)
     {
         var fileId = Guid.NewGuid();
-        var url = _s3FileService.GetUploadUrl($"patches/{fileId}");
+        var path = $"{User.UserId()}/{fileId}";
+
+        await using var stream = file.OpenReadStream();
+        await _s3FileService.UploadFile(path, stream);
+        var url = _s3FileService.GetDownloadUrl(path);
 
         return Ok(new FileUploadUrlResponse
         {

@@ -11,6 +11,7 @@ using PatchDb.Backend.Service.Patches;
 using PatchDb.Backend.Service.PatchIndexApi;
 using PatchDb.Backend.Service.PatchSubmittion;
 using PatchDb.Backend.Service.User;
+using PatchDb.Backend.Service.UserPatches;
 
 namespace PatchDb.Backend.Service;
 
@@ -42,6 +43,7 @@ internal static class Program
         builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
         builder.Services.AddScoped<IPatchService, PatchService>();
         builder.Services.AddScoped<IPatchSubmittionService, PatchSubmittionService>();
+        builder.Services.AddScoped<IUserPatchService, UserPatchService>();
 
         // builder.Services.AddScoped<IUserRepository, UserRepository>();
         // builder.Services.AddScoped<IUserPasswordRepository, UserPasswordRepository>();
