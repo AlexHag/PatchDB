@@ -39,7 +39,7 @@ public class ServiceDbContext : DbContext
             .HasOne(up => up.Patch)
             .WithMany()
             .HasForeignKey(up => up.PatchNumber)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<UserPatchUploadEntity>()
             .HasOne(u => u.UserPatch)

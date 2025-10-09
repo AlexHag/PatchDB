@@ -169,10 +169,10 @@ public class PatchSubmittionService : IPatchSubmittionService
                 Created = DateTime.UtcNow
             };
 
-            await _patchIndexApi.IndexPatch(patch.PatchNumber!.Value, patch.FilePath);
-
             _dbContext.Patches.Add(patch);
             await _dbContext.SaveChangesAsync();
+
+            await _patchIndexApi.IndexPatch(patch.PatchNumber!.Value, patch.FilePath);
 
             patchSubmittion.PatchNumber = patch.PatchNumber;
             await _dbContext.SaveChangesAsync();
