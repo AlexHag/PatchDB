@@ -8,6 +8,7 @@ import Matches from './pages/Matches';
 import Profile from './pages/Profile';
 import SubmitPatch from './pages/SubmitPatch';
 import PatchSubmissionView from './pages/PatchSubmissionView';
+import PatchView from './pages/PatchView';
 
 // Protected Route component
 interface ProtectedRouteProps {
@@ -69,6 +70,12 @@ const App: React.FC = () => {
           <Route path="/submit-patch/:patchSubmittionId" element={
             <ProtectedRoute>
               <PatchSubmissionView />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/patch/:patchNumber" element={
+            <ProtectedRoute>
+              <PatchView />
             </ProtectedRoute>
           } />
 

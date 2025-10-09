@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../components/hooks/useAuth';
 import Navigation from '../components/Navigation';
 import { 
@@ -7,12 +7,11 @@ import {
 } from '../api/patchdb';
 import type { 
   GetUserPatchesResponse, 
-  UserPatchModel,
-  UserPatchUploadModel
+  UserPatchModel
 } from '../api/types';
 
 const Dashboard: React.FC = () => {
-  const { userId, requireAuth } = useAuth();
+  const { userId } = useAuth();
   const navigate = useNavigate();
   const [userPatches, setUserPatches] = useState<GetUserPatchesResponse>({ patches: [], unmatchesPatches: [] });
   const [loading, setLoading] = useState(false);
@@ -138,65 +137,122 @@ const Dashboard: React.FC = () => {
           </div>
         )}
 
-        {/* New API Patches */}
-        {userPatches.patches.length > 0 && userPatches.patches.map((patch: UserPatchModel, index) => (
-          <div key={patch.userPatchId} className="row mb-4 patch-group">
+        {/* Patch Collection */}
+        {userPatches.patches.length > 0 && userPatches.patches.map((patch: UserPatchModel) => (
+          <div key={patch.userPatchId} className="row mb-4">
             <div className="col-12">
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <div className="d-flex align-items-center">
-                  <h2 className="h5 mb-0 me-2">
-                    {patch.matchingPatch.name || `Patch #${patch.matchingPatch.patchNumber}`}
-                  </h2>
-                  {patch.isFavorite && (
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" className="text-warning">
-                      <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-                    </svg>
-                  )}
-                </div>
-                <div className="d-flex align-items-center">
-                  <span className="badge bg-secondary me-2">
-                    You own {patch.uploads.length} of these
-                  </span>
-                </div>
-              </div>
-              <div className="patch-grid">
-                <div className="patch-item">
-                  <img 
-                    src={patch.matchingPatch.imageUrl} 
-                    alt={patch.matchingPatch.name || `Patch #${patch.matchingPatch.patchNumber}`} 
-                    loading="lazy" 
-                  />
-                  <div className="patch-overlay">
-                    <div className="patch-overlay-text">
-                      <div className="small">Official Patch Image</div>
+              <div className="card h-100 patch-collection-card">
+                <div className="card-body p-0">
+                  <div className="row g-0">
+                    {/* Patch Image */}
+                    <div className="col-12 col-md-4">
+                      <Link 
+                        to={`/patch/${patch.matchingPatch.patchNumber}`}
+                        className="d-block text-decoration-none"
+                      >
+                        <div className="position-relative patch-image-container" style={{ aspectRatio: '1', minHeight: '200px' }}>
+                          <img 
+                            src={patch.matchingPatch.imageUrl} 
+                            alt={patch.matchingPatch.name || `Patch #${patch.matchingPatch.patchNumber}`} 
+                            loading="lazy"
+                            className="w-100 h-100 object-fit-cover rounded-start-3"
+                          />
+                          <div className="patch-overlay rounded-start-3">
+                            <div className="patch-overlay-text">
+                              <div className="small">View Details</div>
+                              <div className="small text-primary">→</div>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
                     </div>
-                  </div>
-                </div>
-                {patch.uploads.map((upload: UserPatchUploadModel) => (
-                  <div key={upload.userPatchUploadId} className="patch-item">
-                    <img 
-                      src={upload.imageUrl} 
-                      alt="Your upload" 
-                      loading="lazy"
-                    />
-                    <div className="patch-overlay">
-                      <div className="patch-overlay-text">
-                        <div className="small">Your Upload</div>
-                        <div className="small">{new Date(upload.created).toLocaleDateString()}</div>
+                    
+                    {/* Patch Details */}
+                    <div className="col-12 col-md-8">
+                      <div className="p-3 p-md-4 h-100 d-flex flex-column">
+                        {/* Header with title and favorite */}
+                        <div className="d-flex justify-content-between align-items-start mb-3">
+                          <div className="flex-grow-1">
+                            <h3 className="h4 mb-2" style={{color: '#2c3e50'}}>
+                              <Link 
+                                to={`/patch/${patch.matchingPatch.patchNumber}`}
+                                className="text-decoration-none"
+                                style={{color: 'inherit'}}
+                              >
+                                {patch.matchingPatch.name || `Patch #${patch.matchingPatch.patchNumber}`}
+                              </Link>
+                            </h3>
+                            {patch.matchingPatch.description && (
+                              <p className="text-muted mb-3" style={{fontSize: '0.95rem'}}>
+                                {patch.matchingPatch.description}
+                              </p>
+                            )}
+                          </div>
+                          {patch.isFavorite && (
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16" className="text-warning ms-2 flex-shrink-0">
+                              <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+                            </svg>
+                          )}
+                        </div>
+                        
+                        {/* University and Maker Info */}
+                        <div className="flex-grow-1">
+                          {patch.matchingPatch.university && (
+                            <div className="d-flex align-items-center mb-3">
+                              {patch.matchingPatch.university.logoUrl && (
+                                <img 
+                                  src={patch.matchingPatch.university.logoUrl} 
+                                  alt={`${patch.matchingPatch.university.name} logo`}
+                                  className="me-2 rounded"
+                                  style={{ width: '32px', height: '32px', objectFit: 'contain' }}
+                                  loading="lazy"
+                                />
+                              )}
+                              <div>
+                                <div className="fw-semibold" style={{color: '#2c3e50', fontSize: '0.9rem'}}>
+                                  {patch.matchingPatch.university.name}
+                                </div>
+                                {patch.matchingPatch.universitySection && (
+                                  <div className="text-muted small">
+                                    {patch.matchingPatch.universitySection}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Additional Details */}
+                          <div className="row g-2 text-muted small">
+                            {patch.matchingPatch.patchMaker && (
+                              <div className="col-12 col-sm-6">
+                                <strong>Maker:</strong> {patch.matchingPatch.patchMaker}
+                              </div>
+                            )}
+                            {patch.matchingPatch.releaseDate && (
+                              <div className="col-12 col-sm-6">
+                                <strong>Released:</strong> {new Date(patch.matchingPatch.releaseDate).getFullYear()}
+                              </div>
+                            )}
+                            <div className="col-12 col-sm-6">
+                              <strong>Acquired:</strong> {new Date(patch.aquiredAt).toLocaleDateString()}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Action Button */}
+                        <div className="mt-3 pt-2 border-top">
+                          <Link 
+                            to={`/patch/${patch.matchingPatch.patchNumber}`}
+                            className="btn btn-outline-dark btn-sm"
+                          >
+                            View Full Details →
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-              {patch.matchingPatch.patchMaker && (
-                <div className="mt-2">
-                  <small className="text-muted">
-                    Maker: {patch.matchingPatch.patchMaker}
-                    {patch.matchingPatch.university && ` • ${patch.matchingPatch.university}`}
-                    {patch.matchingPatch.universitySection && ` • ${patch.matchingPatch.universitySection}`}
-                  </small>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         ))}

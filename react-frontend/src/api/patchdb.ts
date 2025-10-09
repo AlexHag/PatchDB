@@ -16,7 +16,8 @@ import type {
   UniversityModel,
   UploadPatchRequest,
   PatchSubmittionResponse,
-  UpdatePatchSubmissionRequest
+  UpdatePatchSubmissionRequest,
+  PatchResponse
 } from './types';
 import { getAuthHeaders } from './auth';
 
@@ -270,6 +271,19 @@ export async function updatePatchSubmission(request: UpdatePatchSubmissionReques
     method: 'PATCH',
     headers: getAuthHeaders(),
     body: JSON.stringify(request)
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+// Patch detail function
+export async function getPatchDetail(patchNumber: number): Promise<PatchResponse> {
+  const response = await fetch(`${API_BASE_URL}/patches/${patchNumber}`, {
+    headers: getAuthHeaders()
   });
 
   if (!response.ok) {

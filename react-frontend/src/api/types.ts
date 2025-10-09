@@ -51,14 +51,17 @@ export interface FileUploadUrlResponse {
   url: string;
 }
 
-// New patch types from swagger schema
 export interface PatchResponse {
   patchNumber: number;
   imageUrl: string;
   name?: string;
   description?: string;
   patchMaker?: string;
-  university?: string;
+  university?: {
+    code: string;
+    name: string;
+    logoUrl: string;
+  };
   universitySection?: string;
   releaseDate?: string;
   created: string;
@@ -84,20 +87,6 @@ export interface GetUserPatchesResponse {
   unmatchesPatches: UserPatchUploadModel[];
 }
 
-export interface NewMatchingPatchesModel {
-  patchNumber: number;
-  imageUrl: string;
-  name?: string;
-  description?: string;
-  patchMaker?: string;
-  university?: string;
-  universitySection?: string;
-  releaseDate?: string;
-  created: string;
-  updated?: string;
-  similarity: number;
-}
-
 export interface OwnedMatchingPatchesModel {
   userPatchId: string;
   matchingPatch: PatchResponse;
@@ -109,7 +98,7 @@ export interface OwnedMatchingPatchesModel {
 
 export interface PatchUploadResponse {
   ownedMatchingPatches: OwnedMatchingPatchesModel[];
-  newMatchingPatches: NewMatchingPatchesModel[];
+  newMatchingPatches: PatchResponse[];
   upload: UserPatchUploadModel;
 }
 

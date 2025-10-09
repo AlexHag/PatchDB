@@ -11,6 +11,7 @@ namespace PatchDb.Backend.Service.Patches;
 public interface IPatchService
 {
     Task<List<PatchResponse>> GetPatches(int skip, int take);
+    Task<PatchResponse> GetPatch(int patchNumber);
     Task<List<PatchResponse>> SearchPatches(SearchPatchRequest request);
 }
 
@@ -32,6 +33,9 @@ public class PatchService : IPatchService
         _universityService = universityService;
         _mapper = mapper;
     }
+
+    public async Task<PatchResponse> GetPatch(int patchNumber)
+        => ToPatchResponse(await _dbContext.Patches.FindAsync(patchNumber) ?? throw new NotFoundApiException("Patch not found"));
 
     public async Task<List<PatchResponse>> GetPatches(int skip, int take)
     {
