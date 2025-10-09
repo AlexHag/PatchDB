@@ -111,6 +111,15 @@ const Navigation: React.FC<NavigationProps> = () => {
                 Upload Patch
               </Link>
               
+              <Link 
+                to="/profile" 
+                className="mobile-nav-link"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <span className="nav-icon">👤</span>
+                Profile
+              </Link>
+              
               <button 
                 className="mobile-nav-link logout-btn"
                 onClick={handleLogout}

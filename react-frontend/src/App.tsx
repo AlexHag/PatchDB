@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Upload from './pages/Upload';
 import Matches from './pages/Matches';
+import Profile from './pages/Profile';
 
 // Protected Route component
 interface ProtectedRouteProps {
@@ -48,6 +49,12 @@ const App: React.FC = () => {
           <Route path="/matches" element={
             <ProtectedRoute>
               <Matches />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           } />
 

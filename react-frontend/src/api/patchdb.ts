@@ -11,7 +11,12 @@ import type {
   GetUserPatchesResponse,
   PatchUploadResponse,
   UserPatchModel,
-  FileUploadUrlResponse
+  FileUploadUrlResponse,
+  UserResponse,
+  UpdateBioRequest,
+  UpdateProfilePictureRequest,
+  UpdateUserUniversityInfoRequest,
+  UniversityAndProgramModel
 } from './types';
 import { getAuthHeaders } from './auth';
 
@@ -253,6 +258,96 @@ export async function confirmPatchMatch(
 
 export async function getNewUserPatches(): Promise<GetUserPatchesResponse> {
   const response = await fetch(`${API_BASE_URL}/user-patches`, {
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+// Profile API functions
+
+export async function getCurrentUser(): Promise<UserResponse> {
+  const response = await fetch(`${API_BASE_URL}/user`, {
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+export async function updateUserBio(bio: string): Promise<UserResponse> {
+  const request: UpdateBioRequest = { bio };
+  
+  const response = await fetch(`${API_BASE_URL}/user/bio`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(request)
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+export async function updateUserProfilePicture(fileId: string): Promise<UserResponse> {
+  const request: UpdateProfilePictureRequest = { fileId };
+  
+  const response = await fetch(`${API_BASE_URL}/user/profile-picture`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(request)
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+export async function removeUserProfilePicture(): Promise<UserResponse> {
+  const response = await fetch(`${API_BASE_URL}/user/profile-picture`, {
+    method: 'DELETE',
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+export async function updateUserUniversityInfo(universityCode?: string, universityProgram?: string): Promise<UserResponse> {
+  const request: UpdateUserUniversityInfoRequest = { 
+    universityCode, 
+    universityProgram 
+  };
+  
+  const response = await fetch(`${API_BASE_URL}/user/university-information`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(request)
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+export async function getUniversities(): Promise<UniversityAndProgramModel[]> {
+  const response = await fetch(`${API_BASE_URL}/universities`, {
     headers: getAuthHeaders()
   });
 

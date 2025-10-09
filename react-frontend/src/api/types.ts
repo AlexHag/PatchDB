@@ -20,6 +20,9 @@ export interface UserResponse {
   profilePictureUrl?: string;
   email?: string;
   phoneNumber?: string;
+  universityName?: string;
+  universityLogoUrl?: string;
+  universityProgram?: string;
   created: string;
 }
 
@@ -163,4 +166,34 @@ export interface UploadResult {
 
 export interface ApiError {
   error: string;
+}
+
+// Profile management types
+export interface UpdateBioRequest {
+  bio: string;
+}
+
+export interface UpdateProfilePictureRequest {
+  fileId: string;
+}
+
+export interface UpdateUserUniversityInfoRequest {
+  universityCode?: string;
+  universityProgram?: string;
+}
+
+// University types
+export interface UniversityProgramModel {
+  frontendName: string;
+  name: string;
+}
+
+export interface UniversityModel {
+  code: string;
+  name: string;
+  logoUrl: string;
+}
+
+export interface UniversityAndProgramModel extends UniversityModel {
+  programs: UniversityProgramModel[];
 }
