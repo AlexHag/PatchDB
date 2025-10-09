@@ -6,8 +6,7 @@ import { getPatchSubmission, updatePatchSubmission, getUniversities } from '../a
 import type { 
   PatchSubmittionResponse,
   UpdatePatchSubmissionRequest, 
-  UniversityModel,
-  PatchSubmissionStatus
+  UniversityModel
 } from '../api/types';
 
 const PatchSubmissionView: React.FC = () => {
@@ -32,6 +31,8 @@ const PatchSubmissionView: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Auth check
   useEffect(() => {
@@ -84,7 +85,20 @@ const PatchSubmissionView: React.FC = () => {
 
   const showError = (message: string) => {
     setError(message);
+    setShowSuccess(false);
     setTimeout(() => setError(''), 5000);
+  };
+
+  const showSuccessMessage = (message: string) => {
+    setSuccess(message);
+    setError(''); // Clear any existing errors
+    setShowSuccess(true);
+    
+    // Auto-hide success message after 4 seconds
+    setTimeout(() => {
+      setShowSuccess(false);
+      setTimeout(() => setSuccess(''), 300); // Wait for fade out animation
+    }, 4000);
   };
 
   const getStatusBadgeClass = (status: string) => {
@@ -138,6 +152,7 @@ const PatchSubmissionView: React.FC = () => {
       const updatedSubmission = await updatePatchSubmission(request);
       setSubmission(updatedSubmission);
       setEditing(false);
+      showSuccessMessage('✅ Patch information updated successfully!');
       
     } catch (error) {
       showError('Failed to update patch info: ' + (error instanceof Error ? error.message : 'Unknown error'));
@@ -169,6 +184,10 @@ const PatchSubmissionView: React.FC = () => {
       const updatedSubmission = await updatePatchSubmission(request);
       setSubmission(updatedSubmission);
       setEditing(false);
+      
+      // Show success message with appropriate emoji based on status
+      const statusEmoji = getStatusIcon(newStatus);
+      showSuccessMessage(`${statusEmoji} Status updated to ${newStatus} successfully!`);
       
     } catch (error) {
       showError('Failed to update status: ' + (error instanceof Error ? error.message : 'Unknown error'));
@@ -372,14 +391,13 @@ const PatchSubmissionView: React.FC = () => {
                           >
                             ❌ Cancel
                           </button>
-                          <button 
-                            className="btn btn-secondary"
-                            onClick={handleUpdateInfo}
-                            disabled={updating}
-                          >
-                            {updating && <span className="spinner-border spinner-border-sm me-2"></span>}
-                            💾 Update Info
-                          </button>
+                           <button 
+                             className="btn btn-secondary"
+                             onClick={handleUpdateInfo}
+                             disabled={updating}
+                           >
+                             💾 Update Info
+                           </button>
                         </div>
                       </div>
                     ) : (
@@ -435,62 +453,62 @@ const PatchSubmissionView: React.FC = () => {
                 <h5 className="mb-0">🔄 Status Management</h5>
               </div>
               <div className="card-body">
-                <div className="row g-2">
-                  {/* Pending */}
-                  <div className="col-6 col-md-3">
-                    <button 
-                      className={`btn w-100 ${submission.status === 'Pending' ? 'btn-warning' : 'btn-outline-warning'}`}
-                      onClick={() => handleStatusUpdate('Pending')}
-                      disabled={!canUpdateStatus('Pending') || updating || submission.status === 'Pending'}
-                    >
-                      ⏳ Pending
-                    </button>
-                  </div>
+                 <div className="row g-2">
+                   {/* Pending */}
+                   <div className="col-6 col-md-3">
+                     <button 
+                       className={`btn w-100 ${submission.status === 'Pending' ? 'btn-warning' : 'btn-outline-warning'}`}
+                       onClick={() => handleStatusUpdate('Pending')}
+                       disabled={!canUpdateStatus('Pending') || updating || submission.status === 'Pending'}
+                     >
+                       ⏳ Pending
+                     </button>
+                   </div>
 
-                  {/* Accepted */}
-                  <div className="col-6 col-md-3">
-                    <button 
-                      className={`btn w-100 ${submission.status === 'Accepted' ? 'btn-success' : 'btn-outline-success'}`}
-                      onClick={() => handleStatusUpdate('Accepted')}
-                      disabled={!canUpdateStatus('Accepted') || updating || submission.status === 'Accepted'}
-                    >
-                      ✅ Accepted
-                    </button>
-                  </div>
+                   {/* Accepted */}
+                   <div className="col-6 col-md-3">
+                     <button 
+                       className={`btn w-100 ${submission.status === 'Accepted' ? 'btn-success' : 'btn-outline-success'}`}
+                       onClick={() => handleStatusUpdate('Accepted')}
+                       disabled={!canUpdateStatus('Accepted') || updating || submission.status === 'Accepted'}
+                     >
+                       ✅ Accepted
+                     </button>
+                   </div>
 
-                  {/* Rejected */}
-                  <div className="col-6 col-md-3">
-                    <button 
-                      className={`btn w-100 ${submission.status === 'Rejected' ? 'btn-danger' : 'btn-outline-danger'}`}
-                      onClick={() => handleStatusUpdate('Rejected')}
-                      disabled={!canUpdateStatus('Rejected') || updating || submission.status === 'Rejected'}
-                    >
-                      ❌ Rejected
-                    </button>
-                  </div>
+                   {/* Rejected */}
+                   <div className="col-6 col-md-3">
+                     <button 
+                       className={`btn w-100 ${submission.status === 'Rejected' ? 'btn-danger' : 'btn-outline-danger'}`}
+                       onClick={() => handleStatusUpdate('Rejected')}
+                       disabled={!canUpdateStatus('Rejected') || updating || submission.status === 'Rejected'}
+                     >
+                       ❌ Rejected
+                     </button>
+                   </div>
 
-                  {/* Duplicate */}
-                  <div className="col-6 col-md-3">
-                    <button 
-                      className={`btn w-100 ${submission.status === 'Duplicate' ? 'btn-secondary' : 'btn-outline-secondary'}`}
-                      onClick={() => handleStatusUpdate('Duplicate')}
-                      disabled={!canUpdateStatus('Duplicate') || updating || submission.status === 'Duplicate'}
-                    >
-                      🔄 Duplicate
-                    </button>
-                  </div>
+                   {/* Duplicate */}
+                   <div className="col-6 col-md-3">
+                     <button 
+                       className={`btn w-100 ${submission.status === 'Duplicate' ? 'btn-secondary' : 'btn-outline-secondary'}`}
+                       onClick={() => handleStatusUpdate('Duplicate')}
+                       disabled={!canUpdateStatus('Duplicate') || updating || submission.status === 'Duplicate'}
+                     >
+                       🔄 Duplicate
+                     </button>
+                   </div>
 
-                  {/* Deleted */}
-                  <div className="col-12 col-md-6 mx-auto mt-2">
-                    <button 
-                      className={`btn w-100 ${submission.status === 'Deleted' ? 'btn-dark' : 'btn-outline-dark'}`}
-                      onClick={() => handleStatusUpdate('Deleted')}
-                      disabled={!canUpdateStatus('Deleted') || updating || submission.status === 'Deleted'}
-                    >
-                      🗑️ Delete
-                    </button>
-                  </div>
-                </div>
+                   {/* Deleted */}
+                   <div className="col-12 col-md-6 mx-auto mt-2">
+                     <button 
+                       className={`btn w-100 ${submission.status === 'Deleted' ? 'btn-dark' : 'btn-outline-dark'}`}
+                       onClick={() => handleStatusUpdate('Deleted')}
+                       disabled={!canUpdateStatus('Deleted') || updating || submission.status === 'Deleted'}
+                     >
+                       🗑️ Delete
+                     </button>
+                   </div>
+                 </div>
 
                 {user?.role === 'PatchMaker' && (
                   <div className="alert alert-info mt-3 mb-0">
@@ -502,6 +520,26 @@ const PatchSubmissionView: React.FC = () => {
               </div>
             </div>
 
+            {/* Success Messages */}
+            {success && (
+              <div 
+                className={`alert alert-success alert-dismissible mt-3 ${showSuccess ? 'fade show' : 'fade'}`} 
+                style={showSuccess ? {
+                  animation: 'pulse 0.6s ease-in-out',
+                  backgroundColor: '#d1e7dd',
+                  borderColor: '#a3cfbb',
+                  color: '#0a3622'
+                } : {}}
+                role="alert"
+              >
+                <strong>{success}</strong>
+                <button type="button" className="btn-close" onClick={() => {
+                  setShowSuccess(false);
+                  setTimeout(() => setSuccess(''), 300);
+                }}></button>
+              </div>
+            )}
+
             {/* Error Messages */}
             {error && (
               <div className="alert alert-danger alert-dismissible fade show mt-3" role="alert">
@@ -512,6 +550,57 @@ const PatchSubmissionView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Central Loading Overlay */}
+      {updating && (
+        <div 
+          className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+          style={{
+            backgroundColor: 'rgba(0, 0, 0, 0.6)',
+            zIndex: 9999,
+            backdropFilter: 'blur(3px)',
+            animation: 'fadeIn 0.3s ease-in-out'
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="loading-title"
+        >
+          <div 
+            className="text-center text-white bg-dark rounded-3 p-4" 
+            style={{ 
+              minWidth: '280px', 
+              boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+              transform: 'scale(1)',
+              animation: 'fadeInScale 0.3s ease-out'
+            }}
+          >
+            <div className="spinner-border text-light mb-3" style={{ width: '3rem', height: '3rem' }} role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <h5 className="mb-2" id="loading-title">⚡ Updating patch submission...</h5>
+            <small className="text-light opacity-75">Please wait while we process your request</small>
+          </div>
+        </div>
+      )}
+
+      <style>
+        {`
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          @keyframes fadeInScale {
+            from { 
+              opacity: 0; 
+              transform: scale(0.9);
+            }
+            to { 
+              opacity: 1; 
+              transform: scale(1);
+            }
+          }
+        `}
+      </style>
     </div>
   );
 };
