@@ -215,7 +215,11 @@ export interface PatchSubmittionResponse {
   name?: string;
   description?: string;
   patchMaker?: string;
-  university?: string;
+  university?: {
+    code: string;
+    name: string;
+    logoUrl: string;
+  };
   universitySection?: string;
   releaseDate?: string;
   imageUrl: string;
@@ -224,4 +228,25 @@ export interface PatchSubmittionResponse {
   lastUpdatedByUserId?: string;
   created: string;
   updated?: string;
+}
+
+export interface UpdatePatchSubmissionRequest {
+  id: string;
+  name?: string;
+  description?: string;
+  patchMaker?: string;
+  universityCode?: string;
+  universitySection?: string;
+  releaseDate?: string;
+  status?: string;
+}
+
+// Patch submission status enum
+export enum PatchSubmissionStatus {
+  Unknown = 0,
+  Pending = 10,
+  Accepted = 20,
+  Rejected = 30,
+  Duplicate = 40,
+  Deleted = 50
 }

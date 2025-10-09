@@ -199,9 +199,8 @@ const SubmitPatch: React.FC = () => {
       
       const result = await submitPatch(request);
       
-      // Success - show confirmation and redirect
-      alert(`Patch submitted successfully! Submission ID: ${result.patchSubmittionId}`);
-      navigate('/dashboard');
+      // Success - redirect to view the submission
+      navigate(`/submit-patch/${result.patchSubmittionId}`);
       
     } catch (error) {
       showError('Submission failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
