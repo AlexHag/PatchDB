@@ -7,6 +7,9 @@ using PatchDb.Backend.Service.PatchIndexApi;
 using PatchDb.Backend.Service.PatchSubmittion.Models;
 using PatchDb.Backend.Service.PatchSubmittion.Models.Dto;
 using PatchDb.Backend.Service.PatchSubmittion.Models.Entities;
+using PatchDb.Backend.Service.Universities;
+using PatchDb.Backend.Service.User.Models;
+using PatchDb.Backend.Service.User.Models.Entities;
 
 namespace PatchDb.Backend.Service.PatchSubmittion;
 
@@ -22,17 +25,20 @@ public class PatchSubmittionService : IPatchSubmittionService
     private readonly ServiceDbContext _dbContext;
     private readonly IS3FileService _s3FileService;
     private readonly IPatchIndexApi _patchIndexApi;
+    private readonly IUniversityService _universityService;
     private readonly IMapper _mapper;
 
     public PatchSubmittionService(
         ServiceDbContext dbContext,
         IS3FileService s3FileService,
         IPatchIndexApi patchIndexApi,
+        IUniversityService universityService,
         IMapper mapper)
     {
         _dbContext = dbContext;
         _s3FileService = s3FileService;
         _patchIndexApi = patchIndexApi;
+        _universityService = universityService;
         _mapper = mapper;
     }
 
@@ -45,6 +51,11 @@ public class PatchSubmittionService : IPatchSubmittionService
             throw new NotFoundApiException("File not found");
         }
 
+        if (!string.IsNullOrWhiteSpace(request.UniversityCode) && !_universityService.IsValidUniversityCode(request.UniversityCode))
+        {
+            throw new BadRequestApiException("Invalid university code");
+        }
+
         var entity = new PatchSubmittionEntity
         {
             Id = Guid.NewGuid(),
@@ -52,7 +63,7 @@ public class PatchSubmittionService : IPatchSubmittionService
             Name = request.Name,
             Description = request.Description,
             PatchMaker = request.PatchMaker,
-            University = request.University,
+            UniversityCode = request.UniversityCode,
             UniversitySection = request.UniversitySection,
             ReleaseDate = request.ReleaseDate,
             Status = PatchSubmittionStatus.Pending,
@@ -68,17 +79,10 @@ public class PatchSubmittionService : IPatchSubmittionService
 
     public async Task<PatchSubmittionResponse> UpdatePatch(Guid userId, UpdatePatchRequest request)
     {
-        var patchSubmittion = await _dbContext.PatchSubmittions.FindAsync(request.Id);
+        var patchSubmittion = await _dbContext.PatchSubmittions.FindAsync(request.Id) ?? throw new NotFoundApiException("Patch submittion not found");
+        var user = await _dbContext.Users.FindAsync(userId) ?? throw new UnauthorizedApiException("User not found");
 
-        if (patchSubmittion == null)
-        {
-            throw new NotFoundApiException("Patch submittion not found");
-        }
-
-        if (patchSubmittion.Status != PatchSubmittionStatus.Pending)
-        {
-            throw new BadRequestApiException("Only pending patch submittions can be updated");
-        }
+        ValidateCanUpdatePatch(request, user, patchSubmittion);
 
         if (!string.IsNullOrWhiteSpace(request.Name))
         {
@@ -95,9 +99,14 @@ public class PatchSubmittionService : IPatchSubmittionService
             patchSubmittion.PatchMaker = request.PatchMaker;
         }
 
-        if (!string.IsNullOrWhiteSpace(request.University))
+        if (!string.IsNullOrWhiteSpace(request.UniversityCode))
         {
-            patchSubmittion.University = request.University;
+            if (!_universityService.IsValidUniversityCode(request.UniversityCode))
+            {
+                throw new BadRequestApiException("Invalid university code");
+            }
+
+            patchSubmittion.UniversityCode = request.UniversityCode;
         }
 
         if (!string.IsNullOrWhiteSpace(request.UniversitySection))
@@ -117,7 +126,30 @@ public class PatchSubmittionService : IPatchSubmittionService
 
         patchSubmittion.LastUpdatedByUserId = userId;
 
-        if (patchSubmittion.Status == PatchSubmittionStatus.Accepted)
+        if (patchSubmittion.PatchNumber.HasValue)
+        {
+            var patch = await _dbContext.Patches.FindAsync(patchSubmittion.PatchNumber.Value) ?? throw new InternalServerErrorApiException("Patch not found");
+
+            if (patchSubmittion.Status == PatchSubmittionStatus.Accepted)
+            {
+                patch.Name = patchSubmittion.Name;
+                patch.Description = patchSubmittion.Description;
+                patch.PatchMaker = patchSubmittion.PatchMaker;
+                patch.UniversityCode = patchSubmittion.UniversityCode;
+                patch.UniversitySection = patchSubmittion.UniversitySection;
+                patch.ReleaseDate = patchSubmittion.ReleaseDate;
+                patch.Updated = DateTime.UtcNow;
+            }
+            else
+            {
+                _dbContext.Patches.Remove(patch);
+                await _patchIndexApi.DeleteFromIndex(patchSubmittion.PatchNumber.Value);
+                patchSubmittion.PatchNumber = null;
+            }
+
+            await _dbContext.SaveChangesAsync();
+        }
+        else if (patchSubmittion.Status == PatchSubmittionStatus.Accepted)
         {
             if (string.IsNullOrEmpty(patchSubmittion.Name))
             {
@@ -130,17 +162,17 @@ public class PatchSubmittionService : IPatchSubmittionService
                 Name = patchSubmittion.Name,
                 Description = patchSubmittion.Description,
                 PatchMaker = patchSubmittion.PatchMaker,
-                University = patchSubmittion.University,
+                UniversityCode = patchSubmittion.UniversityCode,
                 UniversitySection = patchSubmittion.UniversitySection,
                 ReleaseDate = patchSubmittion.ReleaseDate,
-                PatchSubmittionId = patchSubmittion.Id,
+                PatchSubmissionId = patchSubmittion.Id,
                 Created = DateTime.UtcNow
             };
 
+            await _patchIndexApi.IndexPatch(patch.PatchNumber!.Value, patch.FilePath);
+
             _dbContext.Patches.Add(patch);
             await _dbContext.SaveChangesAsync();
-
-            await _patchIndexApi.IndexPatch(patch.PatchNumber!.Value, patch.FilePath);
 
             patchSubmittion.PatchNumber = patch.PatchNumber;
             await _dbContext.SaveChangesAsync();
@@ -152,6 +184,40 @@ public class PatchSubmittionService : IPatchSubmittionService
 
         return ToPatchSubmittionResponse(patchSubmittion);
     }
+    
+    private void ValidateCanUpdatePatch(UpdatePatchRequest request, UserEntity user, PatchSubmittionEntity patchSubmittion)
+    {
+        if (user.Role == UserRole.Admin || user.Role == UserRole.Moderator)
+        {
+            return;
+        }
+
+        if (patchSubmittion.Status == PatchSubmittionStatus.Deleted)
+        {
+            throw new NotFoundApiException("Patch submittion not found");
+        }
+
+        if (user.Role != UserRole.PatchMaker)
+        {
+            throw new UnauthorizedApiException("Only patch makers, moderators and admins can update patch submittions");
+        }
+
+        if (patchSubmittion.UploadedByUserId != user.Id)
+        {
+            throw new UnauthorizedApiException("You can only update your own patch submittions");
+        }
+
+        if (patchSubmittion.Status != PatchSubmittionStatus.Pending && patchSubmittion.Status != PatchSubmittionStatus.Accepted)
+        {
+            throw new BadRequestApiException("You cannot update this patch");
+        }
+
+        if (request.Status.HasValue && request.Status.Value != PatchSubmittionStatus.Deleted)
+        {
+            throw new BadRequestApiException("You cannot update this patch");
+        }
+    }
+
 
     public async Task<List<PatchSubmittionResponse>> GetPendingSubmittions(int skip, int take)
     {
@@ -173,6 +239,12 @@ public class PatchSubmittionService : IPatchSubmittionService
         var response = _mapper.Map<PatchSubmittionResponse>(entity);
         response.PatchSubmittionId = entity.Id;
         response.ImageUrl = _s3FileService.GetDownloadUrl(entity.FilePath);
+
+        if (!string.IsNullOrWhiteSpace(entity.UniversityCode))
+        {
+            response.University = _universityService.GetUniversity(entity.UniversityCode);
+        }
+
         return response;
     }
 }

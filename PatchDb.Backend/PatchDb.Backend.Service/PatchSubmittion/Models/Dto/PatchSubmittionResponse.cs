@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using PatchDb.Backend.Service.Universities;
 
 namespace PatchDb.Backend.Service.PatchSubmittion.Models.Dto;
 
@@ -27,7 +28,7 @@ public class PatchSubmittionResponse
     public string? PatchMaker { get; set; }
 
     [JsonProperty("university")]
-    public string? University { get; set; }
+    public UniversityModel? University { get; set; }
 
     [JsonProperty("universitySection")]
     public string? UniversitySection { get; set; }

@@ -4,6 +4,7 @@ using PatchDb.Backend.Core.Exceptions;
 using PatchDb.Backend.Service.FileService;
 using PatchDb.Backend.Service.Patches.Models.Dto;
 using PatchDb.Backend.Service.Patches.Models.Entities;
+using PatchDb.Backend.Service.Universities;
 
 namespace PatchDb.Backend.Service.Patches;
 
@@ -17,15 +18,18 @@ public class PatchService : IPatchService
 {
     private readonly ServiceDbContext _dbContext;
     private readonly IS3FileService _s3FileService;
+    private readonly IUniversityService _universityService;
     private readonly IMapper _mapper;
 
     public PatchService(
         ServiceDbContext dbContext,
         IS3FileService s3FileService,
+        IUniversityService universityService,
         IMapper mapper)
     {
         _dbContext = dbContext;
         _s3FileService = s3FileService;
+        _universityService = universityService;
         _mapper = mapper;
     }
 
@@ -35,7 +39,6 @@ public class PatchService : IPatchService
         take = Math.Clamp(take, 1, 50);
 
         var patches = await _dbContext.Patches
-            .OrderByDescending(p => p.ReleaseDate)
             .Skip(skip)
             .Take(take)
             .ToListAsync();
@@ -65,9 +68,9 @@ public class PatchService : IPatchService
             query = query.Where(p => p.PatchMaker != null && EF.Functions.Like(p.PatchMaker, $"%{request.PatchMaker}%"));
         }
 
-        if (!string.IsNullOrWhiteSpace(request.University))
+        if (!string.IsNullOrWhiteSpace(request.UniversityCode))
         {
-            query = query.Where(p => p.University != null && EF.Functions.Like(p.University, $"%{request.University}%"));
+            query = query.Where(p => p.UniversityCode == request.UniversityCode);
         }
 
         if (!string.IsNullOrWhiteSpace(request.UniversitySection))
@@ -76,7 +79,6 @@ public class PatchService : IPatchService
         }
 
         var patches = await query
-            .OrderByDescending(p => p.ReleaseDate)
             .Skip(request.Skip)
             .Take(request.Take)
             .ToListAsync();
@@ -88,6 +90,12 @@ public class PatchService : IPatchService
     {
         var response = _mapper.Map<PatchResponse>(patch);
         response.ImageUrl = _s3FileService.GetDownloadUrl(patch.FilePath);
+
+        if (!string.IsNullOrWhiteSpace(patch.UniversityCode))
+        {
+            response.University = _universityService.GetUniversity(patch.UniversityCode);
+        }
+
         return response;
     }
 }

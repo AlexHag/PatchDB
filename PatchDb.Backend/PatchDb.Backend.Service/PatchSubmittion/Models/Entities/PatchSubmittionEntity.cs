@@ -18,8 +18,10 @@ public class PatchSubmittionEntity
     public string? Name { get; set; }
     public string? Description { get; set; }
     public string? PatchMaker { get; set; }
-    public string? University { get; set; }
+
+    public string? UniversityCode { get; set; }
     public string? UniversitySection { get; set; }
+
     public DateTime? ReleaseDate { get; set; }
 
     /// <summary>

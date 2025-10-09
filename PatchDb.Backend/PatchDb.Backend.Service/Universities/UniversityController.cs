@@ -14,8 +14,13 @@ public class UniversityController : ControllerBase
         _universityService = universityService;
     }
 
+    [HttpGet("programs")]
+    [Authorize]
+    public async Task<ActionResult<List<UniversityAndProgramModel>>> GetUniversitiesAndPrograms()
+        => Ok(_universityService.GetUniversitiesAndPrograms());
+
     [HttpGet]
     [Authorize]
-    public async Task<ActionResult<List<UniversityAndProgramModel>>> GetAll()
-        => Ok(_universityService.GetAll());
+    public async Task<ActionResult<List<UniversityModel>>> GetUniversities()
+        => Ok(_universityService.GetUniversities());
 }

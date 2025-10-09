@@ -5,6 +5,7 @@ using PatchDb.Backend.Service.FileService;
 using PatchDb.Backend.Service.Patches.Models.Dto;
 using PatchDb.Backend.Service.Patches.Models.Entities;
 using PatchDb.Backend.Service.PatchIndexApi;
+using PatchDb.Backend.Service.Universities;
 using PatchDb.Backend.Service.UserPatches.Models.Dto;
 using PatchDb.Backend.Service.UserPatches.Models.Entities;
 
@@ -31,17 +32,20 @@ public class UserPatchService : IUserPatchService
     private readonly ServiceDbContext _dbContext;
     private readonly IS3FileService _s3FileService;
     private readonly IPatchIndexApi _patchIndexApi;
+    private readonly IUniversityService _universityService;
     private readonly IMapper _mapper;
 
     public UserPatchService(
         ServiceDbContext dbContext,
         IS3FileService s3FileService,
         IPatchIndexApi patchIndexApi,
+        IUniversityService universityService,
         IMapper mapper)
     {
         _dbContext = dbContext;
         _s3FileService = s3FileService;
         _patchIndexApi = patchIndexApi;
+        _universityService = universityService;
         _mapper = mapper;
     }
 
@@ -193,6 +197,12 @@ public class UserPatchService : IUserPatchService
     {
         var response = _mapper.Map<PatchResponse>(patch);
         response.ImageUrl = _s3FileService.GetDownloadUrl(patch.FilePath);
+
+        if (!string.IsNullOrWhiteSpace(patch.UniversityCode))
+        {
+            response.University = _universityService.GetUniversity(patch.UniversityCode);
+        }
+
         return response;
     }
 

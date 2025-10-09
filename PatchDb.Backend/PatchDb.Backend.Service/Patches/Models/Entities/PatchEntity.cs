@@ -8,11 +8,11 @@ public class PatchEntity
     public string? Name { get; set; }
     public string? Description { get; set; }
     public string? PatchMaker { get; set; }
-    public string? University { get; set; }
+    public string? UniversityCode { get; set; }
     public string? UniversitySection { get; set; }
     public DateTime? ReleaseDate { get; set; }
 
-    public Guid PatchSubmittionId { get; set; }
+    public Guid PatchSubmissionId { get; set; }
 
     public DateTime Created { get; set; }
     public DateTime? Updated { get; set; }

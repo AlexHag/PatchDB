@@ -13,8 +13,8 @@ public class SearchPatchRequest
     [JsonProperty("patchMaker")]
     public string? PatchMaker { get; set; }
 
-    [JsonProperty("university")]
-    public string? University { get; set; }
+    [JsonProperty("universityCode")]
+    public string? UniversityCode { get; set; }
 
     [JsonProperty("universitySection")]
     public string? UniversitySection { get; set; }

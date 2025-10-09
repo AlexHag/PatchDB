@@ -2,9 +2,11 @@ namespace PatchDb.Backend.Service.Universities;
 
 public interface IUniversityService
 {
-    List<UniversityAndProgramModel> GetAll();
+    List<UniversityAndProgramModel> GetUniversitiesAndPrograms();
+    List<UniversityModel> GetUniversities();
     UniversityModel? GetUniversity(string? code);
     bool IsValidUniversityInfo(string? code, string? program);
+    bool IsValidUniversityCode(string code);
 }
 
 public class UniversityService : IUniversityService
@@ -16,13 +18,19 @@ public class UniversityService : IUniversityService
         _universityProgramListConfiguration = universityProgramListConfiguration;
     }
 
-    public List<UniversityAndProgramModel> GetAll()
+    public List<UniversityAndProgramModel> GetUniversitiesAndPrograms()
         => _universityProgramListConfiguration.Universities.Values.ToList();
+
+    public List<UniversityModel> GetUniversities()
+        => _universityProgramListConfiguration.Universities.Values.Select(u => new UniversityModel { Code = u.Code, Name = u.Name, LogoUrl = u.LogoUrl }).ToList();
 
     public UniversityModel? GetUniversity(string? code)
         => string.IsNullOrWhiteSpace(code)
             ? null
             : _universityProgramListConfiguration.Universities.GetValueOrDefault(code);
+
+    public bool IsValidUniversityCode(string code)
+        => _universityProgramListConfiguration.Universities.ContainsKey(code);
 
     public bool IsValidUniversityInfo(string? code, string? program)
     {

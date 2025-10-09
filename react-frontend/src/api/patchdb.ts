@@ -16,7 +16,8 @@ import type {
   UpdateBioRequest,
   UpdateProfilePictureRequest,
   UpdateUserUniversityInfoRequest,
-  UniversityAndProgramModel
+  UniversityAndProgramModel,
+  UniversityModel
 } from './types';
 import { getAuthHeaders } from './auth';
 
@@ -346,7 +347,19 @@ export async function updateUserUniversityInfo(universityCode?: string, universi
   return await response.json();
 }
 
-export async function getUniversities(): Promise<UniversityAndProgramModel[]> {
+export async function getUniversitiesAndPrograms(): Promise<UniversityAndProgramModel[]> {
+  const response = await fetch(`${API_BASE_URL}/universities/programs`, {
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+export async function getUniversities(): Promise<UniversityModel[]> {
   const response = await fetch(`${API_BASE_URL}/universities`, {
     headers: getAuthHeaders()
   });

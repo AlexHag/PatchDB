@@ -7,7 +7,7 @@ import {
   updateUserProfilePicture,
   removeUserProfilePicture,
   updateUserUniversityInfo,
-  getUniversities
+  getUniversitiesAndPrograms
 } from '../api/patchdb';
 import { uploadFileWithValidation } from '../api/fileUpload';
 import type { 
@@ -54,7 +54,7 @@ const Profile: React.FC = () => {
       
       // Find university code from the user data
       if (userData.universityName) {
-        const unis = await getUniversities();
+        const unis = await getUniversitiesAndPrograms();
         const matchingUni = unis.find(u => u.name === userData.universityName);
         if (matchingUni) {
           setSelectedUniversityCode(matchingUni.code);
@@ -70,7 +70,7 @@ const Profile: React.FC = () => {
 
   const loadUniversities = async () => {
     try {
-      const data = await getUniversities();
+      const data = await getUniversitiesAndPrograms();
       setUniversities(data);
     } catch (err) {
       console.error('Failed to load universities:', err);
@@ -228,54 +228,146 @@ const Profile: React.FC = () => {
               </div>
             )}
 
-            {/* Profile Picture Section */}
+            {/* Profile Header Card - Social Media Style */}
             <div className="card mb-4 shadow-sm">
               <div className="card-body">
-                <h5 className="card-title d-flex align-items-center">
-                  <span className="me-2">🖼️</span>
-                  Profile Picture
-                </h5>
-                
-                <div className="row align-items-center">
-                  <div className="col-auto">
-                    <div style={{ width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden', border: '3px solid #dee2e6' }}>
-                      <img 
-                        src={user.profilePictureUrl || '/no_profile_picture.png'} 
-                        alt="Profile" 
-                        className="w-100 h-100"
-                        style={{ objectFit: 'cover' }}
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/no_profile_picture.png';
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className="col">
-                    <div className="d-flex flex-column flex-sm-row gap-2">
+                <div className="row">
+                  {/* Profile Picture Column */}
+                  <div className="col-12 col-sm-auto text-center text-sm-start mb-3 mb-sm-0">
+                    <div className="position-relative d-inline-block">
+                      <div style={{ 
+                        width: '120px', 
+                        height: '120px', 
+                        borderRadius: '50%', 
+                        overflow: 'hidden', 
+                        border: '4px solid #dee2e6',
+                        margin: '0 auto'
+                      }}>
+                        <img 
+                          src={user.profilePictureUrl || '/no_profile_picture.png'} 
+                          alt="Profile" 
+                          className="w-100 h-100"
+                          style={{ objectFit: 'cover' }}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/no_profile_picture.png';
+                          }}
+                        />
+                      </div>
+                      
+                      {/* Profile Picture Edit Button - Floating */}
                       <button 
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-primary btn-sm position-absolute"
+                        style={{ 
+                          bottom: '5px', 
+                          right: '5px', 
+                          borderRadius: '50%', 
+                          width: '32px', 
+                          height: '32px', 
+                          padding: '0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploadingProfilePicture}
+                        title="Change profile picture"
                       >
                         {uploadingProfilePicture ? (
-                          <>
-                            <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                            Uploading...
-                          </>
+                          <span className="spinner-border spinner-border-sm" role="status"></span>
                         ) : (
-                          <>📸 Upload New Picture</>
+                          <span style={{ fontSize: '14px' }}>📸</span>
                         )}
                       </button>
-                      
+                    </div>
+
+                    {/* Profile Picture Actions */}
+                    <div className="mt-2 d-flex flex-column gap-1">
                       {user.profilePictureUrl && (
                         <button 
                           className="btn btn-outline-danger btn-sm"
                           onClick={handleRemoveProfilePicture}
                           disabled={uploadingProfilePicture}
+                          style={{ fontSize: '12px' }}
                         >
-                          🗑️ Remove Picture
+                          🗑️ Remove
                         </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Profile Info Column */}
+                  <div className="col">
+                    {/* Username & Role Row */}
+                    <div className="d-flex align-items-center flex-wrap mb-2">
+                      <h3 className="mb-0 me-3">{user.username}</h3>
+                      {user.role && user.role !== 'User' && (
+                        <span className={`badge bg-${getRoleBadgeColor(user.role)} me-2`}>
+                          {user.role}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Member Since */}
+                    <p className="text-muted mb-3" style={{ fontSize: '14px' }}>
+                      📅 Member since {new Date(user.created).toLocaleDateString()}
+                    </p>
+
+                    {/* Bio Section */}
+                    <div>
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <h6 className="mb-0 text-muted">About</h6>
+                        {!editingBio && (
+                          <button 
+                            className="btn btn-outline-primary btn-sm"
+                            onClick={() => setEditingBio(true)}
+                            style={{ fontSize: '12px' }}
+                          >
+                            ✏️ Edit Bio
+                          </button>
+                        )}
+                      </div>
+
+                      {editingBio ? (
+                        <div>
+                          <textarea 
+                            className="form-control mb-2"
+                            rows={3}
+                            value={bioText}
+                            onChange={(e) => setBioText(e.target.value)}
+                            placeholder="Tell us about yourself..."
+                            maxLength={160}
+                          />
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <small className="text-muted">
+                              {bioText.length}/160 characters
+                            </small>
+                            <div className="d-flex gap-2">
+                              <button 
+                                className="btn btn-success btn-sm"
+                                onClick={handleBioUpdate}
+                              >
+                                💾 Save
+                              </button>
+                              <button 
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => {
+                                  setEditingBio(false);
+                                  setBioText(user.bio || '');
+                                }}
+                              >
+                                ❌ Cancel
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="mb-0" style={{ 
+                          fontStyle: user.bio ? 'normal' : 'italic',
+                          color: user.bio ? 'inherit' : '#6c757d'
+                        }}>
+                          {user.bio || 'No bio added yet. Click "Edit Bio" to tell others about yourself!'}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -288,85 +380,6 @@ const Profile: React.FC = () => {
                   accept="image/*"
                   style={{ display: 'none' }}
                 />
-              </div>
-            </div>
-
-            {/* Username & Role Section */}
-            <div className="card mb-4 shadow-sm">
-              <div className="card-body">
-                <h5 className="card-title d-flex align-items-center">
-                  <span className="me-2">👋</span>
-                  Username & Role
-                </h5>
-                
-                <div className="d-flex align-items-center flex-wrap">
-                  <span className="h4 mb-0 me-3">{user.username}</span>
-                  {user.role && user.role !== 'User' && (
-                    <span className={`badge bg-${getRoleBadgeColor(user.role)} me-2`}>
-                      {user.role}
-                    </span>
-                  )}
-                  <small className="text-muted">
-                    Member since {new Date(user.created).toLocaleDateString()}
-                  </small>
-                </div>
-              </div>
-            </div>
-
-            {/* Bio Section */}
-            <div className="card mb-4 shadow-sm">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h5 className="card-title d-flex align-items-center mb-0">
-                    <span className="me-2">📝</span>
-                    Bio
-                  </h5>
-                  {!editingBio && (
-                    <button 
-                      className="btn btn-outline-primary btn-sm"
-                      onClick={() => setEditingBio(true)}
-                    >
-                      ✏️ Edit
-                    </button>
-                  )}
-                </div>
-
-                {editingBio ? (
-                  <div>
-                    <textarea 
-                      className="form-control mb-3"
-                      rows={3}
-                      value={bioText}
-                      onChange={(e) => setBioText(e.target.value)}
-                      placeholder="Tell us about yourself..."
-                      maxLength={160}
-                    />
-                    <small className="text-muted d-block mb-3">
-                      {bioText.length}/160 characters
-                    </small>
-                    <div className="d-flex gap-2">
-                      <button 
-                        className="btn btn-success btn-sm"
-                        onClick={handleBioUpdate}
-                      >
-                        💾 Save
-                      </button>
-                      <button 
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => {
-                          setEditingBio(false);
-                          setBioText(user.bio || '');
-                        }}
-                      >
-                        ❌ Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-muted mb-0">
-                    {user.bio || 'No bio set yet. Click "Edit" to add one!'}
-                  </p>
-                )}
               </div>
             </div>
 

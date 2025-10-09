@@ -1,8 +1,5 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PatchDb.Backend.Core.Authentication;
 using PatchDb.Backend.Service.Patches.Models.Dto;
-using PatchDb.Backend.Service.User.Models;
 
 namespace PatchDb.Backend.Service.Patches;
 
