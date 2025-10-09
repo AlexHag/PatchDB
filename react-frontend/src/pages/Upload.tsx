@@ -177,7 +177,7 @@ const Upload: React.FC = () => {
 
   return (
     <div className="bg-light min-vh-100">
-      <Navigation showDashboardLink />
+      <Navigation />
 
       <div className="container mt-4">
         <div className="row justify-content-center">

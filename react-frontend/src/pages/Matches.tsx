@@ -94,7 +94,7 @@ const Matches: React.FC = () => {
   if (!uploadResult) {
     return (
       <div className="bg-light min-vh-100">
-        <Navigation showDashboardLink />
+        <Navigation />
         <div className="container mt-4">
           <div className="text-center py-5">
             <div className="spinner-border text-dark" role="status">
@@ -112,7 +112,7 @@ const Matches: React.FC = () => {
 
   return (
     <div className="bg-light min-vh-100">
-      <Navigation showDashboardLink />
+      <Navigation />
 
       <div className="container mt-4">
         <div className="row justify-content-center">
