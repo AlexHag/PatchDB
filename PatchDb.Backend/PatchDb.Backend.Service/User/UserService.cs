@@ -2,6 +2,7 @@ using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using PatchDb.Backend.Core.Exceptions;
 using PatchDb.Backend.Service.FileService;
+using PatchDb.Backend.Service.Universities;
 using PatchDb.Backend.Service.User.Models.Dto;
 using PatchDb.Backend.Service.User.Models.Entities;
 
@@ -14,6 +15,7 @@ public interface IUserService
     Task<UserResponse> UpdateProfilePicture(Guid userId, Guid fileId);
     Task<UserResponse> RemoveProfilePicture(Guid userId);
     Task<UserResponse> UpdateBio(Guid userId, string bio);
+    Task<UserResponse> UpdateUniversityInfo(Guid userId, UpdateUserUniversityInfoRequest request);
     Task<List<UserEntity>> GetAllUsers();
     UserResponse ToUserReponse(UserEntity user);
 }
@@ -22,15 +24,18 @@ public class UserService : IUserService
 {
     private readonly ServiceDbContext _dbContext;
     private readonly IS3FileService _s3FileService;
+    private readonly IUniversityService _universityService;
     private readonly IMapper _mapper;
 
     public UserService(
         ServiceDbContext dbContext,
         IS3FileService s3FileService,
+        IUniversityService universityService,
         IMapper mapper)
     {
         _dbContext = dbContext;
         _s3FileService = s3FileService;
+        _universityService = universityService;
         _mapper = mapper;
     }
 
@@ -117,6 +122,29 @@ public class UserService : IUserService
 
         return ToUserReponse(user);
     }
+    
+    public async Task<UserResponse> UpdateUniversityInfo(Guid userId, UpdateUserUniversityInfoRequest request)
+    {
+        var user = await _dbContext.Users.FindAsync(userId);
+
+        if (user == null)
+        {
+            throw new NotFoundApiException("User not found");
+        }
+
+        user.UniversityCode = request.UniversityCode;
+        user.UniversityProgram = request.UniversityProgram;
+
+        if (!_universityService.IsValidUniversityInfo(user.UniversityCode, user.UniversityProgram))
+        {
+            throw new BadRequestApiException("invalid-university-information", "The provided university information is invalid");
+        }
+
+        user.Updated = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync();
+
+        return ToUserReponse(user);
+    }
 
     public UserResponse ToUserReponse(UserEntity user)
     {
@@ -125,6 +153,13 @@ public class UserService : IUserService
         if (!string.IsNullOrEmpty(user.ProfilePicturePath))
         {
             response.ProfilePictureUrl = _s3FileService.GetDownloadUrl(user.ProfilePicturePath);
+        }
+
+        if (user.UniversityCode != null)
+        {
+            var university = _universityService.GetUniversity(user.UniversityCode);
+            response.UniversityName = university?.Name;
+            response.UniversityLogoUrl = university?.LogoUrl;
         }
 
         return response;

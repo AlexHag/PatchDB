@@ -15,6 +15,9 @@ public class UserEntity
     public string? Email { get; set; }
     public string? PhoneNumber { get; set; }
 
+    public string? UniversityCode { get; set; }
+    public string? UniversityProgram { get; set; }
+
     public DateTime Created { get; set; }
     public DateTime? Updated { get; set; }
 }

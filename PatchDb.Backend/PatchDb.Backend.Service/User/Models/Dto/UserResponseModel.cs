@@ -31,6 +31,15 @@ public class UserResponse
     [JsonProperty("phoneNumber")]
     public string? PhoneNumber { get; set; }
 
+    [JsonProperty("universityName")]
+    public string? UniversityName { get; set; }
+
+    [JsonProperty("universityLogoUrl")]
+    public string? UniversityLogoUrl { get; set; }
+
+    [JsonProperty("universityProgram")]
+    public string? UniversityProgram { get; set; }
+
     [JsonProperty("created")]
     public DateTime Created { get; set; }
 }

@@ -41,4 +41,9 @@ public class UserController : ControllerBase
     [Authorize(Roles = nameof(UserRole.Admin))]
     public async Task<ActionResult> GetAllUsers()
         => Ok(await _userService.GetAllUsers());
+    
+    [HttpPut("university-information")]
+    [Authorize]
+    public async Task<ActionResult<UserResponse>> UpdateUniversityInfo([FromBody] UpdateUserUniversityInfoRequest request)
+        => Ok(await _userService.UpdateUniversityInfo(User.UserId(), request));
 }

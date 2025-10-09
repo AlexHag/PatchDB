@@ -10,6 +10,7 @@ using PatchDb.Backend.Service.FileService.Configuration;
 using PatchDb.Backend.Service.Patches;
 using PatchDb.Backend.Service.PatchIndexApi;
 using PatchDb.Backend.Service.PatchSubmittion;
+using PatchDb.Backend.Service.Universities;
 using PatchDb.Backend.Service.User;
 using PatchDb.Backend.Service.UserPatches;
 
@@ -34,6 +35,7 @@ internal static class Program
         builder.Services.AddScoped<IMapper, Mapper>();
         builder.AddConfiguration<AwsConfiguration>();
         builder.AddConfiguration<AwsCredentials>();
+        builder.AddConfiguration<UniversityProgramListConfiguration>();
 
         builder.RegisterPatchIndexApi();
 
@@ -44,6 +46,7 @@ internal static class Program
         builder.Services.AddScoped<IPatchService, PatchService>();
         builder.Services.AddScoped<IPatchSubmittionService, PatchSubmittionService>();
         builder.Services.AddScoped<IUserPatchService, UserPatchService>();
+        builder.Services.AddScoped<IUniversityService, UniversityService>();
 
         // builder.Services.AddScoped<IUserRepository, UserRepository>();
         // builder.Services.AddScoped<IUserPasswordRepository, UserPasswordRepository>();
