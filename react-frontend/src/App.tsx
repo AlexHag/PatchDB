@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Upload from './pages/Upload';
 import Matches from './pages/Matches';
 import Profile from './pages/Profile';
+import SubmitPatch from './pages/SubmitPatch';
 
 // Protected Route component
 interface ProtectedRouteProps {
@@ -55,6 +56,12 @@ const App: React.FC = () => {
           <Route path="/profile" element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/submit-patch" element={
+            <ProtectedRoute>
+              <SubmitPatch />
             </ProtectedRoute>
           } />
 

@@ -197,3 +197,31 @@ export interface UniversityModel {
 export interface UniversityAndProgramModel extends UniversityModel {
   programs: UniversityProgramModel[];
 }
+
+// Patch submission types
+export interface UploadPatchRequest {
+  fileId: string;
+  name?: string;
+  description?: string;
+  patchMaker?: string;
+  universityCode?: string;
+  universitySection?: string;
+  releaseDate?: string;
+}
+
+export interface PatchSubmittionResponse {
+  patchSubmittionId: string;
+  patchNumber?: number;
+  name?: string;
+  description?: string;
+  patchMaker?: string;
+  university?: string;
+  universitySection?: string;
+  releaseDate?: string;
+  imageUrl: string;
+  status: string;
+  uploadedByUserId: string;
+  lastUpdatedByUserId?: string;
+  created: string;
+  updated?: string;
+}

@@ -5,7 +5,7 @@ import { useAuth } from './hooks/useAuth';
 interface NavigationProps {}
 
 const Navigation: React.FC<NavigationProps> = () => {
-  const { username, logout } = useAuth();
+  const { username, user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -110,6 +110,18 @@ const Navigation: React.FC<NavigationProps> = () => {
                 <span className="nav-icon">📸</span>
                 Upload Patch
               </Link>
+              
+              {/* Submit Patch - Only for Admin, Moderator, PatchMaker */}
+              {user && ['Admin', 'Moderator', 'PatchMaker'].includes(user.role) && (
+                <Link 
+                  to="/submit-patch" 
+                  className="mobile-nav-link"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <span className="nav-icon">✨</span>
+                  Submit New Patch
+                </Link>
+              )}
               
               <Link 
                 to="/profile" 

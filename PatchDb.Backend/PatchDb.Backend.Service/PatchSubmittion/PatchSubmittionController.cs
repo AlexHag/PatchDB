@@ -32,4 +32,9 @@ public class PatchSubmittionController : ControllerBase
     [Authorize]
     public async Task<ActionResult<List<PatchSubmittionResponse>>> GetPendingSubmittions([FromQuery] int skip = 0, [FromQuery] int take = 20)
         => Ok(await _patchSubmittionService.GetPendingSubmittions(skip, take));
+
+    [HttpGet("{patchSubmittionId}")]
+    [Authorize]
+    public async Task<ActionResult<PatchSubmittionResponse>> GetPatchSubmittion([FromRoute] Guid patchSubmittionId)
+        => Ok(await _patchSubmittionService.GetPatchSubmittion(patchSubmittionId));
 }

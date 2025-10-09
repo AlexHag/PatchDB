@@ -1,9 +1,7 @@
 // PatchDB API functions
 import type {
-  User,
   UserPatchesResponse,
   UploadResult,
-  ApiError,
   LoginRequest,
   RegisterRequest,
   AuthResponse,
@@ -17,13 +15,15 @@ import type {
   UpdateProfilePictureRequest,
   UpdateUserUniversityInfoRequest,
   UniversityAndProgramModel,
-  UniversityModel
+  UniversityModel,
+  UploadPatchRequest,
+  PatchSubmittionResponse
 } from './types';
 import { getAuthHeaders } from './auth';
 
 // API Configuration
 // For development, use the local C# backend
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
+const API_BASE_URL = (typeof window !== 'undefined' && window.location.hostname !== 'localhost')
   ? `${window.location.origin}/api` 
   : `http://localhost:5064`; // Default HTTPS port for .NET development
 
@@ -362,6 +362,21 @@ export async function getUniversitiesAndPrograms(): Promise<UniversityAndProgram
 export async function getUniversities(): Promise<UniversityModel[]> {
   const response = await fetch(`${API_BASE_URL}/universities`, {
     headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+// Patch submission functions
+export async function submitPatch(request: UploadPatchRequest): Promise<PatchSubmittionResponse> {
+  const response = await fetch(`${API_BASE_URL}/patch-submittion/upload`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(request)
   });
 
   if (!response.ok) {

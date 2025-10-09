@@ -18,6 +18,7 @@ public interface IPatchSubmittionService
     Task<PatchSubmittionResponse> UploadPatch(Guid userId, UploadPatchRequest request);
     Task<PatchSubmittionResponse> UpdatePatch(Guid userId, UpdatePatchRequest request);
     Task<List<PatchSubmittionResponse>> GetPendingSubmittions(int skip, int take);
+    Task<PatchSubmittionResponse> GetPatchSubmittion(Guid patchSubmittionId);
 }
 
 public class PatchSubmittionService : IPatchSubmittionService
@@ -212,7 +213,7 @@ public class PatchSubmittionService : IPatchSubmittionService
             throw new BadRequestApiException("You cannot update this patch");
         }
 
-        if (request.Status.HasValue && request.Status.Value != PatchSubmittionStatus.Deleted)
+        if (request.Status.HasValue && request.Status.Value != PatchSubmittionStatus.Deleted && request.Status.Value != patchSubmittion.Status)
         {
             throw new BadRequestApiException("You cannot update this patch");
         }
@@ -232,6 +233,12 @@ public class PatchSubmittionService : IPatchSubmittionService
             .ToListAsync();
 
         return patches.Select(ToPatchSubmittionResponse).ToList();
+    }
+
+    public async Task<PatchSubmittionResponse> GetPatchSubmittion(Guid patchSubmittionId)
+    {
+        var patchSubmittion = await _dbContext.PatchSubmittions.FindAsync(patchSubmittionId) ?? throw new NotFoundApiException("Patch submittion not found");
+        return ToPatchSubmittionResponse(patchSubmittion);
     }
 
     private PatchSubmittionResponse ToPatchSubmittionResponse(PatchSubmittionEntity entity)
