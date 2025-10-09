@@ -85,13 +85,16 @@ const Login: React.FC = () => {
             <div className="card shadow">
               <div className="card-body p-4">
                 <div className="text-center mb-4">
-                  <h1 className="h3 fw-bold text-dark">PatchDB</h1>
-                  <p className="text-muted">Track your patch collection</p>
+                  <h1 className="h2 fw-bold" style={{background: 'linear-gradient(135deg, #2c3e50, #e67e22)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>
+                    🧵 PatchDB
+                  </h1>
+                  <p className="text-muted fs-6">Your personal patch collection adventure starts here!</p>
+                  <p className="text-muted small">Snap, match, and collect patches from your university journey</p>
                 </div>
 
                 <form onSubmit={handleSubmit}>
                   <div className="mb-3">
-                    <label htmlFor="username" className="form-label">Username</label>
+                    <label htmlFor="username" className="form-label fw-semibold">Username</label>
                     <input 
                       type="text" 
                       className="form-control form-control-lg" 
@@ -101,11 +104,12 @@ const Login: React.FC = () => {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       disabled={loading}
+                      style={{borderRadius: '0.75rem', border: '2px solid #ecf0f1'}}
                     />
                   </div>
 
                   <div className="mb-3">
-                    <label htmlFor="password" className="form-label">Password</label>
+                    <label htmlFor="password" className="form-label fw-semibold">Password</label>
                     <input 
                       type="password" 
                       className="form-control form-control-lg" 
@@ -115,12 +119,13 @@ const Login: React.FC = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       disabled={loading}
+                      style={{borderRadius: '0.75rem', border: '2px solid #ecf0f1'}}
                     />
                   </div>
 
                   {!isLoginMode && (
                     <div className="mb-3">
-                      <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+                      <label htmlFor="confirmPassword" className="form-label fw-semibold">Confirm Password</label>
                       <input 
                         type="password" 
                         className="form-control form-control-lg" 
@@ -130,6 +135,7 @@ const Login: React.FC = () => {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         disabled={loading}
+                        style={{borderRadius: '0.75rem', border: '2px solid #ecf0f1'}}
                       />
                     </div>
                   )}

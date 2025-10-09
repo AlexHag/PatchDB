@@ -12,17 +12,21 @@ const Navigation: React.FC<NavigationProps> = ({ showDashboardLink = false }) =>
   return (
     <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
       <div className="container">
-        <Link className="navbar-brand" to="/dashboard">PatchDB</Link>
+        <Link className="navbar-brand" to="/dashboard">🧵 PatchDB</Link>
         <div className="navbar-nav ms-auto">
           {username && (
-            <span className="navbar-text me-3">Hello, {username}</span>
+            <span className="navbar-text me-3" style={{color: '#f39c12'}}>
+              👋 Hey, <strong>{username}</strong>!
+            </span>
           )}
           {showDashboardLink && (
-            <Link to="/dashboard" className="btn btn-outline-light btn-sm me-2">Dashboard</Link>
+            <Link to="/dashboard" className="btn btn-outline-light btn-sm me-2">
+              🏠 Dashboard
+            </Link>
           )}
           {username && (
             <button className="btn btn-outline-light btn-sm" onClick={logout}>
-              Logout
+              👋 Logout
             </button>
           )}
         </div>

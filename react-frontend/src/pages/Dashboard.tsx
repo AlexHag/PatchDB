@@ -265,7 +265,10 @@ const Dashboard: React.FC = () => {
         {/* User Stats */}
         <div className="row mb-4">
           <div className="col-12">
-            <h2 className="h4 mb-3">Your Collection</h2>
+            <h2 className="h3 mb-1" style={{background: 'linear-gradient(135deg, #2c3e50, #e67e22)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>
+              🎒 Your Patch Collection
+            </h2>
+            <p className="text-muted mb-4">Track your university adventures through the patches you've collected!</p>
           </div>
           <div className="col-6 col-md-4 mb-3">
             <div className="stat-card">
@@ -292,7 +295,9 @@ const Dashboard: React.FC = () => {
         {/* Quick Actions */}
         <div className="row mb-4">
           <div className="col-12">
-            <h3 className="h5 mb-3">Quick Actions</h3>
+            <h3 className="h4 mb-3" style={{color: '#2c3e50'}}>
+              ⚡ Quick Actions
+            </h3>
           </div>
           <div className="col-12 col-md-6 col-lg-4 mb-3 mx-auto">
             <div className="card h-100">
@@ -303,13 +308,13 @@ const Dashboard: React.FC = () => {
                     <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093L6.52 10.724l-2.005-2.005A.5.5 0 0 0 4.229 8.7l-3.226 3.226A1 1 0 0 1 1.002 13V3a1 1 0 0 1 1-1h12z"/>
                   </svg>
                 </div>
-                <h4 className="h6 mb-2">Add New Patch</h4>
-                <p className="text-muted mb-3 flex-grow-1">Take a photo or upload an image of your new patch</p>
+                <h4 className="h6 mb-2" style={{color: '#e67e22'}}>📸 Upload a new Patch?</h4>
+                <p className="text-muted mb-3 flex-grow-1">Take a photo or upload an image of your new patch!!</p>
                 <button 
                   className="btn btn-dark" 
                   onClick={() => navigate('/upload')}
                 >
-                  Upload Patch
+                  🚀 Upload Patch
                 </button>
               </div>
             </div>
@@ -320,7 +325,10 @@ const Dashboard: React.FC = () => {
         {(allPatches.patches.length > 0 || allPatches.ungrouped_patches.length > 0) && (
           <div className="row mb-4">
             <div className="col-12">
-              <h3 className="h5 mb-3">Your Patch Collection</h3>
+              <h3 className="h4 mb-1" style={{color: '#2c3e50'}}>
+                🏆 Your Patch Gallery
+              </h3>
+              <p className="text-muted small mb-3">Your Patch Collection</p>
             </div>
             <div className="col-12 col-md-6">
               <div className="input-group">
@@ -370,13 +378,13 @@ const Dashboard: React.FC = () => {
               <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
               <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093L6.52 10.724l-2.005-2.005A.5.5 0 0 0 4.229 8.7l-3.226 3.226A1 1 0 0 1 1.002 13V3a1 1 0 0 1 1-1h12z"/>
             </svg>
-            <h3 className="h5">No Patches Yet</h3>
+            <h3 className="h4" style={{color: '#e67e22'}}>🌟 Your Collection Awaits!</h3>
             <p className="text-muted mb-3">Start building your patch collection by uploading your first patch!</p>
             <button 
               className="btn btn-dark" 
               onClick={() => navigate('/upload')}
             >
-              Add Your First Patch
+              🎯 Add Your First Patch!
             </button>
           </div>
         )}
@@ -451,9 +459,9 @@ const Dashboard: React.FC = () => {
         {newPatches.unmatchesPatches.length > 0 && (
           <div className="row mb-4">
             <div className="col-12">
-              <h2 className="h5">Unmatched Uploads</h2>
+              <h2 className="h5" style={{color: '#e67e22'}}>🤔 Mystery Patches</h2>
               <p className="text-muted small mb-3">
-                These uploads haven't been matched to any patches yet. They may be processing or need administrator review.
+                These uploads are still being identified! They might be new patches or need a closer look from our team.
               </p>
               <div className="patch-grid">
                 {newPatches.unmatchesPatches.map((upload: UserPatchUploadModel) => (
@@ -482,11 +490,11 @@ const Dashboard: React.FC = () => {
             <svg className="mb-3 text-muted" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
               <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
             </svg>
-            <h3 className="h6">No patches match your search</h3>
+            <h3 className="h6" style={{color: '#e67e22'}}>🔍 No matches found</h3>
             <p className="text-muted small">
               {allPatches.ungrouped_patches.length > 0 
-                ? 'Note: Ungrouped patches are hidden during search. Try clearing your search to see them.'
-                : 'Try adjusting your search term or filter'}
+                ? 'Tip: Individual patches are hidden during search. Clear your search to see everything!'
+                : 'Try a different search term or check out all your patches instead'}
             </p>
           </div>
         )}
@@ -554,8 +562,8 @@ const Dashboard: React.FC = () => {
         {filteredData.ungroupedPatches.length > 0 && (
           <div className="row mb-3">
             <div className="col-12">
-              <h2 className="h5">Ungrouped Patches</h2>
-              <p className="text-muted small">These patches haven't been organized into groups yet.</p>
+              <h2 className="h5" style={{color: '#3498db'}}>📦 Individual Patches</h2>
+              <p className="text-muted small">These patches are waiting to be organized! Click one to match it with similar patches.</p>
             </div>
             <div className="col-12">
               <div className="patch-grid mb-4">

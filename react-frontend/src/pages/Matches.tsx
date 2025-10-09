@@ -121,7 +121,9 @@ const Matches: React.FC = () => {
             {/* Your Uploaded Image */}
             <div className="card mb-4">
               <div className="card-header">
-                <h2 className="h5 mb-0">Your Uploaded Image</h2>
+                <h2 className="h4 mb-0" style={{background: 'linear-gradient(135deg, #2c3e50, #e67e22)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>
+                  📸 Your Uploaded Patch
+                </h2>
               </div>
               <div className="card-body text-center">
                 <img 
@@ -142,21 +144,20 @@ const Matches: React.FC = () => {
                     <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
                     <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
                   </svg>
-                  <h3 className="h5 text-danger">This patch does not exist</h3>
+                  <h3 className="h4" style={{color: '#e67e22'}}>🤔 Hmm, This One's New to Us!</h3>
                   <p className="text-muted mb-4">
-                    Your upload doesn't match any existing patches in our database. 
-                    This usually means the image is not of an actual patch or the patch hasn't been added to our system yet.
+                    We couldn't find this patch in our collection yet! 
+                    This might be a brand new patch or perhaps the photo needs a different angle.
                   </p>
                   <p className="text-muted small mb-4">
-                    <strong>Note:</strong> Only administrators and moderators can add new patches to the system. 
-                    If you believe this is a valid patch that should be in our database, 
-                    please contact an administrator for manual review.
+                    <strong>💡 Pro tip:</strong> Our team is always adding new patches to the database. 
+                    If you think this should be included, our moderators will take a look during their next review!
                   </p>
                   <button 
                     className="btn btn-outline-dark" 
                     onClick={() => navigate('/upload')}
                   >
-                    Try Another Upload
+                    🔄 Try Another Photo
                   </button>
                 </div>
               </div>
@@ -166,11 +167,11 @@ const Matches: React.FC = () => {
             {hasOwnedMatches && (
               <div className="card mb-4">
                 <div className="card-header">
-                  <h2 className="h5 mb-0">
-                    You Already Own {uploadResult.ownedMatchingPatches!.length === 1 ? 'This Patch' : 'These Patches'}
+                  <h2 className="h4 mb-1" style={{color: '#27ae60'}}>
+                    🎉 You Already Have {uploadResult.ownedMatchingPatches!.length === 1 ? 'This One!' : 'These!'}
                   </h2>
                   <small className="text-muted">
-                    Great! You already have {uploadResult.ownedMatchingPatches![0].uploads.length} upload{uploadResult.ownedMatchingPatches![0].uploads.length > 1 ? 's' : ''} of this patch.
+                    Awesome! You already have {uploadResult.ownedMatchingPatches![0].uploads.length} photo{uploadResult.ownedMatchingPatches![0].uploads.length > 1 ? 's' : ''} of this patch in your collection.
                   </small>
                 </div>
                 <div className="card-body">
@@ -222,9 +223,9 @@ const Matches: React.FC = () => {
             {hasNewMatches && (
               <div className="card mb-4">
                 <div className="card-header">
-                  <h2 className="h5 mb-0">New Patch Found!</h2>
+                  <h2 className="h4 mb-1" style={{color: '#e67e22'}}>🌟 New Patch Discovered!</h2>
                   <small className="text-muted">
-                    You don't own this patch yet. Select it to add it to your collection.
+                    This patch isn't in your collection yet. Click it to add it to your collection!
                   </small>
                 </div>
                 <div className="card-body">
@@ -269,7 +270,7 @@ const Matches: React.FC = () => {
             {hasAnyMatches && (
               <div className="card">
                 <div className="card-body text-center">
-                  <h4 className="h6 mb-3">Confirm Your Selection</h4>
+                  <h4 className="h5 mb-3" style={{color: '#2c3e50'}}>🎯 Confirm Your Selection!</h4>
                   <button 
                     className="btn btn-dark btn-lg" 
                     onClick={handleConfirmMatch}
@@ -279,15 +280,15 @@ const Matches: React.FC = () => {
                       <span className="spinner-border spinner-border-sm me-2"></span>
                     )}
                     {selectedMatch?.type === 'owned' 
-                      ? 'Add to Existing Collection' 
+                      ? '📚 Add to Collection' 
                       : selectedMatch?.type === 'new' 
-                      ? 'Acquire This Patch' 
-                      : 'Please Select a Match Above'
+                      ? '✨ Acquire This Patch!' 
+                      : '👆 Please Select a Match Above'
                     }
                   </button>
                   {selectedMatch && (
                     <p className="text-muted small mt-2 mb-0">
-                      Selected: {selectedMatch.patchName || `Patch #${selectedMatch.patchNumber}`}
+                      🎯 Selected: <strong>{selectedMatch.patchName || `Patch #${selectedMatch.patchNumber}`}</strong>
                     </p>
                   )}
                 </div>

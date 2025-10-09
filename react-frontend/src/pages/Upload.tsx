@@ -184,8 +184,10 @@ const Upload: React.FC = () => {
           <div className="col-12 col-lg-8">
             <div className="card">
               <div className="card-header">
-                <h2 className="h5 mb-0">Add New Patch</h2>
-                <small className="text-muted">Take a photo or upload an image of your patch</small>
+                <h2 className="h4 mb-1" style={{background: 'linear-gradient(135deg, #2c3e50, #e67e22)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>
+                  📸 Upload a new Patch!
+                </h2>
+                <small className="text-muted">Take a photo or upload an image of your new patch!!</small>
               </div>
               <div className="card-body">
                 
@@ -202,7 +204,7 @@ const Upload: React.FC = () => {
                           <path d="M15 12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h1.172a3 3 0 0 0 2.12-.879l.83-.828A1 1 0 0 1 6.827 3h2.344a1 1 0 0 1 .707.293l.828.828A3 3 0 0 0 12.828 5H14a1 1 0 0 1 1 1v6zM2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2z"/>
                           <path d="M8 11a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5zm0 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 6.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
                         </svg>
-                        <div>{isCameraSupported() ? 'Take Photo' : 'Camera Not Available'}</div>
+                        <div>{isCameraSupported() ? '📱 Take Photo!' : '📷 Camera Not Available'}</div>
                       </button>
                     </div>
                     <div className="col-12 col-sm-6 mb-3">
@@ -211,7 +213,7 @@ const Upload: React.FC = () => {
                           <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
                           <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
                         </svg>
-                        <div>Upload File</div>
+                        <div>📁 Browse Files</div>
                       </label>
                       <input 
                         type="file" 
@@ -243,8 +245,8 @@ const Upload: React.FC = () => {
                       </div>
                     </div>
                     <div className="text-center">
-                      <button className="btn btn-secondary" onClick={handleHideCamera}>
-                        Cancel
+                      <button className="btn btn-outline-secondary" onClick={handleHideCamera}>
+                        ❌ Cancel
                       </button>
                     </div>
                   </div>
@@ -263,8 +265,8 @@ const Upload: React.FC = () => {
                     </div>
                     
                     <div className="d-flex gap-2 justify-content-center">
-                      <button className="btn btn-secondary" onClick={clearImage}>
-                        Choose Different Image
+                      <button className="btn btn-outline-secondary" onClick={clearImage}>
+                        🔄 Choose Different Image
                       </button>
                       <button 
                         className="btn btn-dark" 
@@ -274,7 +276,7 @@ const Upload: React.FC = () => {
                         {loading && (
                           <span className="spinner-border spinner-border-sm me-2"></span>
                         )}
-                        Upload Patch
+                        🚀 Upload Patch!
                       </button>
                     </div>
                   </div>
@@ -294,8 +296,9 @@ const Upload: React.FC = () => {
                       <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
                       <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093L6.52 10.724l-2.005-2.005A.5.5 0 0 0 4.229 8.7l-3.226 3.226A1 1 0 0 1 1.002 13V3a1 1 0 0 1 1-1h12z"/>
                     </svg>
-                    <h4 className="h6">Drag & Drop Image Here</h4>
-                    <p className="text-muted mb-0">Or use the buttons above</p>
+                    <h4 className="h5" style={{color: '#3498db'}}>🎯 Drop Your Patch Photo Here!</h4>
+                    <p className="text-muted mb-2">Or use the awesome buttons above</p>
+                    <p className="text-muted small mb-0">✨ Supports JPG, PNG, and more • Max 10MB</p>
                   </div>
                 )}
 
