@@ -64,6 +64,7 @@ export interface PatchResponse {
   };
   universitySection?: string;
   releaseDate?: string;
+  patchSubmissionId: string;
   created: string;
   updated?: string;
 }
@@ -96,9 +97,13 @@ export interface OwnedMatchingPatchesModel {
   similarity: number;
 }
 
+export interface NewMatchingPatchesModel extends PatchResponse {
+  similarity: number;
+}
+
 export interface PatchUploadResponse {
   ownedMatchingPatches: OwnedMatchingPatchesModel[];
-  newMatchingPatches: PatchResponse[];
+  newMatchingPatches: NewMatchingPatchesModel[];
   upload: UserPatchUploadModel;
 }
 

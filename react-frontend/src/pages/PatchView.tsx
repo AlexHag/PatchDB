@@ -7,7 +7,7 @@ import type { PatchResponse } from '../api/types';
 
 const PatchView: React.FC = () => {
   const { patchNumber } = useParams<{ patchNumber: string }>();
-  const { requireAuth } = useAuth();
+  const { requireAuth, user } = useAuth();
   const navigate = useNavigate();
   const [patch, setPatch] = useState<PatchResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -243,6 +243,16 @@ const PatchView: React.FC = () => {
                     >
                       🎒 View Collection
                     </button>
+
+                    {user && ['Admin', 'Moderator', 'PatchMaker'].includes(user.role) && (
+                      <button 
+                        className="btn btn-dark flex-fill"
+                        onClick={() => navigate(`/submit-patch/${patch.patchSubmissionId}`)}
+                      >
+                        📝 View Patch Submission
+                      </button>
+                    )}
+
                   </div>
                 </div>
               </div>

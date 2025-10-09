@@ -6,8 +6,7 @@ import { confirmPatchMatch } from '../api/patchdb';
 import type { 
   PatchUploadResponse, 
   OwnedMatchingPatchesModel, 
-  PatchResponse,
-  UserPatchUploadModel
+  NewMatchingPatchesModel,
 } from '../api/types';
 
 interface SelectedMatch {
@@ -230,7 +229,7 @@ const Matches: React.FC = () => {
                 </div>
                 <div className="card-body">
                   <div className="row">
-                    {uploadResult.newMatchingPatches!.map((newMatch: PatchResponse, index) => {
+                    {uploadResult.newMatchingPatches!.map((newMatch: NewMatchingPatchesModel, index) => {
                       const confidence = Math.round(newMatch.similarity * 100);
                       const isSelected = selectedMatch?.type === 'new' && selectedMatch?.patchNumber === newMatch.patchNumber;
                       

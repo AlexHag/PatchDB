@@ -29,6 +29,9 @@ public class PatchResponse
     [JsonProperty("releaseDate")]
     public DateTime? ReleaseDate { get; set; }
 
+    [JsonProperty("patchSubmissionId")]
+    public Guid PatchSubmissionId { get; set; }
+
     [JsonProperty("created")]
     public DateTime Created { get; set; }
 
