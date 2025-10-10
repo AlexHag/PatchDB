@@ -1,0 +1,4 @@
+- [X] Block public access to buckets and objects granted through new access control lists (ACLs)
+- [X] Block public access to buckets and objects granted through any access control lists (ACLs)
+- [ ] Block public access to buckets and objects granted through new public bucket or access point policies
+- [ ] Block public and cross-account access to buckets and objects through any public bucket or access point policies

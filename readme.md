@@ -10,152 +10,33 @@ https://github.com/openai/CLIP
 
 # Server
 
-## Create user
-Request:
-```
-POST /user
-Content-Type: application/json
-{
-    "username": "John"
-}
-```
-Response
-```
-{
-    "id": 1,
-    "username": "John"
-}
-```
+## Patch indexing written in python
+- POST /index
+- DELETE /index/{id}
+- POST /search
 
-## Upload an image of a patch
-Request:
-```
-POST /<user_id>/upload
-File image=@my_patch.png
-```
-Response:
-```
-{
-  "matches": [
-    {
-      "group_id": 3,
-      "group_name": "Apple",
-      "is_favorite": 1
-      "id": 9,
-      "path": "./images/2/3d670593-1661-4bc7-991e-d7508dac0e03.png",
-      "score": 0.8786004185676575
-    }
-  ],
-  "patch": {
-    "id": 11,
-    "path": "./images/2/ed0c487b-5c30-45c1-b014-5823b9fc6d79.jpg"
-  },
-  "ungrouped_matches": []
-}
-```
+## Authentication
+- Login
+- Register
 
-## Add an uploaded patch to an existing group of patches
-Request
-```
-PATCH /<user_id>/group
-Content-Type: application/json
-{
-    "patch_id": 11,
-    "group_id": 3
-}
-```
-Response
-```
-{
-    "message": "Patch added to group"
-}
-```
+## User
+- Profile Picture
+- Bio
+- University Information
 
-## Create new group of patches
-Request
-```
-POST /<user_id>/group
-Content-Type: application/json
-{
-    "patch_id": 11,
-    "name": "My new patch"
-}
-```
-Response
-```
-{
-    "message": "Patch added to group"
-}
-```
+## Patches
+- Get
+- Search
 
-## List user patches
-Request
-```
-GET /<user_id>/patches
-```
-Response
-```
-{
-    "patches": [
-        {
-            "id": 1,
-            "images": [
-                {
-                    "id": 1,
-                    "path": "./images/2/0cbe8703-0254-43d7-af32-59c7a507141d.jpg"
-                },
-                {
-                    "id": 3,
-                    "path": "./images/2/4800987c-c5b8-44d2-9a61-801a47db04ad.jpg"
-                }
-            ],
-            "name": "My Cool Patch",
-            "is_favorite": 0
-        },
-        {
-            "id": 2,
-            "images": [
-                {
-                    "id": 2,
-                    "path": "./images/2/fcd6d76f-cbdd-4a09-9079-f59fac216ab6.jpg"
-                }
-            ],
-            "name": "Another Patch",
-            "is_favorite": 1
-        }
-    ],
-    "ungrouped_patches": [
-        {
-            "id": 5,
-            "path": "./images/2/4b7b93de-4795-4451-bb0f-cbad37e6879b.jpg"
-        }
-    ]
-}
-```
+## Patch submittion
+- Upload
+- Update
+- Get pending
 
-## Delete patch
-Request
-```
-DELETE /<user_id>/patch/<patch_id>
-```
-
-## Delete group and all patches in it
-Request
-```
-DELETE /<user_id>/group/<group_id>
-```
-
-## Add a patch group to favorites
-Request
-```
-PUT /<user_id>/group/<group_id>/favorite
-```
-
-## Remove a patch group from favorites
-Request
-```
-DELETE /<user_id>/group/<group_id>/favorite
-```
+## User patches
+- Get patches
+- Upload patch
+- Match with existing
 
 # Deploy
 
@@ -209,6 +90,64 @@ source .venv/bin/activate
 pip install -r requirements.txt
 python3 -m flask run > output.log 2>&1 &
 ```
+
+## Build react app
+Build locally
+```
+npm i
+npm run build
+```
+Copy build to VM
+```
+scp -r .\dist\* username@server_ip:/var/www/patch_db_react
+```
+
+## Install and deploy .NET backend
+
+### Install the SDK
+```
+sudo apt-get update && \
+  sudo apt-get install -y dotnet-sdk-8.0
+```
+### Install the runtime
+```
+sudo apt-get update && \
+  sudo apt-get install -y aspnetcore-runtime-8.0
+```
+(Make sure the global.json file matches the installed sdk version)
+
+### Configure database
+1. Install entity framework
+```
+cd ~/PatchDB/PatchDb.Backend
+dotnet new tool-manifest
+dotnet tool install --local dotnet-ef
+```
+2. Update database
+```
+cd ~/PatchDB/PatchDb.Backend/PatchDb.Backend.Service
+dotnet ef database update
+```
+
+### You must manually copy the secrets into
+```
+~/PatchDB/PatchDb.Backend/app-secrets/
+```
+
+### Generate JWT certificate
+```
+cd ~/PatchDB/PatchDb.Backend/certificates
+chmod +x generate_jwt_cert.sh
+./generate_jwt_cert.sh
+```
+
+### Run the backend
+```
+cd ~/PatchDB/PatchDb.Backend/PatchDb.Backend.Service
+dotnet run > output.log 2>&1 &
+```
+
+TODO: Do not run production in development mode but please give me some slack...
 
 ## Deploy through proxy
 Generate self signed cerificate on backend
