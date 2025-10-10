@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { isAuthenticated } from './api/auth';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -15,6 +15,24 @@ import BrowsePatches from './pages/BrowsePatches';
 import PublicProfile from './pages/PublicProfile';
 import SearchUsers from './pages/SearchUsers';
 import Search from './pages/Search';
+import MobileFooter from './components/MobileFooter';
+
+// Layout wrapper that includes the mobile footer for authenticated users
+interface LayoutWrapperProps {
+  children: React.ReactNode;
+}
+
+const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
+  const location = useLocation();
+  const showMobileFooter = isAuthenticated() && location.pathname !== '/';
+
+  return (
+    <>
+      {children}
+      {showMobileFooter && <MobileFooter />}
+    </>
+  );
+};
 
 // Protected Route component
 interface ProtectedRouteProps {
@@ -34,7 +52,8 @@ const App: React.FC = () => {
   return (
     <Router>
       <div className="App">
-        <Routes>
+        <LayoutWrapper>
+          <Routes>
           {/* Public routes */}
           <Route path="/" element={
             <PublicRoute>
@@ -123,7 +142,8 @@ const App: React.FC = () => {
 
           {/* Catch-all redirect */}
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+          </Routes>
+        </LayoutWrapper>
       </div>
     </Router>
   );
