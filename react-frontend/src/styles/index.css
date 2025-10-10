@@ -540,11 +540,13 @@ body {
 .mobile-nav-menu {
     width: 90%;
     max-width: 400px;
+    max-height: 85vh;
     background: linear-gradient(135deg, white 0%, var(--cream) 100%);
     border-radius: 1.5rem;
     box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.3);
     padding: 2rem;
     animation: slideInMenu 0.4s ease-out;
+    overflow-y: auto;
 }
 
 .mobile-nav-links {
@@ -644,6 +646,80 @@ body {
     }
 }
 
+/* Mobile navigation responsive design */
+/* Very small devices (320px and up) */
+@media (max-width: 374px) {
+    .mobile-nav-overlay {
+        padding: 1rem;
+    }
+    
+    .mobile-nav-menu {
+        width: 95%;
+        max-width: 280px;
+        padding: 1.25rem;
+        border-radius: 1rem;
+    }
+    
+    .mobile-nav-links {
+        gap: 0.75rem;
+    }
+    
+    .mobile-nav-link {
+        font-size: 0.95rem;
+        padding: 1rem 1.25rem;
+        border-radius: 0.75rem;
+    }
+    
+    .nav-svg-icon {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .nav-icon {
+        min-width: 1.25rem;
+    }
+}
+
+/* Small devices (375px - 424px) */
+@media (min-width: 375px) and (max-width: 424px) {
+    .mobile-nav-overlay {
+        padding: 1.25rem;
+    }
+    
+    .mobile-nav-menu {
+        width: 92%;
+        max-width: 320px;
+        padding: 1.5rem;
+    }
+    
+    .mobile-nav-links {
+        gap: 0.875rem;
+    }
+    
+    .mobile-nav-link {
+        font-size: 1rem;
+        padding: 1.1rem 1.375rem;
+    }
+}
+
+/* Medium-small devices (425px - 575px) */
+@media (min-width: 425px) and (max-width: 575px) {
+    .mobile-nav-overlay {
+        padding: 1.5rem;
+    }
+    
+    .mobile-nav-menu {
+        width: 90%;
+        max-width: 380px;
+        padding: 1.75rem;
+    }
+    
+    .mobile-nav-link {
+        font-size: 1.05rem;
+        padding: 1.15rem 1.4rem;
+    }
+}
+
 /* Desktop responsiveness - show greeting on larger screens */
 @media (min-width: 576px) {
     .mobile-nav-overlay {
@@ -658,6 +734,53 @@ body {
     .mobile-nav-link {
         font-size: 1.2rem;
         padding: 1.5rem 2rem;
+    }
+}
+
+/* Landscape orientation adjustments for mobile devices */
+@media (max-height: 500px) and (orientation: landscape) {
+    .mobile-nav-overlay {
+        padding: 0.75rem;
+    }
+    
+    .mobile-nav-menu {
+        width: 95%;
+        max-width: 450px;
+        max-height: 90vh;
+        padding: 1rem;
+        border-radius: 1rem;
+    }
+    
+    .mobile-nav-links {
+        gap: 0.5rem;
+    }
+    
+    .mobile-nav-link {
+        font-size: 0.9rem;
+        padding: 0.8rem 1.2rem;
+        border-radius: 0.75rem;
+    }
+    
+    .nav-svg-icon {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+/* Extra small height devices in landscape */
+@media (max-height: 400px) and (orientation: landscape) {
+    .mobile-nav-menu {
+        max-height: 95vh;
+        padding: 0.75rem;
+    }
+    
+    .mobile-nav-links {
+        gap: 0.375rem;
+    }
+    
+    .mobile-nav-link {
+        font-size: 0.85rem;
+        padding: 0.7rem 1rem;
     }
 }
 
