@@ -201,6 +201,14 @@ export interface SearchPatchRequest {
   take?: number;
 }
 
+// User search types
+export interface SearchUserRequest {
+  username?: string;
+  universityCode?: string;
+  skip?: number;
+  take?: number;
+}
+
 // Generic pagination response
 export interface PaginationResponse<T> {
   count: number;

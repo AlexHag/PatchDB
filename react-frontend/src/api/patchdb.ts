@@ -19,7 +19,8 @@ import type {
   UpdatePatchSubmissionRequest,
   PatchResponse,
   PaginationResponse,
-  SearchPatchRequest
+  SearchPatchRequest,
+  SearchUserRequest
 } from './types';
 import { getAuthHeaders } from './auth';
 
@@ -348,6 +349,21 @@ export async function getUserById(userId: string): Promise<UserResponse> {
 export async function getUserPatchesById(userId: string): Promise<GetUserPatchesResponse> {
   const response = await fetch(`${API_BASE_URL}/user-patches/${userId}`, {
     headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+// User search function
+export async function searchUsers(request: SearchUserRequest): Promise<UserResponse[]> {
+  const response = await fetch(`${API_BASE_URL}/user/search`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(request)
   });
 
   if (!response.ok) {

@@ -13,6 +13,7 @@ import UniversitySetup from './pages/UniversitySetup';
 import ReviewQueue from './pages/ReviewQueue';
 import BrowsePatches from './pages/BrowsePatches';
 import PublicProfile from './pages/PublicProfile';
+import SearchUsers from './pages/SearchUsers';
 
 // Protected Route component
 interface ProtectedRouteProps {
@@ -104,6 +105,12 @@ const App: React.FC = () => {
           <Route path="/user/:userId" element={
             <ProtectedRoute>
               <PublicProfile />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/search-users" element={
+            <ProtectedRoute>
+              <SearchUsers />
             </ProtectedRoute>
           } />
 
