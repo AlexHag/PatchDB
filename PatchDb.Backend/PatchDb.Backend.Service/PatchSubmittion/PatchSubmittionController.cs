@@ -4,6 +4,7 @@ using PatchDb.Backend.Core.Authentication;
 using PatchDb.Backend.Service.Patches.Models.Dto;
 using PatchDb.Backend.Service.PatchSubmittion.Models.Dto;
 using PatchDb.Backend.Service.User.Models;
+using Platform.Core.Application.Persistence;
 
 namespace PatchDb.Backend.Service.PatchSubmittion;
 
@@ -30,7 +31,7 @@ public class PatchSubmittionController : ControllerBase
 
     [HttpGet("pending")]
     [Authorize]
-    public async Task<ActionResult<List<PatchSubmittionResponse>>> GetPendingSubmittions([FromQuery] int skip = 0, [FromQuery] int take = 20)
+    public async Task<ActionResult<PaginationResponse<PatchSubmittionResponse>>> GetPendingSubmittions([FromQuery] int skip = 0, [FromQuery] int take = 20)
         => Ok(await _patchSubmittionService.GetPendingSubmittions(skip, take));
 
     [HttpGet("{patchSubmittionId}")]

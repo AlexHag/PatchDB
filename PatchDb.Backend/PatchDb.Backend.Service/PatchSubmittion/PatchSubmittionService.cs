@@ -10,6 +10,7 @@ using PatchDb.Backend.Service.PatchSubmittion.Models.Entities;
 using PatchDb.Backend.Service.Universities;
 using PatchDb.Backend.Service.User.Models;
 using PatchDb.Backend.Service.User.Models.Entities;
+using Platform.Core.Application.Persistence;
 
 namespace PatchDb.Backend.Service.PatchSubmittion;
 
@@ -17,7 +18,7 @@ public interface IPatchSubmittionService
 {
     Task<PatchSubmittionResponse> UploadPatch(Guid userId, UploadPatchRequest request);
     Task<PatchSubmittionResponse> UpdatePatch(Guid userId, UpdatePatchRequest request);
-    Task<List<PatchSubmittionResponse>> GetPendingSubmittions(int skip, int take);
+    Task<PaginationResponse<PatchSubmittionResponse>> GetPendingSubmittions(int skip, int take);
     Task<PatchSubmittionResponse> GetPatchSubmittion(Guid patchSubmittionId);
 }
 
@@ -157,26 +158,39 @@ public class PatchSubmittionService : IPatchSubmittionService
                 throw new BadRequestApiException("Patch name is required to accept this");
             }
 
-            var patch = new PatchEntity
+            using (var transaction = await _dbContext.Database.BeginTransactionAsync())
             {
-                FilePath = patchSubmittion.FilePath,
-                Name = patchSubmittion.Name,
-                Description = patchSubmittion.Description,
-                PatchMaker = patchSubmittion.PatchMaker,
-                UniversityCode = patchSubmittion.UniversityCode,
-                UniversitySection = patchSubmittion.UniversitySection,
-                ReleaseDate = patchSubmittion.ReleaseDate,
-                PatchSubmissionId = patchSubmittion.Id,
-                Created = DateTime.UtcNow
-            };
+                try
+                {
+                    var patch = new PatchEntity
+                    {
+                        FilePath = patchSubmittion.FilePath,
+                        Name = patchSubmittion.Name,
+                        Description = patchSubmittion.Description,
+                        PatchMaker = patchSubmittion.PatchMaker,
+                        UniversityCode = patchSubmittion.UniversityCode,
+                        UniversitySection = patchSubmittion.UniversitySection,
+                        ReleaseDate = patchSubmittion.ReleaseDate,
+                        PatchSubmissionId = patchSubmittion.Id,
+                        Created = DateTime.UtcNow
+                    };
 
-            _dbContext.Patches.Add(patch);
-            await _dbContext.SaveChangesAsync();
+                    _dbContext.Patches.Add(patch);
+                    await _dbContext.SaveChangesAsync();
 
-            await _patchIndexApi.IndexPatch(patch.PatchNumber!.Value, patch.FilePath);
+                    await _patchIndexApi.IndexPatch(patch.PatchNumber!.Value, patch.FilePath);
 
-            patchSubmittion.PatchNumber = patch.PatchNumber;
-            await _dbContext.SaveChangesAsync();
+                    patchSubmittion.PatchNumber = patch.PatchNumber;
+                    await _dbContext.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
         }
         else
         {
@@ -220,7 +234,7 @@ public class PatchSubmittionService : IPatchSubmittionService
     }
 
 
-    public async Task<List<PatchSubmittionResponse>> GetPendingSubmittions(int skip, int take)
+    public async Task<PaginationResponse<PatchSubmittionResponse>> GetPendingSubmittions(int skip, int take)
     {
         skip = Math.Max(0, skip);
         take = Math.Clamp(take, 1, 50);
@@ -232,7 +246,13 @@ public class PatchSubmittionService : IPatchSubmittionService
             .Take(take)
             .ToListAsync();
 
-        return patches.Select(ToPatchSubmittionResponse).ToList();
+        var response = new PaginationResponse<PatchSubmittionResponse>
+        {
+            Items = patches.Select(ToPatchSubmittionResponse).ToList(),
+            Count = await _dbContext.PatchSubmittions.CountAsync(p => p.Status == PatchSubmittionStatus.Pending)
+        };
+
+        return response;
     }
 
     public async Task<PatchSubmittionResponse> GetPatchSubmittion(Guid patchSubmittionId)
