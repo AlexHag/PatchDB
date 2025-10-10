@@ -3,12 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../components/hooks/useAuth';
 import Navigation from '../components/Navigation';
 import { getPendingPatchSubmissions } from '../api/patchdb';
-import type { PendingPatchSubmissionsResponse, PatchSubmittionResponse } from '../api/types';
+import type { PaginationResponse, PatchSubmittionResponse } from '../api/types';
 
 const ReviewQueue: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [submissions, setSubmissions] = useState<PendingPatchSubmissionsResponse>({ count: 0, items: [] });
+  const [submissions, setSubmissions] = useState<PaginationResponse<PatchSubmittionResponse>>({ count: 0, items: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -124,9 +124,9 @@ const ReviewQueue: React.FC = () => {
         {/* Submissions Grid */}
         {submissions.items.length > 0 && (
           <>
-            <div className="row">
+            <div className="row g-2 g-md-3">
               {submissions.items.map((submission: PatchSubmittionResponse) => (
-                <div key={submission.patchSubmittionId} className="col-12 col-md-6 mb-4">
+                <div key={submission.patchSubmittionId} className="col-6 mb-3">
                   <div className="card h-100 patch-submission-card">
                     <div className="card-body p-0">
                       <div className="row g-0">
@@ -136,7 +136,7 @@ const ReviewQueue: React.FC = () => {
                             to={`/submit-patch/${submission.patchSubmittionId}`}
                             className="d-block text-decoration-none"
                           >
-                            <div className="position-relative patch-image-container" style={{ aspectRatio: '4/3', minHeight: '200px' }}>
+                            <div className="position-relative patch-image-container" style={{ aspectRatio: '4/3', minHeight: '140px' }}>
                               <img 
                                 src={submission.imageUrl} 
                                 alt={submission.name || `Submission #${submission.patchSubmittionId.slice(0, 8)}`} 
@@ -165,7 +165,7 @@ const ReviewQueue: React.FC = () => {
                           <div className="p-3">
                             {/* Header */}
                             <div className="mb-3">
-                              <h3 className="h6 mb-2" style={{color: '#2c3e50'}}>
+                              <h3 className="h6 mb-2" style={{color: '#2c3e50', fontSize: '0.9rem'}}>
                                 <Link 
                                   to={`/submit-patch/${submission.patchSubmittionId}`}
                                   className="text-decoration-none"
@@ -176,7 +176,8 @@ const ReviewQueue: React.FC = () => {
                               </h3>
                               
                               {submission.description && (
-                                <p className="text-muted mb-2 small" style={{ 
+                                <p className="text-muted mb-2 d-none d-md-block" style={{ 
+                                  fontSize: '0.75rem',
                                   display: '-webkit-box',
                                   WebkitLineClamp: 2,
                                   WebkitBoxOrient: 'vertical',
@@ -194,17 +195,17 @@ const ReviewQueue: React.FC = () => {
                                   <img 
                                     src={submission.university.logoUrl} 
                                     alt={`${submission.university.name} logo`}
-                                    className="me-2 rounded"
-                                    style={{ width: '24px', height: '24px', objectFit: 'contain' }}
+                                    className="me-1 me-md-2 rounded"
+                                    style={{ width: '20px', height: '20px', objectFit: 'contain' }}
                                     loading="lazy"
                                   />
                                 )}
                                 <div>
-                                  <div className="fw-semibold small" style={{color: '#2c3e50'}}>
+                                  <div className="fw-semibold" style={{color: '#2c3e50', fontSize: '0.75rem'}}>
                                     {submission.university.name}
                                   </div>
                                   {submission.universitySection && (
-                                    <div className="text-muted" style={{fontSize: '0.75rem'}}>
+                                    <div className="text-muted d-none d-md-block" style={{fontSize: '0.7rem'}}>
                                       {submission.universitySection}
                                     </div>
                                   )}
@@ -213,9 +214,9 @@ const ReviewQueue: React.FC = () => {
                             )}
                             
                             {/* Additional Details */}
-                            <div className="text-muted" style={{fontSize: '0.75rem'}}>
+                            <div className="text-muted" style={{fontSize: '0.7rem'}}>
                               {submission.patchMaker && (
-                                <div className="mb-1">
+                                <div className="mb-1 d-none d-md-block">
                                   <strong>Maker:</strong> {submission.patchMaker}
                                 </div>
                               )}
@@ -223,19 +224,20 @@ const ReviewQueue: React.FC = () => {
                                 <strong>Submitted:</strong> {new Date(submission.created).toLocaleDateString()}
                               </div>
                               {submission.releaseDate && (
-                                <div className="mb-1">
+                                <div className="mb-1 d-none d-md-block">
                                   <strong>Release Date:</strong> {new Date(submission.releaseDate).toLocaleDateString()}
                                 </div>
                               )}
                             </div>
                             
                             {/* Action Button */}
-                            <div className="mt-3 pt-2 border-top">
+                            <div className="mt-2 mt-md-3 pt-2 border-top">
                               <Link 
                                 to={`/submit-patch/${submission.patchSubmittionId}`}
                                 className="btn btn-outline-dark btn-sm w-100"
+                                style={{fontSize: '0.75rem'}}
                               >
-                                Review Submission →
+                                <span className="d-none d-md-inline">Review Submission </span>Review →
                               </Link>
                             </div>
                           </div>

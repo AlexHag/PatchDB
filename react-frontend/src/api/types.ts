@@ -190,8 +190,8 @@ export enum PatchSubmissionStatus {
   Deleted = 50
 }
 
-// Pagination response for pending submissions
-export interface PendingPatchSubmissionsResponse {
+// Generic pagination response
+export interface PaginationResponse<T> {
   count: number;
-  items: PatchSubmittionResponse[];
+  items: T[];
 }

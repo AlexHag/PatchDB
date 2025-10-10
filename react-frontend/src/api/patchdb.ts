@@ -18,7 +18,7 @@ import type {
   PatchSubmittionResponse,
   UpdatePatchSubmissionRequest,
   PatchResponse,
-  PendingPatchSubmissionsResponse
+  PaginationResponse
 } from './types';
 import { getAuthHeaders } from './auth';
 
@@ -295,7 +295,7 @@ export async function getPatchDetail(patchNumber: number): Promise<PatchResponse
 }
 
 // Admin/Moderator functions
-export async function getPendingPatchSubmissions(skip = 0, take = 20): Promise<PendingPatchSubmissionsResponse> {
+export async function getPendingPatchSubmissions(skip = 0, take = 20): Promise<PaginationResponse<PatchSubmittionResponse>> {
   const response = await fetch(`${API_BASE_URL}/patch-submittion/pending?skip=${skip}&take=${take}`, {
     headers: getAuthHeaders()
   });
