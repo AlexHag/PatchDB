@@ -18,7 +18,8 @@ import type {
   PatchSubmittionResponse,
   UpdatePatchSubmissionRequest,
   PatchResponse,
-  PaginationResponse
+  PaginationResponse,
+  SearchPatchRequest
 } from './types';
 import { getAuthHeaders } from './auth';
 
@@ -298,6 +299,33 @@ export async function getPatchDetail(patchNumber: number): Promise<PatchResponse
 export async function getPendingPatchSubmissions(skip = 0, take = 20): Promise<PaginationResponse<PatchSubmittionResponse>> {
   const response = await fetch(`${API_BASE_URL}/patch-submittion/pending?skip=${skip}&take=${take}`, {
     headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+// Browse patches functions
+export async function getPatches(skip = 0, take = 20): Promise<PaginationResponse<PatchResponse>> {
+  const response = await fetch(`${API_BASE_URL}/patches?skip=${skip}&take=${take}`, {
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+export async function searchPatches(request: SearchPatchRequest): Promise<PaginationResponse<PatchResponse>> {
+  const response = await fetch(`${API_BASE_URL}/patches/search`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(request)
   });
 
   if (!response.ok) {

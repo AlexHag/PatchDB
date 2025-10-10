@@ -111,6 +111,15 @@ const Navigation: React.FC<NavigationProps> = () => {
                 Upload Patch
               </Link>
               
+              <Link 
+                to="/browse-patches" 
+                className="mobile-nav-link"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <span className="nav-icon">🧩</span>
+                Browse Patches
+              </Link>
+              
               {/* Submit Patch - Only for Admin, Moderator, PatchMaker */}
               {user && ['Admin', 'Moderator', 'PatchMaker'].includes(user.role) && (
                 <Link 

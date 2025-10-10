@@ -190,6 +190,17 @@ export enum PatchSubmissionStatus {
   Deleted = 50
 }
 
+// Patch search types
+export interface SearchPatchRequest {
+  name?: string;
+  description?: string;
+  patchMaker?: string;
+  universityCode?: string;
+  universitySection?: string;
+  skip?: number;
+  take?: number;
+}
+
 // Generic pagination response
 export interface PaginationResponse<T> {
   count: number;

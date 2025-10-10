@@ -11,6 +11,7 @@ import PatchSubmissionView from './pages/PatchSubmissionView';
 import PatchView from './pages/PatchView';
 import UniversitySetup from './pages/UniversitySetup';
 import ReviewQueue from './pages/ReviewQueue';
+import BrowsePatches from './pages/BrowsePatches';
 
 // Protected Route component
 interface ProtectedRouteProps {
@@ -84,6 +85,12 @@ const App: React.FC = () => {
           <Route path="/review-queue" element={
             <ProtectedRoute>
               <ReviewQueue />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/browse-patches" element={
+            <ProtectedRoute>
+              <BrowsePatches />
             </ProtectedRoute>
           } />
           
