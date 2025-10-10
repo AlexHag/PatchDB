@@ -5,14 +5,15 @@ using PatchDb.Backend.Service.FileService;
 using PatchDb.Backend.Service.Patches.Models.Dto;
 using PatchDb.Backend.Service.Patches.Models.Entities;
 using PatchDb.Backend.Service.Universities;
+using Platform.Core.Application.Persistence;
 
 namespace PatchDb.Backend.Service.Patches;
 
 public interface IPatchService
 {
-    Task<List<PatchResponse>> GetPatches(int skip, int take);
+    Task<PaginationResponse<PatchResponse>> GetPatches(int skip, int take);
     Task<PatchResponse> GetPatch(int patchNumber);
-    Task<List<PatchResponse>> SearchPatches(SearchPatchRequest request);
+    Task<PaginationResponse<PatchResponse>> SearchPatches(SearchPatchRequest request);
 }
 
 public class PatchService : IPatchService
@@ -37,7 +38,7 @@ public class PatchService : IPatchService
     public async Task<PatchResponse> GetPatch(int patchNumber)
         => ToPatchResponse(await _dbContext.Patches.FindAsync(patchNumber) ?? throw new NotFoundApiException("Patch not found"));
 
-    public async Task<List<PatchResponse>> GetPatches(int skip, int take)
+    public async Task<PaginationResponse<PatchResponse>> GetPatches(int skip, int take)
     {
         skip = Math.Max(0, skip);
         take = Math.Clamp(take, 1, 50);
@@ -46,11 +47,17 @@ public class PatchService : IPatchService
             .Skip(skip)
             .Take(take)
             .ToListAsync();
-        
-        return patches.Select(ToPatchResponse).ToList();
+
+        var response = new PaginationResponse<PatchResponse>
+        {
+            Count = await _dbContext.Patches.CountAsync(),
+            Items = patches.Select(ToPatchResponse).ToList()
+        };
+
+        return response;
     }
 
-    public async Task<List<PatchResponse>> SearchPatches(SearchPatchRequest request)
+    public async Task<PaginationResponse<PatchResponse>> SearchPatches(SearchPatchRequest request)
     {
         request.Skip = Math.Max(0, request.Skip);
         request.Take = Math.Clamp(request.Take, 1, 50);
@@ -87,7 +94,13 @@ public class PatchService : IPatchService
             .Take(request.Take)
             .ToListAsync();
         
-        return patches.Select(ToPatchResponse).ToList();
+        var response = new PaginationResponse<PatchResponse>
+        {
+            Count = await query.CountAsync(),
+            Items = patches.Select(ToPatchResponse).ToList()
+        };
+
+        return response;
     }
 
     private PatchResponse ToPatchResponse(PatchEntity patch)

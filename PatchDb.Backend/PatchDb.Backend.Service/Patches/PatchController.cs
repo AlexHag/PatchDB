@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PatchDb.Backend.Service.Patches.Models.Dto;
+using Platform.Core.Application.Persistence;
 
 namespace PatchDb.Backend.Service.Patches;
 
@@ -15,7 +16,7 @@ public class PatchController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<PatchResponse>>> GetPatches([FromQuery] int skip = 0, [FromQuery] int take = 20)
+    public async Task<ActionResult<PaginationResponse<PatchResponse>>> GetPatches([FromQuery] int skip = 0, [FromQuery] int take = 20)
         => Ok(await _patchService.GetPatches(skip, take));
 
     [HttpGet("{patchNumber}")]
@@ -23,6 +24,6 @@ public class PatchController : ControllerBase
         => Ok(await _patchService.GetPatch(patchNumber));
 
     [HttpPost("search")]
-    public async Task<ActionResult<List<PatchResponse>>> SearchPatches([FromBody] SearchPatchRequest request)
+    public async Task<ActionResult<PaginationResponse<PatchResponse>>> SearchPatches([FromBody] SearchPatchRequest request)
         => Ok(await _patchService.SearchPatches(request));
 }
