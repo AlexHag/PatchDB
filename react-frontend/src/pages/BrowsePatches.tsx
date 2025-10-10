@@ -126,19 +126,15 @@ const BrowsePatches: React.FC = () => {
 
       <div className="container mt-4">
         {/* Header */}
-        <div className="row mb-4">
+        <div className="row mb-2">
           <div className="col-12">
             <h2 className="h3 mb-1" style={{background: 'linear-gradient(135deg, #2c3e50, #e67e22)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>
               🧩 Browse Patches
             </h2>
             <p className="text-muted mb-3">Explore the complete patch collection</p>
             
-            {/* Stats */}
-            <div className="d-flex align-items-center mb-3">
-              <div className="stat-card me-3">
-                <div className="stat-number">{patches.count}</div>
-                <div className="stat-label">{isSearching ? 'Search Results' : 'Total Patches'}</div>
-              </div>
+            {/* Loading indicator */}
+            <div className="d-flex align-items-center mb-2">
               {loading && (
                 <div className="spinner-border spinner-border-sm text-dark" role="status">
                   <span className="visually-hidden">Loading...</span>
@@ -149,7 +145,7 @@ const BrowsePatches: React.FC = () => {
         </div>
 
         {/* Search Filters Toggle */}
-        <div className="card mb-4">
+        <div className="card mb-3">
           <div className="card-header">
             <button 
               className="btn btn-link w-100 text-start p-0 text-decoration-none d-flex justify-content-between align-items-center"
@@ -262,6 +258,15 @@ const BrowsePatches: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Search Results Count */}
+        {patches.items.length > 0 && (
+          <div className="mb-3">
+            <small className="text-muted">
+              {isSearching ? `Found ${patches.count} search result${patches.count !== 1 ? 's' : ''}` : `Showing ${patches.items.length} of ${patches.count} patches`}
+            </small>
+          </div>
+        )}
 
         {/* Error Message */}
         {error && (
