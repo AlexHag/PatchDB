@@ -138,42 +138,51 @@ const Dashboard: React.FC = () => {
         )}
 
         {/* Patch Collection */}
-        {userPatches.patches.length > 0 && userPatches.patches.map((patch: UserPatchModel) => (
-          <div key={patch.userPatchId} className="row mb-4">
-            <div className="col-12">
-              <div className="card h-100 patch-collection-card">
-                <div className="card-body p-0">
-                  <div className="row g-0">
-                    {/* Patch Image */}
-                    <div className="col-12 col-md-4">
-                      <Link 
-                        to={`/patch/${patch.matchingPatch.patchNumber}`}
-                        className="d-block text-decoration-none"
-                      >
-                        <div className="position-relative patch-image-container" style={{ aspectRatio: '1', minHeight: '200px' }}>
-                          <img 
-                            src={patch.matchingPatch.imageUrl} 
-                            alt={patch.matchingPatch.name || `Patch #${patch.matchingPatch.patchNumber}`} 
-                            loading="lazy"
-                            className="w-100 h-100 object-fit-cover rounded-start-3"
-                          />
-                          <div className="patch-overlay rounded-start-3">
-                            <div className="patch-overlay-text">
-                              <div className="small">View Details</div>
-                              <div className="small text-primary">→</div>
+        {userPatches.patches.length > 0 && (
+          <div className="row g-2 g-md-3">
+            {userPatches.patches.map((patch: UserPatchModel) => (
+              <div key={patch.userPatchId} className="col-6 mb-3">
+                <div className="card h-100 patch-collection-card">
+                  <div className="card-body p-0">
+                    <div className="row g-0">
+                      {/* Patch Image */}
+                      <div className="col-12">
+                        <Link 
+                          to={`/patch/${patch.matchingPatch.patchNumber}`}
+                          className="d-block text-decoration-none"
+                        >
+                          <div className="position-relative patch-image-container" style={{ aspectRatio: '4/3', minHeight: '140px' }}>
+                            <img 
+                              src={patch.matchingPatch.imageUrl} 
+                              alt={patch.matchingPatch.name || `Patch #${patch.matchingPatch.patchNumber}`} 
+                              loading="lazy"
+                              className="w-100 h-100 object-fit-cover rounded-top-3"
+                            />
+                            <div className="patch-overlay rounded-top-3">
+                              <div className="patch-overlay-text">
+                                <div className="small">View Details</div>
+                                <div className="small text-primary">→</div>
+                              </div>
                             </div>
+                            
+                            {/* Favorite Badge */}
+                            {patch.isFavorite && (
+                              <div className="position-absolute top-0 end-0 m-2">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" className="text-warning">
+                                  <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
+                                </svg>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      </Link>
-                    </div>
-                    
-                    {/* Patch Details */}
-                    <div className="col-12 col-md-8">
-                      <div className="p-3 p-md-4 h-100 d-flex flex-column">
-                        {/* Header with title and favorite */}
-                        <div className="d-flex justify-content-between align-items-start mb-3">
-                          <div className="flex-grow-1">
-                            <h3 className="h4 mb-2" style={{color: '#2c3e50'}}>
+                        </Link>
+                      </div>
+                      
+                      {/* Patch Details */}
+                      <div className="col-12">
+                        <div className="p-3">
+                          {/* Header */}
+                          <div className="mb-3">
+                            <h3 className="h6 mb-2" style={{color: '#2c3e50', fontSize: '0.9rem'}}>
                               <Link 
                                 to={`/patch/${patch.matchingPatch.patchNumber}`}
                                 className="text-decoration-none"
@@ -182,38 +191,38 @@ const Dashboard: React.FC = () => {
                                 {patch.matchingPatch.name || `Patch #${patch.matchingPatch.patchNumber}`}
                               </Link>
                             </h3>
+                            
                             {patch.matchingPatch.description && (
-                              <p className="text-muted mb-3" style={{fontSize: '0.95rem'}}>
+                              <p className="text-muted mb-2 d-none d-md-block" style={{ 
+                                fontSize: '0.75rem',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden'
+                              }}>
                                 {patch.matchingPatch.description}
                               </p>
                             )}
                           </div>
-                          {patch.isFavorite && (
-                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16" className="text-warning ms-2 flex-shrink-0">
-                              <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-                            </svg>
-                          )}
-                        </div>
-                        
-                        {/* University and Maker Info */}
-                        <div className="flex-grow-1">
+                          
+                          {/* University and Maker Info */}
                           {patch.matchingPatch.university && (
-                            <div className="d-flex align-items-center mb-3">
+                            <div className="d-flex align-items-center mb-2">
                               {patch.matchingPatch.university.logoUrl && (
                                 <img 
                                   src={patch.matchingPatch.university.logoUrl} 
                                   alt={`${patch.matchingPatch.university.name} logo`}
-                                  className="me-2 rounded"
-                                  style={{ width: '32px', height: '32px', objectFit: 'contain' }}
+                                  className="me-1 me-md-2 rounded"
+                                  style={{ width: '20px', height: '20px', objectFit: 'contain' }}
                                   loading="lazy"
                                 />
                               )}
                               <div>
-                                <div className="fw-semibold" style={{color: '#2c3e50', fontSize: '0.9rem'}}>
+                                <div className="fw-semibold" style={{color: '#2c3e50', fontSize: '0.75rem'}}>
                                   {patch.matchingPatch.university.name}
                                 </div>
                                 {patch.matchingPatch.universitySection && (
-                                  <div className="text-muted small">
+                                  <div className="text-muted d-none d-md-block" style={{fontSize: '0.7rem'}}>
                                     {patch.matchingPatch.universitySection}
                                   </div>
                                 )}
@@ -222,40 +231,41 @@ const Dashboard: React.FC = () => {
                           )}
                           
                           {/* Additional Details */}
-                          <div className="row g-2 text-muted small">
+                          <div className="text-muted" style={{fontSize: '0.7rem'}}>
                             {patch.matchingPatch.patchMaker && (
-                              <div className="col-12 col-sm-6">
+                              <div className="mb-1 d-none d-md-block">
                                 <strong>Maker:</strong> {patch.matchingPatch.patchMaker}
                               </div>
                             )}
+                            <div className="mb-1">
+                              <strong>Acquired:</strong> {new Date(patch.aquiredAt).toLocaleDateString()}
+                            </div>
                             {patch.matchingPatch.releaseDate && (
-                              <div className="col-12 col-sm-6">
+                              <div className="mb-1 d-none d-md-block">
                                 <strong>Released:</strong> {new Date(patch.matchingPatch.releaseDate).getFullYear()}
                               </div>
                             )}
-                            <div className="col-12 col-sm-6">
-                              <strong>Acquired:</strong> {new Date(patch.aquiredAt).toLocaleDateString()}
-                            </div>
                           </div>
-                        </div>
-                        
-                        {/* Action Button */}
-                        <div className="mt-3 pt-2 border-top">
-                          <Link 
-                            to={`/patch/${patch.matchingPatch.patchNumber}`}
-                            className="btn btn-outline-dark btn-sm"
-                          >
-                            View Full Details →
-                          </Link>
+                          
+                          {/* Action Button */}
+                          <div className="mt-2 mt-md-3 pt-2 border-top">
+                            <Link 
+                              to={`/patch/${patch.matchingPatch.patchNumber}`}
+                              className="btn btn-outline-dark btn-sm w-100"
+                              style={{fontSize: '0.75rem'}}
+                            >
+                              <span className="d-none d-md-inline">View Details </span>View →
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
-        ))}
+        )}
 
         {/* Unmatched Uploads */}
         {/* {userPatches.unmatchesPatches.length > 0 && (
