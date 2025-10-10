@@ -5,7 +5,7 @@ import { getAuthHeaders } from './auth';
 // API Configuration
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? `${window.location.origin}/api` 
-  : `http://localhost:5064`;
+  : `http://localhost:5001`;
 
 export class FileUploadError extends Error {
   constructor(message: string) {

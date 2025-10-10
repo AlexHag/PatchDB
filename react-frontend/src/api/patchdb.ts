@@ -25,7 +25,7 @@ import { getAuthHeaders } from './auth';
 // For development, use the local C# backend
 const API_BASE_URL = (typeof window !== 'undefined' && window.location.hostname !== 'localhost')
   ? `${window.location.origin}/api` 
-  : `http://localhost:5064`; // Default HTTPS port for .NET development
+  : `http://localhost:5001`; // Default HTTPS port for .NET development
 
 
 export class PatchDBApiError extends Error {
