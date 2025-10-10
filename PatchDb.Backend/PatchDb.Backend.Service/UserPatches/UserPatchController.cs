@@ -41,4 +41,16 @@ public class UserPatchController : ControllerBase
             UnmatchesPatches = await unmatchedPatchesTask
         });
     }
+
+    [HttpGet("{userId}")]
+    [Authorize]
+    public async Task<ActionResult<GetUserPatchesResponse>> GetUserPatches(Guid userId)
+    {
+        var userPatchesTask = _userPatchService.GetUserPatches(userId);
+
+        return Ok(new GetUserPatchesResponse
+        {
+            Patches = await userPatchesTask
+        });
+    }
 }

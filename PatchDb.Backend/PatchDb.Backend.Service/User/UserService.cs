@@ -10,14 +10,15 @@ namespace PatchDb.Backend.Service.User;
 
 public interface IUserService
 {
-    Task<UserResponse> GetUserById(Guid userId);
+    Task<UserResponse> GetUserById(Guid userId, bool hidePii = false);
     Task<UserResponse?> TryGetUserById(Guid userId);
     Task<UserResponse> UpdateProfilePicture(Guid userId, Guid fileId);
     Task<UserResponse> RemoveProfilePicture(Guid userId);
     Task<UserResponse> UpdateBio(Guid userId, string bio);
     Task<UserResponse> UpdateUniversityInfo(Guid userId, UpdateUserUniversityInfoRequest request);
     Task<List<UserEntity>> GetAllUsers();
-    UserResponse ToUserReponse(UserEntity user);
+    Task<List<UserResponse>> SearchUser(SearchUserRequest request);
+    UserResponse ToUserReponse(UserEntity user, bool hidePii = false);
 }
 
 public class UserService : IUserService
@@ -39,7 +40,7 @@ public class UserService : IUserService
         _mapper = mapper;
     }
 
-    public async Task<UserResponse> GetUserById(Guid userId)
+    public async Task<UserResponse> GetUserById(Guid userId, bool hidePii = false)
     {
         var user = await _dbContext.Users.FindAsync(userId);
 
@@ -48,7 +49,7 @@ public class UserService : IUserService
             throw new NotFoundApiException("User not found");
         }
 
-        return ToUserReponse(user);
+        return ToUserReponse(user, hidePii);
     }
 
     public async Task<UserResponse?> TryGetUserById(Guid userId)
@@ -146,7 +147,7 @@ public class UserService : IUserService
         return ToUserReponse(user);
     }
 
-    public UserResponse ToUserReponse(UserEntity user)
+    public UserResponse ToUserReponse(UserEntity user, bool hidePii = false)
     {
         var response = _mapper.Map<UserResponse>(user);
 
@@ -162,7 +163,38 @@ public class UserService : IUserService
             response.UniversityLogoUrl = university?.LogoUrl;
         }
 
+        if (hidePii)
+        {
+            response.Email = null;
+            response.PhoneNumber = null;
+        }
+
         return response;
+    }
+
+    public async Task<List<UserResponse>> SearchUser(SearchUserRequest request)
+    {
+        request.Skip = Math.Max(0, request.Skip);
+        request.Take = Math.Clamp(request.Take, 1, 50);
+
+        var query = _dbContext.Users.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(request.Username))
+        {
+            query = query.Where(p => EF.Functions.Like(p.Username, $"%{request.Username}%"));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.UniversityCode))
+        {
+            query = query.Where(p => p.UniversityCode == request.UniversityCode);
+        }
+
+        var users = await query
+            .Skip(request.Skip)
+            .Take(request.Take)
+            .ToListAsync();
+
+        return users.Select(u => ToUserReponse(u, hidePii: true)).ToList();
     }
 
     public Task<List<UserEntity>> GetAllUsers()

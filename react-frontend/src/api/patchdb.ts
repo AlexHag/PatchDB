@@ -24,10 +24,7 @@ import type {
 import { getAuthHeaders } from './auth';
 
 // API Configuration
-// For development, use the local C# backend
-// const API_BASE_URL = (typeof window !== 'undefined' && window.location.hostname !== 'localhost')
-//   ? `${window.location.origin}/api` 
-//   : `http://localhost:5001`; // Default HTTPS port for .NET development
+// const API_BASE_URL = `http://localhost:5001/api`;
 const API_BASE_URL = `${window.location.origin}/api`;
 
 export class PatchDBApiError extends Error {
@@ -326,6 +323,31 @@ export async function searchPatches(request: SearchPatchRequest): Promise<Pagina
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(request)
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+// Public profile functions
+export async function getUserById(userId: string): Promise<UserResponse> {
+  const response = await fetch(`${API_BASE_URL}/user/${userId}`, {
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+export async function getUserPatchesById(userId: string): Promise<GetUserPatchesResponse> {
+  const response = await fetch(`${API_BASE_URL}/user-patches/${userId}`, {
+    headers: getAuthHeaders()
   });
 
   if (!response.ok) {

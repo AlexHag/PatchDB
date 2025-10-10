@@ -1,8 +1,10 @@
+using Amazon.S3.Model.Internal.MarshallTransformations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PatchDb.Backend.Core.Authentication;
 using PatchDb.Backend.Service.User.Models;
 using PatchDb.Backend.Service.User.Models.Dto;
+using Platform.Core.Application.Persistence;
 
 namespace PatchDb.Backend.Service.User;
 
@@ -21,6 +23,11 @@ public class UserController : ControllerBase
     [Authorize]
     public async Task<ActionResult<UserResponse>> GetUser()
         => Ok(await _userService.GetUserById(User.UserId()));
+
+    [HttpGet("{userId}")]
+    [Authorize]
+    public async Task<ActionResult<UserResponse>> GetUserById(Guid userId)
+        => Ok(await _userService.GetUserById(userId, hidePii: true));
 
     [HttpPut("profile-picture")]
     [Authorize]
@@ -41,9 +48,14 @@ public class UserController : ControllerBase
     [Authorize(Roles = nameof(UserRole.Admin))]
     public async Task<ActionResult> GetAllUsers()
         => Ok(await _userService.GetAllUsers());
-    
+
     [HttpPut("university-information")]
     [Authorize]
     public async Task<ActionResult<UserResponse>> UpdateUniversityInfo([FromBody] UpdateUserUniversityInfoRequest request)
         => Ok(await _userService.UpdateUniversityInfo(User.UserId(), request));
+
+    [HttpPost("search")]
+    [Authorize]
+    public async Task<ActionResult<List<UserResponse>>> SearchUser([FromBody] SearchUserRequest request)
+        => Ok(await _userService.SearchUser(request));
 }
