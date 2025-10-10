@@ -609,9 +609,18 @@ body {
 }
 
 .nav-icon {
-    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     min-width: 1.5rem;
     text-align: center;
+}
+
+/* SVG Icons styling for navigation */
+.nav-svg-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.25s ease;
 }
 
 /* Animations */
