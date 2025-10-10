@@ -189,3 +189,9 @@ export enum PatchSubmissionStatus {
   Duplicate = 40,
   Deleted = 50
 }
+
+// Pagination response for pending submissions
+export interface PendingPatchSubmissionsResponse {
+  count: number;
+  items: PatchSubmittionResponse[];
+}

@@ -123,6 +123,18 @@ const Navigation: React.FC<NavigationProps> = () => {
                 </Link>
               )}
               
+              {/* Review Queue - Only for Admin, Moderator */}
+              {user && ['Admin', 'Moderator'].includes(user.role) && (
+                <Link 
+                  to="/review-queue" 
+                  className="mobile-nav-link"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <span className="nav-icon">🔍</span>
+                  Review Queue
+                </Link>
+              )}
+              
               <Link 
                 to="/profile" 
                 className="mobile-nav-link"

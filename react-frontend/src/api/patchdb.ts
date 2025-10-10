@@ -17,7 +17,8 @@ import type {
   UploadPatchRequest,
   PatchSubmittionResponse,
   UpdatePatchSubmissionRequest,
-  PatchResponse
+  PatchResponse,
+  PendingPatchSubmissionsResponse
 } from './types';
 import { getAuthHeaders } from './auth';
 
@@ -283,6 +284,19 @@ export async function updatePatchSubmission(request: UpdatePatchSubmissionReques
 // Patch detail function
 export async function getPatchDetail(patchNumber: number): Promise<PatchResponse> {
   const response = await fetch(`${API_BASE_URL}/patches/${patchNumber}`, {
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+// Admin/Moderator functions
+export async function getPendingPatchSubmissions(skip = 0, take = 20): Promise<PendingPatchSubmissionsResponse> {
+  const response = await fetch(`${API_BASE_URL}/patch-submittion/pending?skip=${skip}&take=${take}`, {
     headers: getAuthHeaders()
   });
 
