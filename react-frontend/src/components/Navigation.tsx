@@ -112,21 +112,12 @@ const Navigation: React.FC<NavigationProps> = () => {
               </Link>
               
               <Link 
-                to="/browse-patches" 
+                to="/search" 
                 className="mobile-nav-link"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <span className="nav-icon">🧩</span>
-                Browse Patches
-              </Link>
-              
-              <Link 
-                to="/search-users" 
-                className="mobile-nav-link"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <span className="nav-icon">👥</span>
-                Search Users
+                <span className="nav-icon">🔍</span>
+                Search
               </Link>
               
               {/* Submit Patch - Only for Admin, Moderator, PatchMaker */}

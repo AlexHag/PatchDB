@@ -14,6 +14,7 @@ import ReviewQueue from './pages/ReviewQueue';
 import BrowsePatches from './pages/BrowsePatches';
 import PublicProfile from './pages/PublicProfile';
 import SearchUsers from './pages/SearchUsers';
+import Search from './pages/Search';
 
 // Protected Route component
 interface ProtectedRouteProps {
@@ -111,6 +112,12 @@ const App: React.FC = () => {
           <Route path="/search-users" element={
             <ProtectedRoute>
               <SearchUsers />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/search" element={
+            <ProtectedRoute>
+              <Search />
             </ProtectedRoute>
           } />
 

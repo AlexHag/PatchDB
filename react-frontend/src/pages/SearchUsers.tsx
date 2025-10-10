@@ -22,7 +22,7 @@ const SearchUsers: React.FC = () => {
     skip: 0,
     take: itemsPerPage
   });
-  const [isFiltersExpanded, setIsFiltersExpanded] = useState(false);
+  const [isFiltersExpanded, setIsFiltersExpanded] = useState(true);
 
   useEffect(() => {
     requireAuth();
