@@ -9,6 +9,7 @@ import Profile from './pages/Profile';
 import SubmitPatch from './pages/SubmitPatch';
 import PatchSubmissionView from './pages/PatchSubmissionView';
 import PatchView from './pages/PatchView';
+import UniversitySetup from './pages/UniversitySetup';
 
 // Protected Route component
 interface ProtectedRouteProps {
@@ -37,6 +38,12 @@ const App: React.FC = () => {
           } />
 
           {/* Protected routes */}
+          <Route path="/university-setup" element={
+            <ProtectedRoute>
+              <UniversitySetup />
+            </ProtectedRoute>
+          } />
+          
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />

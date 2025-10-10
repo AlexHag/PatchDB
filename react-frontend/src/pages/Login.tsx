@@ -50,15 +50,21 @@ const Login: React.FC = () => {
       
       if (isLoginMode) {
         authResponse = await loginUser(username.trim(), password);
+        
+        // Store user data and credentials
+        setAuthState(authResponse.user, authResponse.credentials);
+        
+        // Redirect to dashboard for login
+        navigate('/dashboard');
       } else {
         authResponse = await registerUser(username.trim(), password);
+        
+        // Store user data and credentials
+        setAuthState(authResponse.user, authResponse.credentials);
+        
+        // Redirect to university setup for new registrations
+        navigate('/university-setup');
       }
-
-      // Store user data and credentials
-      setAuthState(authResponse.user, authResponse.credentials);
-      
-      // Redirect to dashboard
-      navigate('/dashboard');
     } catch (error) {
       showError(error instanceof PatchDBApiError ? error.message : `${isLoginMode ? 'Login' : 'Registration'} failed`);
     } finally {
