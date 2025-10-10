@@ -7,7 +7,7 @@ import { uploadFileWithValidation } from '../api/fileUpload';
 import { initializeCamera, captureImage, resizeImage, isCameraSupported } from '../api/utils';
 
 const Upload: React.FC = () => {
-  const { userId, requireAuth } = useAuth();
+  const { requireAuth } = useAuth();
   const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [currentStream, setCurrentStream] = useState<MediaStream | null>(null);
