@@ -7,7 +7,7 @@ using PatchDb.Backend.Service.User.Models;
 namespace PatchDb.Backend.Service.FileService;
 
 [ApiController]
-[Route("file-service")]
+[Route("api/file-service")]
 public class FileServiceController : ControllerBase
 {
     private readonly IS3FileService _s3FileService;

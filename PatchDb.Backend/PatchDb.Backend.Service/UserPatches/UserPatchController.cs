@@ -7,7 +7,7 @@ using PatchDb.Backend.Service.UserPatches.Models.Dto;
 namespace PatchDb.Backend.Service.UserPatches;
 
 [ApiController]
-[Route("user-patches")]
+[Route("api/user-patches")]
 public class UserPatchController : ControllerBase
 {
     private readonly IUserPatchService _userPatchService;

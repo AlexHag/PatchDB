@@ -4,7 +4,7 @@ using PatchDb.Backend.Service.Authentication.Models.Dto;
 namespace PatchDb.Backend.Service.Authentication;
 
 [ApiController]
-[Route("auth")]
+[Route("api/auth")]
 public class AuthenticationController : ControllerBase
 {
     private readonly IAuthenticationService _authenticationService;

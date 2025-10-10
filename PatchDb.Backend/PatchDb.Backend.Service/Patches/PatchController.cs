@@ -5,7 +5,7 @@ using Platform.Core.Application.Persistence;
 namespace PatchDb.Backend.Service.Patches;
 
 [ApiController]
-[Route("patches")]
+[Route("api/patches")]
 public class PatchController : ControllerBase
 {
     private readonly IPatchService _patchService;

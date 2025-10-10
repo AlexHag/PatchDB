@@ -9,7 +9,7 @@ using Platform.Core.Application.Persistence;
 namespace PatchDb.Backend.Service.PatchSubmittion;
 
 [ApiController]
-[Route("patch-submittion")]
+[Route("api/patch-submittion")]
 public class PatchSubmittionController : ControllerBase
 {
     private readonly IPatchSubmittionService _patchSubmittionService;

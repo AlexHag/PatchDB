@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace PatchDb.Backend.Service.Universities;
 
 [ApiController]
-[Route("universities")]
+[Route("api/universities")]
 public class UniversityController : ControllerBase
 {
     private readonly IUniversityService _universityService;
