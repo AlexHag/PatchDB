@@ -15,6 +15,7 @@ import BrowsePatches from './pages/BrowsePatches';
 import PublicProfile from './pages/PublicProfile';
 import SearchUsers from './pages/SearchUsers';
 import Search from './pages/Search';
+import More from './pages/More';
 import MobileFooter from './components/MobileFooter';
 
 // Layout wrapper that includes the mobile footer for authenticated users
@@ -137,6 +138,12 @@ const App: React.FC = () => {
           <Route path="/search" element={
             <ProtectedRoute>
               <Search />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/more" element={
+            <ProtectedRoute>
+              <More />
             </ProtectedRoute>
           } />
 

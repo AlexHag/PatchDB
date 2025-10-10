@@ -54,7 +54,7 @@ const MobileFooter: React.FC<MobileFooterProps> = () => {
           <span className="mobile-footer-icon">
             <HomeIcon />
           </span>
-          <span className="mobile-footer-label">Dashboard</span>
+          <span className="mobile-footer-label">Collection</span>
         </Link>
 
         {/* Search */}
@@ -79,13 +79,16 @@ const MobileFooter: React.FC<MobileFooterProps> = () => {
           <span className="mobile-footer-label">Upload</span>
         </Link>
 
-        {/* Placeholder - Empty for now */}
-        <div className="mobile-footer-item placeholder">
+        {/* More */}
+        <Link 
+          to="/more" 
+          className={`mobile-footer-item ${isActive('/more') ? 'active' : ''}`}
+        >
           <span className="mobile-footer-icon">
             <DotsIcon />
           </span>
           <span className="mobile-footer-label">More</span>
-        </div>
+        </Link>
 
         {/* Profile */}
         <Link 
