@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import { useAuth } from '../components/hooks/useAuth';
 import { 
@@ -17,7 +18,7 @@ import type {
 } from '../api/types';
 
 const Profile: React.FC = () => {
-  const { requireAuth } = useAuth();
+  const { requireAuth, userId } = useAuth();
   const [user, setUser] = useState<UserResponse | null>(null);
   const [universities, setUniversities] = useState<UniversityAndProgramModel[]>([]);
   const [loading, setLoading] = useState(true);
@@ -206,11 +207,17 @@ const Profile: React.FC = () => {
         <div className="row justify-content-center">
           <div className="col-12 col-lg-8 col-xl-6">
             {/* Header */}
-            <div className="d-flex align-items-center mb-4">
+            <div className="d-flex align-items-center justify-content-between mb-4">
               <h2 className="mb-0">
                 <span className="me-2">👤</span>
                 Profile
               </h2>
+              <Link 
+                to={`/user/${userId}`} 
+                className="btn btn-outline-primary"
+              >
+                👁️ View Profile
+              </Link>
             </div>
 
             {/* Alert Messages */}
