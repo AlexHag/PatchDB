@@ -47,8 +47,9 @@ const PublicProfile: React.FC = () => {
       document.head.removeChild(styleElement);
     };
   }, []);
+  
   const { userId } = useParams<{ userId: string }>();
-  const { requireAuth } = useAuth();
+  const { requireAuth, userId: currentUserId } = useAuth();
   const [user, setUser] = useState<UserResponse | null>(null);
   const [userPatches, setUserPatches] = useState<GetUserPatchesResponse>({ patches: [], unmatchesPatches: [] });
   const [loading, setLoading] = useState(true);
@@ -219,6 +220,18 @@ const PublicProfile: React.FC = () => {
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Edit Profile Button - Only show if viewing own profile */}
+                  {currentUserId === userId && (
+                    <div className="text-center mt-3 pt-3 border-top">
+                      <Link 
+                        to="/profile" 
+                        className="btn btn-outline-primary"
+                      >
+                        ✏️ Edit Profile
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </div>
 
