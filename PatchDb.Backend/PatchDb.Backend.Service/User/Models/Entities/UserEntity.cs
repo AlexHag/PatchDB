@@ -18,6 +18,9 @@ public class UserEntity
     public string? UniversityCode { get; set; }
     public string? UniversityProgram { get; set; }
 
+    public int FollowingCount { get; set; }
+    public int FollowersCount { get; set; }
+
     public DateTime Created { get; set; }
     public DateTime? Updated { get; set; }
 }

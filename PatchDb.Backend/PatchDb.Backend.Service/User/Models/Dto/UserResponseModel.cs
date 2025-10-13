@@ -38,6 +38,12 @@ public class UserResponse
     [JsonProperty("universityProgram")]
     public string? UniversityProgram { get; set; }
 
+    [JsonProperty("followingCount")]
+    public int FollowingCount { get; set; }
+
+    [JsonProperty("followersCount")]
+    public int FollowersCount { get; set; }
+
     [JsonProperty("created")]
     public DateTime Created { get; set; }
 }

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PatchDb.Backend.Service.Following.Models.Entities;
 using PatchDb.Backend.Service.Patches.Models.Entities;
 using PatchDb.Backend.Service.PatchSubmittion.Models.Entities;
 using PatchDb.Backend.Service.User.Models.Entities;
@@ -14,6 +15,7 @@ public class ServiceDbContext : DbContext
 
     public DbSet<UserPatchEntity> UserPatches { get; set; }
     public DbSet<UserPatchUploadEntity> UserPatchUploads { get; set; }
+    public DbSet<FollowingEntity> Followings { get; set; }
 
     public ServiceDbContext(DbContextOptions<ServiceDbContext> options) : base(options)
     { }
@@ -46,6 +48,17 @@ public class ServiceDbContext : DbContext
             .WithMany()
             .HasForeignKey(u => u.UserPatchId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // ------------
+
+        modelBuilder.Entity<FollowingEntity>()
+            .HasOne(f => f.User)
+            .WithMany()
+            .OnDelete(DeleteBehavior.Cascade);
         
+        modelBuilder.Entity<FollowingEntity>()
+            .HasOne(f => f.FollowingUser)
+            .WithMany()
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

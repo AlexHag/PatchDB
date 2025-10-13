@@ -55,6 +55,8 @@ public class ModelMapper : IModelMapper
             PhoneNumber = hidePii ? null : user.PhoneNumber,
             University = user.UniversityCode != null ? _universityService.GetUniversity(user.UniversityCode) : null,
             UniversityProgram = user.UniversityProgram,
+            FollowersCount = user.FollowersCount,
+            FollowingCount = user.FollowingCount,
             Created = user.Created,
         };
     

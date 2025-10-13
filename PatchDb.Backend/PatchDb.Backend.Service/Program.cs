@@ -5,6 +5,7 @@ using PatchDb.Backend.Core.Configuration;
 using PatchDb.Backend.Service.Authentication;
 using PatchDb.Backend.Service.FileService;
 using PatchDb.Backend.Service.FileService.Configuration;
+using PatchDb.Backend.Service.Following;
 using PatchDb.Backend.Service.Patches;
 using PatchDb.Backend.Service.PatchIndexApi;
 using PatchDb.Backend.Service.PatchSubmittion;
@@ -45,6 +46,7 @@ internal static class Program
         builder.Services.AddScoped<IPatchService, PatchService>();
         builder.Services.AddScoped<IPatchSubmittionService, PatchSubmittionService>();
         builder.Services.AddScoped<IUserPatchService, UserPatchService>();
+        builder.Services.AddScoped<IFollowingService, FollowingService>();
 
         // builder.Services.AddScoped<IUserRepository, UserRepository>();
         // builder.Services.AddScoped<IUserPasswordRepository, UserPasswordRepository>();
