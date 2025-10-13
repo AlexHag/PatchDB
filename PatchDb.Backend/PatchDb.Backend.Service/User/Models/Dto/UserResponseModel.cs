@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using PatchDb.Backend.Service.Universities;
 
 namespace PatchDb.Backend.Service.User.Models.Dto;
 
@@ -31,11 +32,8 @@ public class UserResponse
     [JsonProperty("phoneNumber")]
     public string? PhoneNumber { get; set; }
 
-    [JsonProperty("universityName")]
-    public string? UniversityName { get; set; }
-
-    [JsonProperty("universityLogoUrl")]
-    public string? UniversityLogoUrl { get; set; }
+    [JsonProperty("university")]
+    public UniversityModel? University { get; set; }
 
     [JsonProperty("universityProgram")]
     public string? UniversityProgram { get; set; }

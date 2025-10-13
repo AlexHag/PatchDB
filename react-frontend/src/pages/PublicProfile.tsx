@@ -192,18 +192,18 @@ const PublicProfile: React.FC = () => {
                       )}
 
                       {/* University Info - Mobile responsive */}
-                      {user.universityName && (
+                      {user.university?.name && (
                         <div className="d-flex align-items-center mb-1 mb-md-2">
-                          {user.universityLogoUrl && (
+                          {user.university?.logoUrl && (
                             <img 
-                              src={user.universityLogoUrl}
-                              alt={`${user.universityName} logo`}
+                              src={user.university.logoUrl}
+                              alt={`${user.university.name} logo`}
                               style={{ width: '16px', height: '16px', objectFit: 'contain' }}
                               className="me-1 me-md-2"
                             />
                           )}
                           <div>
-                            <div className="fw-semibold text-primary" style={{ fontSize: '0.8rem' }}>{user.universityName}</div>
+                            <div className="fw-semibold text-primary" style={{ fontSize: '0.8rem' }}>{user.university.name}</div>
                             {user.universityProgram && (
                               <small className="text-muted d-none d-md-block">{user.universityProgram}</small>
                             )}

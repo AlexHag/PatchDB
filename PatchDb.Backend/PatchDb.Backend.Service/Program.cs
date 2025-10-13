@@ -1,5 +1,3 @@
-using MapsterMapper;
-
 using Microsoft.EntityFrameworkCore;
 
 using PatchDb.Backend.Core;
@@ -32,7 +30,6 @@ internal static class Program
         // builder.AddConfiguration<EmailVerificationConfiguration>();
         // builder.AddConfiguration<PasswordResetConfiguration>();
 
-        builder.Services.AddScoped<IMapper, Mapper>();
         builder.AddConfiguration<AwsConfiguration>();
         builder.AddConfiguration<AwsCredentials>();
         builder.AddConfiguration<UniversityProgramListConfiguration>();
@@ -40,13 +37,14 @@ internal static class Program
         builder.RegisterPatchIndexApi();
 
         builder.Services.AddSingleton<IS3FileService, S3FileService>();
+        builder.Services.AddScoped<IUniversityService, UniversityService>();
+        builder.Services.AddScoped<IModelMapper, ModelMapper>();
 
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
         builder.Services.AddScoped<IPatchService, PatchService>();
         builder.Services.AddScoped<IPatchSubmittionService, PatchSubmittionService>();
         builder.Services.AddScoped<IUserPatchService, UserPatchService>();
-        builder.Services.AddScoped<IUniversityService, UniversityService>();
 
         // builder.Services.AddScoped<IUserRepository, UserRepository>();
         // builder.Services.AddScoped<IUserPasswordRepository, UserPasswordRepository>();

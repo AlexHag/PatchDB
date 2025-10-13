@@ -1,4 +1,3 @@
-using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using PatchDb.Backend.Core.Exceptions;
 using PatchDb.Backend.Service.FileService;
@@ -28,14 +27,14 @@ public class PatchSubmittionService : IPatchSubmittionService
     private readonly IS3FileService _s3FileService;
     private readonly IPatchIndexApi _patchIndexApi;
     private readonly IUniversityService _universityService;
-    private readonly IMapper _mapper;
+    private readonly IModelMapper _mapper;
 
     public PatchSubmittionService(
         ServiceDbContext dbContext,
         IS3FileService s3FileService,
         IPatchIndexApi patchIndexApi,
         IUniversityService universityService,
-        IMapper mapper)
+        IModelMapper mapper)
     {
         _dbContext = dbContext;
         _s3FileService = s3FileService;
@@ -76,7 +75,7 @@ public class PatchSubmittionService : IPatchSubmittionService
         _dbContext.PatchSubmittions.Add(entity);
         await _dbContext.SaveChangesAsync();
 
-        return ToPatchSubmittionResponse(entity);
+        return _mapper.ToPatchSubmittionResponse(entity);
     }
 
     public async Task<PatchSubmittionResponse> UpdatePatch(Guid userId, UpdatePatchRequest request)
@@ -197,7 +196,7 @@ public class PatchSubmittionService : IPatchSubmittionService
             await _dbContext.SaveChangesAsync();
         }
 
-        return ToPatchSubmittionResponse(patchSubmittion);
+        return _mapper.ToPatchSubmittionResponse(patchSubmittion);
     }
     
     private void ValidateCanUpdatePatch(UpdatePatchRequest request, UserEntity user, PatchSubmittionEntity patchSubmittion)
@@ -248,7 +247,7 @@ public class PatchSubmittionService : IPatchSubmittionService
 
         var response = new PaginationResponse<PatchSubmittionResponse>
         {
-            Items = patches.Select(ToPatchSubmittionResponse).ToList(),
+            Items = patches.Select(_mapper.ToPatchSubmittionResponse).ToList(),
             Count = await _dbContext.PatchSubmittions.CountAsync(p => p.Status == PatchSubmittionStatus.Pending)
         };
 
@@ -258,20 +257,6 @@ public class PatchSubmittionService : IPatchSubmittionService
     public async Task<PatchSubmittionResponse> GetPatchSubmittion(Guid patchSubmittionId)
     {
         var patchSubmittion = await _dbContext.PatchSubmittions.FindAsync(patchSubmittionId) ?? throw new NotFoundApiException("Patch submittion not found");
-        return ToPatchSubmittionResponse(patchSubmittion);
-    }
-
-    private PatchSubmittionResponse ToPatchSubmittionResponse(PatchSubmittionEntity entity)
-    {
-        var response = _mapper.Map<PatchSubmittionResponse>(entity);
-        response.PatchSubmittionId = entity.Id;
-        response.ImageUrl = _s3FileService.GetDownloadUrl(entity.FilePath);
-
-        if (!string.IsNullOrWhiteSpace(entity.UniversityCode))
-        {
-            response.University = _universityService.GetUniversity(entity.UniversityCode);
-        }
-
-        return response;
+        return _mapper.ToPatchSubmittionResponse(patchSubmittion);
     }
 }

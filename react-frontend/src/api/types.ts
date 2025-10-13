@@ -20,8 +20,11 @@ export interface UserResponse {
   profilePictureUrl?: string;
   email?: string;
   phoneNumber?: string;
-  universityName?: string;
-  universityLogoUrl?: string;
+  university?: {
+    code: string;
+    name: string;
+    logoUrl: string;
+  };
   universityProgram?: string;
   created: string;
 }

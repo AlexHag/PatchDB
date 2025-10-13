@@ -1,4 +1,3 @@
-using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using PatchDb.Backend.Core.Exceptions;
 using PatchDb.Backend.Service.FileService;
@@ -18,7 +17,6 @@ public interface IUserService
     Task<UserResponse> UpdateUniversityInfo(Guid userId, UpdateUserUniversityInfoRequest request);
     Task<List<UserEntity>> GetAllUsers();
     Task<List<UserResponse>> SearchUser(SearchUserRequest request);
-    UserResponse ToUserReponse(UserEntity user, bool hidePii = false);
 }
 
 public class UserService : IUserService
@@ -26,13 +24,13 @@ public class UserService : IUserService
     private readonly ServiceDbContext _dbContext;
     private readonly IS3FileService _s3FileService;
     private readonly IUniversityService _universityService;
-    private readonly IMapper _mapper;
+    private readonly IModelMapper _mapper;
 
     public UserService(
         ServiceDbContext dbContext,
         IS3FileService s3FileService,
         IUniversityService universityService,
-        IMapper mapper)
+        IModelMapper mapper)
     {
         _dbContext = dbContext;
         _s3FileService = s3FileService;
@@ -49,7 +47,7 @@ public class UserService : IUserService
             throw new NotFoundApiException("User not found");
         }
 
-        return ToUserReponse(user, hidePii);
+        return _mapper.ToUserReponse(user, hidePii);
     }
 
     public async Task<UserResponse?> TryGetUserById(Guid userId)
@@ -61,7 +59,7 @@ public class UserService : IUserService
             return null;
         }
 
-        return ToUserReponse(user);
+        return _mapper.ToUserReponse(user);
     }
 
     public async Task<UserResponse> UpdateProfilePicture(Guid userId, Guid fileId)
@@ -84,7 +82,7 @@ public class UserService : IUserService
         user.Updated = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
 
-        return ToUserReponse(user);
+        return _mapper.ToUserReponse(user);
     }
 
     public async Task<UserResponse> RemoveProfilePicture(Guid userId)
@@ -100,7 +98,7 @@ public class UserService : IUserService
         user.Updated = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
 
-        return ToUserReponse(user);
+        return _mapper.ToUserReponse(user);
     }
 
     public async Task<UserResponse> UpdateBio(Guid userId, string bio)
@@ -121,7 +119,7 @@ public class UserService : IUserService
         user.Updated = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
 
-        return ToUserReponse(user);
+        return _mapper.ToUserReponse(user);
     }
     
     public async Task<UserResponse> UpdateUniversityInfo(Guid userId, UpdateUserUniversityInfoRequest request)
@@ -144,32 +142,7 @@ public class UserService : IUserService
         user.Updated = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
 
-        return ToUserReponse(user);
-    }
-
-    public UserResponse ToUserReponse(UserEntity user, bool hidePii = false)
-    {
-        var response = _mapper.Map<UserResponse>(user);
-
-        if (!string.IsNullOrEmpty(user.ProfilePicturePath))
-        {
-            response.ProfilePictureUrl = _s3FileService.GetDownloadUrl(user.ProfilePicturePath);
-        }
-
-        if (user.UniversityCode != null)
-        {
-            var university = _universityService.GetUniversity(user.UniversityCode);
-            response.UniversityName = university?.Name;
-            response.UniversityLogoUrl = university?.LogoUrl;
-        }
-
-        if (hidePii)
-        {
-            response.Email = null;
-            response.PhoneNumber = null;
-        }
-
-        return response;
+        return _mapper.ToUserReponse(user);
     }
 
     public async Task<List<UserResponse>> SearchUser(SearchUserRequest request)
@@ -194,7 +167,7 @@ public class UserService : IUserService
             .Take(request.Take)
             .ToListAsync();
 
-        return users.Select(u => ToUserReponse(u, hidePii: true)).ToList();
+        return users.Select(u => _mapper.ToUserReponse(u, hidePii: true)).ToList();
     }
 
     public Task<List<UserEntity>> GetAllUsers()

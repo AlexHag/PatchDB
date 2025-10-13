@@ -286,17 +286,17 @@ const SearchUsers: React.FC = () => {
                                 )}
                               </div>
                               
-                              {user.universityName && (
+                              {user.university?.name && (
                                 <div className="d-flex align-items-center mb-1">
-                                  {user.universityLogoUrl && (
+                                  {user.university?.logoUrl && (
                                     <img 
-                                      src={user.universityLogoUrl}
-                                      alt={`${user.universityName} logo`}
+                                      src={user.university.logoUrl}
+                                      alt={`${user.university.name} logo`}
                                       style={{ width: '16px', height: '16px', objectFit: 'contain' }}
                                       className="me-1"
                                     />
                                   )}
-                                  <small className="text-muted">{user.universityName}</small>
+                                  <small className="text-muted">{user.university.name}</small>
                                 </div>
                               )}
                               

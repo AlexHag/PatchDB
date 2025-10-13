@@ -1,10 +1,6 @@
-using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using PatchDb.Backend.Core.Exceptions;
-using PatchDb.Backend.Service.FileService;
 using PatchDb.Backend.Service.Patches.Models.Dto;
-using PatchDb.Backend.Service.Patches.Models.Entities;
-using PatchDb.Backend.Service.Universities;
 using Platform.Core.Application.Persistence;
 
 namespace PatchDb.Backend.Service.Patches;
@@ -19,24 +15,18 @@ public interface IPatchService
 public class PatchService : IPatchService
 {
     private readonly ServiceDbContext _dbContext;
-    private readonly IS3FileService _s3FileService;
-    private readonly IUniversityService _universityService;
-    private readonly IMapper _mapper;
+    private readonly IModelMapper _mapper;
 
     public PatchService(
         ServiceDbContext dbContext,
-        IS3FileService s3FileService,
-        IUniversityService universityService,
-        IMapper mapper)
+        IModelMapper mapper)
     {
         _dbContext = dbContext;
-        _s3FileService = s3FileService;
-        _universityService = universityService;
         _mapper = mapper;
     }
 
     public async Task<PatchResponse> GetPatch(int patchNumber)
-        => ToPatchResponse(await _dbContext.Patches.FindAsync(patchNumber) ?? throw new NotFoundApiException("Patch not found"));
+        => _mapper.ToPatchResponse(await _dbContext.Patches.FindAsync(patchNumber) ?? throw new NotFoundApiException("Patch not found"));
 
     public async Task<PaginationResponse<PatchResponse>> GetPatches(int skip, int take)
     {
@@ -51,7 +41,7 @@ public class PatchService : IPatchService
         var response = new PaginationResponse<PatchResponse>
         {
             Count = await _dbContext.Patches.CountAsync(),
-            Items = patches.Select(ToPatchResponse).ToList()
+            Items = patches.Select(_mapper.ToPatchResponse).ToList()
         };
 
         return response;
@@ -97,21 +87,8 @@ public class PatchService : IPatchService
         var response = new PaginationResponse<PatchResponse>
         {
             Count = await query.CountAsync(),
-            Items = patches.Select(ToPatchResponse).ToList()
+            Items = patches.Select(_mapper.ToPatchResponse).ToList()
         };
-
-        return response;
-    }
-
-    private PatchResponse ToPatchResponse(PatchEntity patch)
-    {
-        var response = _mapper.Map<PatchResponse>(patch);
-        response.ImageUrl = _s3FileService.GetDownloadUrl(patch.FilePath);
-
-        if (!string.IsNullOrWhiteSpace(patch.UniversityCode))
-        {
-            response.University = _universityService.GetUniversity(patch.UniversityCode);
-        }
 
         return response;
     }

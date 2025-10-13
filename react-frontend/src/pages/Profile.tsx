@@ -54,9 +54,9 @@ const Profile: React.FC = () => {
       setPhoneText(userData.phoneNumber || '');
       
       // Find university code from the user data
-      if (userData.universityName) {
+      if (userData.university?.name) {
         const unis = await getUniversitiesAndPrograms();
-        const matchingUni = unis.find(u => u.name === userData.universityName);
+        const matchingUni = unis.find(u => u.name === userData.university?.name);
         if (matchingUni) {
           setSelectedUniversityCode(matchingUni.code);
           setSelectedProgram(userData.universityProgram || '');
@@ -463,7 +463,7 @@ const Profile: React.FC = () => {
                           setEditingUniversity(false);
                           // Reset to current user data
                           const unis = universities;
-                          const matchingUni = unis.find(u => u.name === user.universityName);
+                          const matchingUni = unis.find(u => u.name === user.university?.name);
                           if (matchingUni) {
                             setSelectedUniversityCode(matchingUni.code);
                             setSelectedProgram(user.universityProgram || '');
@@ -479,18 +479,18 @@ const Profile: React.FC = () => {
                   </div>
                 ) : (
                   <div>
-                    {user.universityName ? (
+                    {user.university?.name ? (
                       <div className="d-flex align-items-center">
-                        {user.universityLogoUrl && (
+                        {user.university?.logoUrl && (
                           <img 
-                            src={user.universityLogoUrl}
-                            alt={`${user.universityName} logo`}
+                            src={user.university.logoUrl}
+                            alt={`${user.university.name} logo`}
                             style={{ width: '40px', height: '40px', objectFit: 'contain' }}
                             className="me-3"
                           />
                         )}
                         <div>
-                          <div className="fw-bold">{user.universityName}</div>
+                          <div className="fw-bold">{user.university.name}</div>
                           {user.universityProgram && (
                             <small className="text-muted">{user.universityProgram}</small>
                           )}

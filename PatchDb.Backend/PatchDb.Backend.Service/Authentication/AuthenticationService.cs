@@ -6,7 +6,6 @@ using PatchDb.Backend.Core.Authentication;
 using PatchDb.Backend.Core.Authentication.Models;
 using PatchDb.Backend.Core.Exceptions;
 using PatchDb.Backend.Service.Authentication.Models.Dto;
-using PatchDb.Backend.Service.User;
 using PatchDb.Backend.Service.User.Models;
 using PatchDb.Backend.Service.User.Models.Entities;
 
@@ -22,16 +21,16 @@ public class AuthenticationService : IAuthenticationService
 {
     private readonly ServiceDbContext _dbContext;
     private readonly ITokenService _tokenService;
-    private readonly IUserService _userService;
+    private readonly IModelMapper _mapper;
 
     public AuthenticationService(
         ServiceDbContext dbContext,
         ITokenService tokenService,
-        IUserService userService)
+        IModelMapper mapper)
     {
         _dbContext = dbContext;
         _tokenService = tokenService;
-        _userService = userService;
+        _mapper = mapper;
     }
 
     public async Task<AuthResponse> Login(LoginRequest request)
@@ -57,7 +56,7 @@ public class AuthenticationService : IAuthenticationService
         // TODO: Create session
 
         var credentials = _tokenService.GenerateToken(user.Id, AuthenticationMethod.Password, [new Claim(ClaimTypes.Role, user.Role.ToString())]);
-        var userResponse = _userService.ToUserReponse(user);
+        var userResponse = _mapper.ToUserReponse(user);
 
         return new AuthResponse
         {
@@ -91,7 +90,7 @@ public class AuthenticationService : IAuthenticationService
         await _dbContext.SaveChangesAsync();
 
         var credentials = _tokenService.GenerateToken(userEntity.Id, AuthenticationMethod.Password, [new Claim(ClaimTypes.Role, userEntity.Role.ToString())]);
-        var userResponse = _userService.ToUserReponse(userEntity);
+        var userResponse = _mapper.ToUserReponse(userEntity);
 
         return new AuthResponse
         {

@@ -1,11 +1,7 @@
-using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using PatchDb.Backend.Core.Exceptions;
 using PatchDb.Backend.Service.FileService;
-using PatchDb.Backend.Service.Patches.Models.Dto;
-using PatchDb.Backend.Service.Patches.Models.Entities;
 using PatchDb.Backend.Service.PatchIndexApi;
-using PatchDb.Backend.Service.Universities;
 using PatchDb.Backend.Service.UserPatches.Models.Dto;
 using PatchDb.Backend.Service.UserPatches.Models.Entities;
 
@@ -32,20 +28,17 @@ public class UserPatchService : IUserPatchService
     private readonly ServiceDbContext _dbContext;
     private readonly IS3FileService _s3FileService;
     private readonly IPatchIndexApi _patchIndexApi;
-    private readonly IUniversityService _universityService;
-    private readonly IMapper _mapper;
+    private readonly IModelMapper _mapper;
 
     public UserPatchService(
         ServiceDbContext dbContext,
         IS3FileService s3FileService,
         IPatchIndexApi patchIndexApi,
-        IUniversityService universityService,
-        IMapper mapper)
+        IModelMapper mapper)
     {
         _dbContext = dbContext;
         _s3FileService = s3FileService;
         _patchIndexApi = patchIndexApi;
-        _universityService = universityService;
         _mapper = mapper;
     }
 
@@ -71,7 +64,7 @@ public class UserPatchService : IUserPatchService
 
         var apiResponse = new PatchUploadResponse
         {
-            Upload = ToUserPatchUploadModel(upload)
+            Upload = _mapper.ToUserPatchUploadModel(upload)
         };
 
         var searchResponse = await _patchIndexApi.SearchPatch(path);
@@ -93,8 +86,8 @@ public class UserPatchService : IUserPatchService
                 apiResponse.OwnedMatchingPatches.Add(new OwnedMatchingPatchesModel
                 {
                     UserPatchId = ownedUserPatchEntity.Id,
-                    MatchingPatch = ToPatchResponse(ownedUserPatchEntity.Patch),
-                    Uploads = ownedUserPatchEntity.Uploads.Select(ToUserPatchUploadModel).ToList(),
+                    MatchingPatch = _mapper.ToPatchResponse(ownedUserPatchEntity.Patch),
+                    Uploads = ownedUserPatchEntity.Uploads.Select(_mapper.ToUserPatchUploadModel).ToList(),
                     IsFavorite = ownedUserPatchEntity.IsFavorite,
                     AquiredAt = ownedUserPatchEntity.Created,
                     Similarity = match.Score
@@ -108,8 +101,7 @@ public class UserPatchService : IUserPatchService
 
             if (newMatchingPatchEntity != null)
             {
-                var newMatchingPatch = ToNewMatchingPatchesModel(newMatchingPatchEntity);
-                newMatchingPatch.Similarity = match.Score;
+                var newMatchingPatch = _mapper.ToNewMatchingPatchesModel(newMatchingPatchEntity, similarity: match.Score);
                 apiResponse.NewMatchingPatches.Add(newMatchingPatch);
             }
         }
@@ -139,7 +131,7 @@ public class UserPatchService : IUserPatchService
             upload.UserPatch = ownedPatch;
 
             await _dbContext.SaveChangesAsync();
-            return ToUserPatchModel(ownedPatch);
+            return _mapper.ToUserPatchModel(ownedPatch);
         }
 
         var newPatch = await _dbContext.Patches
@@ -169,7 +161,7 @@ public class UserPatchService : IUserPatchService
 
         await _dbContext.SaveChangesAsync();
 
-        return ToUserPatchModel(newUserPatch);
+        return _mapper.ToUserPatchModel(newUserPatch);
     }
 
     public async Task<List<UserPatchModel>> GetUserPatches(Guid userId)
@@ -180,7 +172,7 @@ public class UserPatchService : IUserPatchService
             .Where(up => up.UserId == userId)
             .ToListAsync();
         
-        return userPatches.Select(ToUserPatchModel).ToList();
+        return userPatches.Select(_mapper.ToUserPatchModel).ToList();
     }
 
     public async Task<List<UserPatchUploadModel>> GetUnmatchedUploads(Guid userId)
@@ -190,44 +182,6 @@ public class UserPatchService : IUserPatchService
             .AsNoTracking()
             .ToListAsync();
         
-        return uploads.Select(ToUserPatchUploadModel).ToList();
-    }
-
-    private PatchResponse ToPatchResponse(PatchEntity patch)
-    {
-        var response = _mapper.Map<PatchResponse>(patch);
-        response.ImageUrl = _s3FileService.GetDownloadUrl(patch.FilePath);
-
-        if (!string.IsNullOrWhiteSpace(patch.UniversityCode))
-        {
-            response.University = _universityService.GetUniversity(patch.UniversityCode);
-        }
-
-        return response;
-    }
-
-    private NewMatchingPatchesModel ToNewMatchingPatchesModel(PatchEntity patch)
-    {
-        var model = _mapper.Map<NewMatchingPatchesModel>(patch);
-        model.ImageUrl = _s3FileService.GetDownloadUrl(patch.FilePath);
-        return model;
-    }
-
-    private UserPatchUploadModel ToUserPatchUploadModel(UserPatchUploadEntity upload)
-    {
-        var model = _mapper.Map<UserPatchUploadModel>(upload);
-        model.UserPatchUploadId = upload.Id;
-        model.ImageUrl = _s3FileService.GetDownloadUrl(upload.FilePath);
-        return model;
-    }
-
-    private UserPatchModel ToUserPatchModel(UserPatchEntity userPatch)
-    {
-        var model = _mapper.Map<UserPatchModel>(userPatch);
-        model.UserPatchId = userPatch.Id;
-        model.MatchingPatch = ToPatchResponse(userPatch.Patch);
-        model.Uploads = userPatch.Uploads.Select(ToUserPatchUploadModel).ToList();
-        model.AquiredAt = userPatch.Created;
-        return model;
+        return uploads.Select(_mapper.ToUserPatchUploadModel).ToList();
     }
 }
