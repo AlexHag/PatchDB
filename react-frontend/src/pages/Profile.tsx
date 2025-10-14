@@ -323,7 +323,7 @@ const Profile: React.FC = () => {
                     {/* Stats Row */}
                     <div className="d-flex gap-3 gap-md-4 mb-3">
                       <Link 
-                        to={`/user/${userId}/followers-following`} 
+                        to={`/user/${userId}/followers-following?view=followers`} 
                         className="text-decoration-none text-dark"
                         style={{ cursor: 'pointer' }}
                       >
@@ -333,7 +333,7 @@ const Profile: React.FC = () => {
                         </div>
                       </Link>
                       <Link 
-                        to={`/user/${userId}/followers-following`} 
+                        to={`/user/${userId}/followers-following?view=following`} 
                         className="text-decoration-none text-dark"
                         style={{ cursor: 'pointer' }}
                       >

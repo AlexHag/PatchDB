@@ -224,7 +224,7 @@ const PublicProfile: React.FC = () => {
                           <div className="text-muted" style={{ fontSize: '0.8rem' }}>patches</div>
                         </div>
                         <Link 
-                          to={`/user/${userId}/followers-following`} 
+                          to={`/user/${userId}/followers-following?view=followers`} 
                           className="text-decoration-none text-dark"
                           style={{ cursor: 'pointer' }}
                         >
@@ -234,7 +234,7 @@ const PublicProfile: React.FC = () => {
                           </div>
                         </Link>
                         <Link 
-                          to={`/user/${userId}/followers-following`} 
+                          to={`/user/${userId}/followers-following?view=following`} 
                           className="text-decoration-none text-dark"
                           style={{ cursor: 'pointer' }}
                         >

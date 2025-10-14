@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import { useAuth } from '../components/hooks/useAuth';
 import { getUserFollowers, getUserFollowing, followUser, unfollowUser, getUserById } from '../api/patchdb';
@@ -11,12 +11,20 @@ const FollowersFollowing: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const { requireAuth, userId: currentUserId } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get initial view mode from URL query parameter
+  const getInitialViewMode = (): ViewMode => {
+    const searchParams = new URLSearchParams(location.search);
+    const viewParam = searchParams.get('view');
+    return viewParam === 'following' ? 'following' : 'followers';
+  };
   
   const [user, setUser] = useState<PublicUserResponse | null>(null);
   const [users, setUsers] = useState<PublicUserResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [viewMode, setViewMode] = useState<ViewMode>('followers');
+  const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode());
   const [canLoadMore, setCanLoadMore] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
   const [followLoading, setFollowLoading] = useState<string | null>(null);
@@ -26,6 +34,14 @@ const FollowersFollowing: React.FC = () => {
   useEffect(() => {
     requireAuth();
   }, [requireAuth]);
+
+  // Update view mode when URL changes
+  useEffect(() => {
+    const newViewMode = getInitialViewMode();
+    if (newViewMode !== viewMode) {
+      setViewMode(newViewMode);
+    }
+  }, [location.search]);
 
   // Load the user profile data
   useEffect(() => {
