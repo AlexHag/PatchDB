@@ -18,6 +18,7 @@ const FollowersFollowing: React.FC = () => {
   const [error, setError] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('followers');
   const [canLoadMore, setCanLoadMore] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [followLoading, setFollowLoading] = useState<string | null>(null);
   const [showUnfollowModal, setShowUnfollowModal] = useState<{show: boolean, user: PublicUserResponse | null}>({show: false, user: null});
   const itemsPerPage = 20;
@@ -52,11 +53,14 @@ const FollowersFollowing: React.FC = () => {
     }
   };
 
-  const loadUsers = useCallback(async (loadMore: boolean = false) => {
+  const loadUsers = useCallback(async (loadMore: boolean = false, isToggle: boolean = false) => {
     if (!userId) return;
     
     try {
-      setLoading(true);
+      // Only show loading for initial load and load more, not for toggles
+      if (!isToggle) {
+        setLoading(true);
+      }
       setError('');
       
       const skip = loadMore ? users.length : 0;
@@ -76,19 +80,26 @@ const FollowersFollowing: React.FC = () => {
       
       // Check if we can load more
       setCanLoadMore((data.items || []).length === itemsPerPage);
+      
+      if (initialLoad) {
+        setInitialLoad(false);
+      }
     } catch (error) {
       console.error('Error loading users:', error);
       setError('Failed to load users: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
-      setLoading(false);
+      if (!isToggle) {
+        setLoading(false);
+      }
     }
-  }, [userId, viewMode, users.length]);
+  }, [userId, viewMode, users.length, initialLoad]);
 
   // Load users when view mode changes or component mounts
   useEffect(() => {
     if (userId) {
       setUsers([]);
-      loadUsers(false);
+      // Pass isToggle flag to prevent loading animation when toggling
+      loadUsers(false, !initialLoad);
     }
   }, [userId, viewMode]);
 
@@ -213,6 +224,7 @@ const FollowersFollowing: React.FC = () => {
                 type="button" 
                 className={`btn ${viewMode === 'followers' ? 'btn-dark' : 'btn-outline-secondary'}`}
                 onClick={() => handleViewModeChange('followers')}
+                style={{ transition: 'none' }}
               >
                 👥 Followers {user && `(${user.followersCount})`}
               </button>
@@ -220,6 +232,7 @@ const FollowersFollowing: React.FC = () => {
                 type="button" 
                 className={`btn ${viewMode === 'following' ? 'btn-dark' : 'btn-outline-secondary'}`}
                 onClick={() => handleViewModeChange('following')}
+                style={{ transition: 'none' }}
               >
                 👤 Following {user && `(${user.followingCount})`}
               </button>
