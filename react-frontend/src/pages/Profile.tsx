@@ -476,7 +476,7 @@ const Profile: React.FC = () => {
                           <option value="">Select a program...</option>
                           {getAvailablePrograms().map((program) => (
                             <option key={program.name} value={program.name}>
-                              {program.frontendName}
+                              {program.name}
                             </option>
                           ))}
                         </select>

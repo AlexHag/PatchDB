@@ -158,7 +158,7 @@ const UniversitySetup: React.FC = () => {
                         <option value="">Choose your program (optional)...</option>
                         {getAvailablePrograms().map((program) => (
                           <option key={program.name} value={program.name}>
-                            {program.frontendName}
+                            {program.name}
                           </option>
                         ))}
                       </select>
