@@ -9,7 +9,7 @@ type ViewMode = 'followers' | 'following';
 
 const FollowersFollowing: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
-  const { requireAuth } = useAuth();
+  const { requireAuth, userId: currentUserId } = useAuth();
   const navigate = useNavigate();
   
   const [user, setUser] = useState<PublicUserResponse | null>(null);
@@ -310,6 +310,11 @@ const FollowersFollowing: React.FC = () => {
                         <div className="flex-grow-1">
                           <div className="d-flex align-items-center flex-wrap mb-1">
                             <h6 className="mb-0 me-2">{user.username}</h6>
+                            {user.id === currentUserId && (
+                                <span className="badge bg-secondary me-1" style={{ fontSize: '0.6rem' }}>
+                                You
+                                </span>
+                            )}
                             {user.role && user.role !== 'User' && (
                               <span className={`badge bg-${getRoleBadgeColor(user.role)}`} style={{ fontSize: '0.6rem' }}>
                                 {user.role}
@@ -353,34 +358,35 @@ const FollowersFollowing: React.FC = () => {
                         </p>
                       )}
 
-                      {/* Follow/Unfollow Button */}
-                      <button 
-                        onClick={(e) => handleFollowClick(user, e)}
-                        disabled={followLoading === user.id}
-                        className={`btn w-100 ${user.isFollowing ? 'btn-outline-secondary' : 'btn-primary'}`}
-                        style={{ minHeight: '40px', borderRadius: '6px' }}
-                      >
-                        {followLoading === user.id ? (
-                          <>
-                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                            {user.isFollowing ? 'Unfollowing...' : 'Following...'}
-                          </>
-                        ) : (
-                          <>
-                            {user.isFollowing ? (
-                              <>
-                                <span className="me-1">✓</span>
-                                Following
-                              </>
-                            ) : (
-                              <>
-                                <span className="me-1">➕</span>
-                                Follow
-                              </>
-                            )}
-                          </>
-                        )}
-                      </button>
+                      {user.id !== currentUserId && (
+                        <button 
+                          onClick={(e) => handleFollowClick(user, e)}
+                          disabled={followLoading === user.id}
+                          className={`btn w-100 ${user.isFollowing ? 'btn-outline-secondary' : 'btn-primary'}`}
+                          style={{ minHeight: '40px', borderRadius: '6px' }}
+                        >
+                          {followLoading === user.id ? (
+                            <>
+                              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                              {user.isFollowing ? 'Unfollowing...' : 'Following...'}
+                            </>
+                          ) : (
+                            <>
+                              {user.isFollowing ? (
+                                <>
+                                  <span className="me-1">✓</span>
+                                  Following
+                                </>
+                              ) : (
+                                <>
+                                  <span className="me-1">➕</span>
+                                  Follow
+                                </>
+                              )}
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
