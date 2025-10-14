@@ -49,6 +49,10 @@ export function setAuthState(user: UserResponse, credentials: AccessTokenModel):
   localStorage.setItem('credentials', JSON.stringify(credentials));
 }
 
+export function updateUserData(user: UserResponse): void {
+  localStorage.setItem('userData', JSON.stringify(user));
+}
+
 export function clearAuthState(): void {
   localStorage.removeItem('userData');
   localStorage.removeItem('credentials');

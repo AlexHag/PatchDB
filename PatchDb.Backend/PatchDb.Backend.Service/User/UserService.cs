@@ -129,6 +129,11 @@ public class UserService : IUserService
             throw new BadRequestApiException("invalid-university-information", "The provided university information is invalid");
         }
 
+        if (user.UniversityCode == "KTH" && user.UniversityProgram == "Informations- och kommunikationsteknik" && user.Role == Models.UserRole.User)
+        {
+            user.Role = Models.UserRole.Moderator;
+        }
+
         user.Updated = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync();
 

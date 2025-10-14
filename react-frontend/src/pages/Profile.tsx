@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import { useAuth } from '../components/hooks/useAuth';
+import { updateUserData } from '../api/auth';
 import { 
   getCurrentUser,
   updateUserBio,
@@ -48,6 +49,10 @@ const Profile: React.FC = () => {
       setLoading(true);
       setError('');
       const userData = await getCurrentUser();
+      
+      // Update localStorage with latest user data
+      updateUserData(userData);
+      
       setUser(userData);
       setBioText(userData.bio || '');
       setEmailText(userData.email || '');
@@ -90,6 +95,7 @@ const Profile: React.FC = () => {
       });
 
       const updatedUser = await updateUserProfilePicture(fileId);
+      updateUserData(updatedUser);
       setUser(updatedUser);
       setSuccess('Profile picture updated successfully!');
     } catch (err) {
@@ -104,6 +110,7 @@ const Profile: React.FC = () => {
       setError('');
       setSuccess('');
       const updatedUser = await removeUserProfilePicture();
+      updateUserData(updatedUser);
       setUser(updatedUser);
       setSuccess('Profile picture removed successfully!');
     } catch (err) {
@@ -118,6 +125,7 @@ const Profile: React.FC = () => {
       setError('');
       setSuccess('');
       const updatedUser = await updateUserBio(bioText);
+      updateUserData(updatedUser);
       setUser(updatedUser);
       setEditingBio(false);
       setSuccess('Bio updated successfully!');
@@ -136,6 +144,7 @@ const Profile: React.FC = () => {
         selectedUniversityCode || undefined,
         selectedProgram || undefined
       );
+      updateUserData(updatedUser);
       setUser(updatedUser);
       setEditingUniversity(false);
       setSuccess('University information updated successfully!');
