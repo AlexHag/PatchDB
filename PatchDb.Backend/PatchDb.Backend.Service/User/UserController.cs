@@ -1,10 +1,8 @@
-using Amazon.S3.Model.Internal.MarshallTransformations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PatchDb.Backend.Core.Authentication;
 using PatchDb.Backend.Service.User.Models;
 using PatchDb.Backend.Service.User.Models.Dto;
-using Platform.Core.Application.Persistence;
 
 namespace PatchDb.Backend.Service.User;
 
@@ -19,15 +17,14 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
+    /// <summary>
+    ///     Get your own user details
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     [Authorize]
     public async Task<ActionResult<UserResponse>> GetUser()
         => Ok(await _userService.GetUserById(User.UserId()));
-
-    [HttpGet("{userId}")]
-    [Authorize]
-    public async Task<ActionResult<UserResponse>> GetUserById(Guid userId)
-        => Ok(await _userService.GetUserById(userId, hidePii: true));
 
     [HttpPut("profile-picture")]
     [Authorize]
@@ -44,18 +41,33 @@ public class UserController : ControllerBase
     public async Task<ActionResult<UserResponse>> UpdateBio([FromBody] UpdateBioRequest request)
         => Ok(await _userService.UpdateBio(User.UserId(), request.Bio ?? string.Empty));
 
-    [HttpGet("all")]
-    [Authorize(Roles = nameof(UserRole.Admin))]
-    public async Task<ActionResult> GetAllUsers()
-        => Ok(await _userService.GetAllUsers());
-
     [HttpPut("university-information")]
     [Authorize]
     public async Task<ActionResult<UserResponse>> UpdateUniversityInfo([FromBody] UpdateUserUniversityInfoRequest request)
         => Ok(await _userService.UpdateUniversityInfo(User.UserId(), request));
 
+    /// <summary>
+    ///     Get another user details
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    [HttpGet("{userId}")]
+    [Authorize]
+    public async Task<ActionResult<UserResponse>> GetPublicUser(Guid userId)
+        => Ok(await _userService.GetPublicUser(userId, requesterUserId: User.UserId()));
+
+    /// <summary>
+    ///     Search for other users
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpPost("search")]
     [Authorize]
     public async Task<ActionResult<List<UserResponse>>> SearchUser([FromBody] SearchUserRequest request)
-        => Ok(await _userService.SearchUser(request));
+        => Ok(await _userService.SearchUser(request, requesterUserId: User.UserId()));
+    
+    [HttpGet("all")]
+    [Authorize(Roles = nameof(UserRole.Admin))]
+    public async Task<ActionResult> GetAllUsers()
+        => Ok(await _userService.GetAllUsers());
 }

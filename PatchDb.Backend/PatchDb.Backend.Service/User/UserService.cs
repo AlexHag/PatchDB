@@ -9,14 +9,16 @@ namespace PatchDb.Backend.Service.User;
 
 public interface IUserService
 {
-    Task<UserResponse> GetUserById(Guid userId, bool hidePii = false);
-    Task<UserResponse?> TryGetUserById(Guid userId);
+    Task<UserResponse> GetUserById(Guid userId);
     Task<UserResponse> UpdateProfilePicture(Guid userId, Guid fileId);
     Task<UserResponse> RemoveProfilePicture(Guid userId);
     Task<UserResponse> UpdateBio(Guid userId, string bio);
     Task<UserResponse> UpdateUniversityInfo(Guid userId, UpdateUserUniversityInfoRequest request);
+
+    Task<PublicUserResponse> GetPublicUser(Guid userId, Guid requesterUserId);
+    Task<List<PublicUserResponse>> SearchUser(SearchUserRequest request, Guid requesterUserId);
+
     Task<List<UserEntity>> GetAllUsers();
-    Task<List<UserResponse>> SearchUser(SearchUserRequest request);
 }
 
 public class UserService : IUserService
@@ -38,25 +40,13 @@ public class UserService : IUserService
         _mapper = mapper;
     }
 
-    public async Task<UserResponse> GetUserById(Guid userId, bool hidePii = false)
+    public async Task<UserResponse> GetUserById(Guid userId)
     {
         var user = await _dbContext.Users.FindAsync(userId);
 
         if (user == null)
         {
             throw new NotFoundApiException("User not found");
-        }
-
-        return _mapper.ToUserReponse(user, hidePii);
-    }
-
-    public async Task<UserResponse?> TryGetUserById(Guid userId)
-    {
-        var user = await _dbContext.Users.FindAsync(userId);
-
-        if (user == null)
-        {
-            return null;
         }
 
         return _mapper.ToUserReponse(user);
@@ -121,7 +111,7 @@ public class UserService : IUserService
 
         return _mapper.ToUserReponse(user);
     }
-    
+
     public async Task<UserResponse> UpdateUniversityInfo(Guid userId, UpdateUserUniversityInfoRequest request)
     {
         var user = await _dbContext.Users.FindAsync(userId);
@@ -145,7 +135,20 @@ public class UserService : IUserService
         return _mapper.ToUserReponse(user);
     }
 
-    public async Task<List<UserResponse>> SearchUser(SearchUserRequest request)
+    public async Task<PublicUserResponse> GetPublicUser(Guid userId, Guid requesterUserId)
+    {
+        var user = await _dbContext.Users.FindAsync(userId);
+
+        if (user == null)
+        {
+            throw new NotFoundApiException("User not found");
+        }
+
+        bool isFollowing = await _dbContext.Followings.AnyAsync(f => f.User.Id == requesterUserId && f.FollowingUser.Id == userId);
+        return _mapper.ToPublicUserResponse(user, isFollowing);
+    }
+
+    public async Task<List<PublicUserResponse>> SearchUser(SearchUserRequest request, Guid requesterUserId)
     {
         request.Skip = Math.Max(0, request.Skip);
         request.Take = Math.Clamp(request.Take, 1, 50);
@@ -167,7 +170,19 @@ public class UserService : IUserService
             .Take(request.Take)
             .ToListAsync();
 
-        return users.Select(u => _mapper.ToUserReponse(u, hidePii: true)).ToList();
+        if (!users.Any())
+        {
+            return new List<PublicUserResponse>();
+        }
+
+        var userIds = users.Select(u => u.Id).ToList();
+
+        var followedUserIds = await _dbContext.Followings
+            .Where(f => f.User.Id == requesterUserId && userIds.Contains(f.FollowingUser.Id))
+            .Select(f => f.FollowingUser.Id)
+            .ToListAsync();
+
+        return users.Select(u => _mapper.ToPublicUserResponse(u, isFollowing: followedUserIds.Contains(u.Id))).ToList();
     }
 
     public Task<List<UserEntity>> GetAllUsers()

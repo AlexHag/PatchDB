@@ -14,7 +14,8 @@ namespace PatchDb.Backend.Service;
 public interface IModelMapper
 {
     // ---- User Mappings ---------------------------------------------------------------------------------------------
-    UserResponse ToUserReponse(UserEntity user, bool hidePii = false);
+    UserResponse ToUserReponse(UserEntity user);
+    PublicUserResponse ToPublicUserResponse(UserEntity user, bool? isFollowing = null);
 
     // ---- Patch Mappings --------------------------------------------------------------------------------------------
     PatchResponse ToPatchResponse(PatchEntity patch);
@@ -42,7 +43,7 @@ public class ModelMapper : IModelMapper
     }
 
     // ---- User Mappings ---------------------------------------------------------------------------------------------
-    public UserResponse ToUserReponse(UserEntity user, bool hidePii = false)
+    public UserResponse ToUserReponse(UserEntity user)
         => new UserResponse
         {
             Id = user.Id,
@@ -51,15 +52,31 @@ public class ModelMapper : IModelMapper
             Username = user.Username,
             Bio = user.Bio,
             ProfilePictureUrl = !string.IsNullOrEmpty(user.ProfilePicturePath) ? _s3FileService.GetDownloadUrl(user.ProfilePicturePath) : null,
-            Email = hidePii ? null : user.Email,
-            PhoneNumber = hidePii ? null : user.PhoneNumber,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
             University = user.UniversityCode != null ? _universityService.GetUniversity(user.UniversityCode) : null,
             UniversityProgram = user.UniversityProgram,
             FollowersCount = user.FollowersCount,
             FollowingCount = user.FollowingCount,
             Created = user.Created,
         };
-    
+
+    public PublicUserResponse ToPublicUserResponse(UserEntity user, bool? isFollowing = null)
+        => new PublicUserResponse
+        {
+            Id = user.Id,
+            Role = user.Role,
+            Username = user.Username,
+            Bio = user.Bio,
+            ProfilePictureUrl = !string.IsNullOrEmpty(user.ProfilePicturePath) ? _s3FileService.GetDownloadUrl(user.ProfilePicturePath) : null,
+            University = user.UniversityCode != null ? _universityService.GetUniversity(user.UniversityCode) : null,
+            UniversityProgram = user.UniversityProgram,
+            FollowersCount = user.FollowersCount,
+            FollowingCount = user.FollowingCount,
+            IsFollowing = isFollowing,
+            Created = user.Created,
+        };
+
     // ---- Patch Mappings --------------------------------------------------------------------------------------------
     public PatchResponse ToPatchResponse(PatchEntity patch)
         => new PatchResponse

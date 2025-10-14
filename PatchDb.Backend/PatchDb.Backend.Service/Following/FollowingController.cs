@@ -1,6 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using PatchDb.Backend.Core.Authentication;
 using PatchDb.Backend.Service.User.Models.Dto;
+using Platform.Core.Application.Persistence;
 
 namespace PatchDb.Backend.Service.Following;
 
@@ -16,18 +19,20 @@ public class FollowingController : ControllerBase
     }
 
     [HttpPost("{userId}/follow")]
-    public async Task<ActionResult> Follow(Guid userId)
-        => Ok(await _followingService.Follow(User.UserId(), userId));
+    public async Task<ActionResult<PublicUserResponse>> Follow(Guid userId)
+        => Ok(await _followingService.Follow(userId, requesterUserId: User.UserId()));
 
     [HttpDelete("{userId}/follow")]
-    public async Task<ActionResult> Unfollow(Guid userId)
-        => Ok(await _followingService.Unfollow(User.UserId(), userId));
+    public async Task<ActionResult<PublicUserResponse>> Unfollow(Guid userId)
+        => Ok(await _followingService.Unfollow(userId, requesterUserId: User.UserId()));
 
     [HttpGet("{userId}/followers")]
-    public async Task<ActionResult<List<UserResponse>>> GetFollowers(Guid userId, [FromQuery] int skip = 0, [FromQuery] int take = 20)
-        => Ok(await _followingService.GetFollowers(userId, skip, take));
+    [Authorize]
+    public async Task<ActionResult<PaginationResponse<PublicUserResponse>>> GetFollowers(Guid userId, [FromQuery] int skip = 0, [FromQuery] int take = 20)
+        => Ok(await _followingService.GetFollowers(userId, requesterUserId: User.UserId(), skip, take));
 
     [HttpGet("{userId}/following")]
-    public async Task<ActionResult<List<UserResponse>>> GetFollowing(Guid userId, [FromQuery] int skip = 0, [FromQuery] int take = 20)
-        => Ok(await _followingService.GetFollowing(userId, skip, take));
+    [Authorize]
+    public async Task<ActionResult<PaginationResponse<PublicUserResponse>>> GetFollowing(Guid userId, [FromQuery] int skip = 0, [FromQuery] int take = 20)
+        => Ok(await _followingService.GetFollowing(userId, requesterUserId: User.UserId(), skip, take));
 }
