@@ -273,11 +273,12 @@ const PublicProfile: React.FC = () => {
                   </div>
                   
                   {/* Action Button - Edit Profile or Follow/Unfollow */}
-                  <div className="text-center mt-3 pt-3 border-top">
+                  <div className="mt-3 pt-3 border-top px-3">
                     {currentUserId === userId ? (
                       <Link 
                         to="/profile" 
-                        className="btn btn-outline-primary"
+                        className="btn btn-outline-primary w-100"
+                        style={{ minHeight: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       >
                         ✏️ Edit Profile
                       </Link>
@@ -285,7 +286,8 @@ const PublicProfile: React.FC = () => {
                       <button 
                         onClick={handleFollowClick}
                         disabled={followLoading}
-                        className={`btn ${user.isFollowing ? 'btn-outline-secondary' : 'btn-primary'}`}
+                        className={`btn w-100 ${user.isFollowing ? 'btn-outline-secondary' : 'btn-primary'}`}
+                        style={{ minHeight: '44px' }}
                       >
                         {followLoading ? (
                           <>

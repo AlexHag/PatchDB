@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import { useAuth } from '../components/hooks/useAuth';
 import { searchUsers, getUniversities, followUser, unfollowUser } from '../api/patchdb';
@@ -384,7 +384,8 @@ const SearchUsers: React.FC = () => {
                           <button 
                             onClick={(e) => handleFollowClick(user, e)}
                             disabled={followLoading === user.id}
-                            className={`btn btn-sm w-100 ${user.isFollowing ? 'btn-outline-secondary' : 'btn-primary'}`}
+                            className={`btn w-100 ${user.isFollowing ? 'btn-outline-secondary' : 'btn-primary'}`}
+                            style={{ minHeight: '40px', borderRadius: '6px' }}
                           >
                             {followLoading === user.id ? (
                               <>
