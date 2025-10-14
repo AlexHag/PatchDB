@@ -61,6 +61,11 @@ public class FollowingService : IFollowingService
 
     public async Task<PublicUserResponse> Follow(Guid userId, Guid requesterUserId)
     {
+        if (userId == requesterUserId)
+        {
+            throw new Exception("You cannot follow yourself");
+        }
+
         var existing = await _dbContext.Followings
             .Include(f => f.FollowingUser)
             .FirstOrDefaultAsync(f => f.User.Id == requesterUserId && f.FollowingUser.Id == userId);

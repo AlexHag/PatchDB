@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import { useAuth } from '../components/hooks/useAuth';
-import { getUserById, getUserPatchesById } from '../api/patchdb';
-import type { UserResponse, GetUserPatchesResponse, UserPatchModel } from '../api/types';
+import { getUserById, getUserPatchesById, followUser, unfollowUser } from '../api/patchdb';
+import type { PublicUserResponse, GetUserPatchesResponse, UserPatchModel } from '../api/types';
 
 const PublicProfile: React.FC = () => {
   // Inline styles for profile picture responsiveness
@@ -50,10 +50,12 @@ const PublicProfile: React.FC = () => {
   
   const { userId } = useParams<{ userId: string }>();
   const { requireAuth, userId: currentUserId } = useAuth();
-  const [user, setUser] = useState<UserResponse | null>(null);
+  const [user, setUser] = useState<PublicUserResponse | null>(null);
   const [userPatches, setUserPatches] = useState<GetUserPatchesResponse>({ patches: [], unmatchesPatches: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [followLoading, setFollowLoading] = useState(false);
+  const [showUnfollowModal, setShowUnfollowModal] = useState(false);
 
   useEffect(() => {
     requireAuth();
@@ -90,6 +92,47 @@ const PublicProfile: React.FC = () => {
       case 'Moderator': return 'warning';
       case 'PatchMaker': return 'info';
       default: return 'secondary';
+    }
+  };
+
+  const handleFollowClick = async () => {
+    if (!userId || !user) return;
+
+    if (user.isFollowing) {
+      setShowUnfollowModal(true);
+    } else {
+      await handleFollow();
+    }
+  };
+
+  const handleFollow = async () => {
+    if (!userId || !user) return;
+
+    try {
+      setFollowLoading(true);
+      const updatedUser = await followUser(userId);
+      setUser(updatedUser);
+    } catch (err) {
+      console.error('Error following user:', err);
+      // You could add a toast notification here
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
+  const handleUnfollow = async () => {
+    if (!userId || !user) return;
+
+    try {
+      setFollowLoading(true);
+      const updatedUser = await unfollowUser(userId);
+      setUser(updatedUser);
+      setShowUnfollowModal(false);
+    } catch (err) {
+      console.error('Error unfollowing user:', err);
+      // You could add a toast notification here
+    } finally {
+      setFollowLoading(false);
     }
   };
 
@@ -180,6 +223,14 @@ const PublicProfile: React.FC = () => {
                           <div className="fw-bold h6 h-md-5 mb-0">{userPatches.patches.length}</div>
                           <div className="text-muted" style={{ fontSize: '0.8rem' }}>patches</div>
                         </div>
+                        <div>
+                          <div className="fw-bold h6 h-md-5 mb-0">{user.followersCount}</div>
+                          <div className="text-muted" style={{ fontSize: '0.8rem' }}>followers</div>
+                        </div>
+                        <div>
+                          <div className="fw-bold h6 h-md-5 mb-0">{user.followingCount}</div>
+                          <div className="text-muted" style={{ fontSize: '0.8rem' }}>following</div>
+                        </div>
                       </div>
 
                       {/* Bio Section - Mobile responsive */}
@@ -221,17 +272,44 @@ const PublicProfile: React.FC = () => {
                     </div>
                   </div>
                   
-                  {/* Edit Profile Button - Only show if viewing own profile */}
-                  {currentUserId === userId && (
-                    <div className="text-center mt-3 pt-3 border-top">
+                  {/* Action Button - Edit Profile or Follow/Unfollow */}
+                  <div className="text-center mt-3 pt-3 border-top">
+                    {currentUserId === userId ? (
                       <Link 
                         to="/profile" 
                         className="btn btn-outline-primary"
                       >
                         ✏️ Edit Profile
                       </Link>
-                    </div>
-                  )}
+                    ) : (
+                      <button 
+                        onClick={handleFollowClick}
+                        disabled={followLoading}
+                        className={`btn ${user.isFollowing ? 'btn-outline-secondary' : 'btn-primary'}`}
+                      >
+                        {followLoading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            {user.isFollowing ? 'Unfollowing...' : 'Following...'}
+                          </>
+                        ) : (
+                          <>
+                            {user.isFollowing ? (
+                              <>
+                                <span className="me-1">✓</span>
+                                Following
+                              </>
+                            ) : (
+                              <>
+                                <span className="me-1">➕</span>
+                                Follow
+                              </>
+                            )}
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -387,6 +465,53 @@ const PublicProfile: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Unfollow Confirmation Modal */}
+      {showUnfollowModal && (
+        <div className="modal show d-block" tabIndex={-1} style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Unfollow {user?.username}?</h5>
+                <button 
+                  type="button" 
+                  className="btn-close" 
+                  onClick={() => setShowUnfollowModal(false)}
+                  disabled={followLoading}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>Are you sure you want to unfollow {user?.username}? You won't see their updates in your feed anymore.</p>
+              </div>
+              <div className="modal-footer">
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  onClick={() => setShowUnfollowModal(false)}
+                  disabled={followLoading}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-danger" 
+                  onClick={handleUnfollow}
+                  disabled={followLoading}
+                >
+                  {followLoading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Unfollowing...
+                    </>
+                  ) : (
+                    'Unfollow'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

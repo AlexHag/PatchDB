@@ -9,6 +9,7 @@ import type {
   UserPatchModel,
   FileUploadUrlResponse,
   UserResponse,
+  PublicUserResponse,
   UpdateBioRequest,
   UpdateProfilePictureRequest,
   UpdateUserUniversityInfoRequest,
@@ -334,7 +335,7 @@ export async function searchPatches(request: SearchPatchRequest): Promise<Pagina
 }
 
 // Public profile functions
-export async function getUserById(userId: string): Promise<UserResponse> {
+export async function getUserById(userId: string): Promise<PublicUserResponse> {
   const response = await fetch(`${API_BASE_URL}/user/${userId}`, {
     headers: getAuthHeaders()
   });
@@ -359,11 +360,38 @@ export async function getUserPatchesById(userId: string): Promise<GetUserPatches
 }
 
 // User search function
-export async function searchUsers(request: SearchUserRequest): Promise<UserResponse[]> {
+export async function searchUsers(request: SearchUserRequest): Promise<PublicUserResponse[]> {
   const response = await fetch(`${API_BASE_URL}/user/search`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(request)
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+// Follow/unfollow functions
+export async function followUser(userId: string): Promise<PublicUserResponse> {
+  const response = await fetch(`${API_BASE_URL}/user/${userId}/follow`, {
+    method: 'POST',
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+export async function unfollowUser(userId: string): Promise<PublicUserResponse> {
+  const response = await fetch(`${API_BASE_URL}/user/${userId}/follow`, {
+    method: 'DELETE',
+    headers: getAuthHeaders()
   });
 
   if (!response.ok) {

@@ -1,18 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import { useAuth } from '../components/hooks/useAuth';
-import { searchUsers, getUniversities } from '../api/patchdb';
-import type { UserResponse, SearchUserRequest, UniversityModel } from '../api/types';
+import { searchUsers, getUniversities, followUser, unfollowUser } from '../api/patchdb';
+import type { PublicUserResponse, SearchUserRequest, UniversityModel } from '../api/types';
 
 const SearchUsers: React.FC = () => {
   const { requireAuth } = useAuth();
-  const [users, setUsers] = useState<UserResponse[]>([]);
+  const navigate = useNavigate();
+  const [users, setUsers] = useState<PublicUserResponse[]>([]);
   const [universities, setUniversities] = useState<UniversityModel[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
   const [canLoadMore, setCanLoadMore] = useState(false);
+  const [followLoading, setFollowLoading] = useState<string | null>(null);
+  const [showUnfollowModal, setShowUnfollowModal] = useState<{show: boolean, user: PublicUserResponse | null}>({show: false, user: null});
   const itemsPerPage = 20;
 
   // Search filters
@@ -104,6 +107,57 @@ const SearchUsers: React.FC = () => {
   };
 
   const hasActiveFilters = searchFilters.username || searchFilters.universityCode;
+
+  const handleFollowClick = async (user: PublicUserResponse, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click navigation
+    
+    if (user.isFollowing) {
+      setShowUnfollowModal({show: true, user});
+    } else {
+      await handleFollow(user.id);
+    }
+  };
+
+  const handleFollow = async (userId: string) => {
+    try {
+      setFollowLoading(userId);
+      const updatedUser = await followUser(userId);
+      
+      // Update the user in the list
+      setUsers(prevUsers => 
+        prevUsers.map(u => u.id === userId ? updatedUser : u)
+      );
+    } catch (err) {
+      console.error('Error following user:', err);
+    } finally {
+      setFollowLoading(null);
+    }
+  };
+
+  const handleUnfollow = async () => {
+    const user = showUnfollowModal.user;
+    if (!user) return;
+
+    try {
+      setFollowLoading(user.id);
+      const updatedUser = await unfollowUser(user.id);
+      
+      // Update the user in the list
+      setUsers(prevUsers => 
+        prevUsers.map(u => u.id === user.id ? updatedUser : u)
+      );
+      
+      setShowUnfollowModal({show: false, user: null});
+    } catch (err) {
+      console.error('Error unfollowing user:', err);
+    } finally {
+      setFollowLoading(null);
+    }
+  };
+
+  const handleCardClick = (userId: string) => {
+    navigate(`/user/${userId}`);
+  };
 
   return (
     <div className="bg-light min-vh-100">
@@ -239,9 +293,13 @@ const SearchUsers: React.FC = () => {
               <>
                 {/* User Results Grid */}
                 <div className="row g-3 mb-4">
-                  {users.map((user: UserResponse) => (
+                  {users.map((user: PublicUserResponse) => (
                     <div key={user.id} className="col-12 col-md-6 col-lg-4">
-                      <div className="card h-100">
+                      <div 
+                        className="card h-100" 
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => handleCardClick(user.id)}
+                      >
                         <div className="card-body">
                           <div className="d-flex align-items-center mb-3">
                             {/* Profile Picture */}
@@ -322,13 +380,33 @@ const SearchUsers: React.FC = () => {
                             </p>
                           )}
 
-                          {/* View Profile Button */}
-                          <Link 
-                            to={`/user/${user.id}`}
-                            className="btn btn-outline-primary btn-sm w-100"
+                          {/* Follow/Unfollow Button */}
+                          <button 
+                            onClick={(e) => handleFollowClick(user, e)}
+                            disabled={followLoading === user.id}
+                            className={`btn btn-sm w-100 ${user.isFollowing ? 'btn-outline-secondary' : 'btn-primary'}`}
                           >
-                            👁️ View Profile
-                          </Link>
+                            {followLoading === user.id ? (
+                              <>
+                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                {user.isFollowing ? 'Unfollowing...' : 'Following...'}
+                              </>
+                            ) : (
+                              <>
+                                {user.isFollowing ? (
+                                  <>
+                                    <span className="me-1">✓</span>
+                                    Following
+                                  </>
+                                ) : (
+                                  <>
+                                    <span className="me-1">➕</span>
+                                    Follow
+                                  </>
+                                )}
+                              </>
+                            )}
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -361,6 +439,53 @@ const SearchUsers: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Unfollow Confirmation Modal */}
+      {showUnfollowModal.show && showUnfollowModal.user && (
+        <div className="modal show d-block" tabIndex={-1} style={{backgroundColor: 'rgba(0,0,0,0.5)'}}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Unfollow {showUnfollowModal.user.username}?</h5>
+                <button 
+                  type="button" 
+                  className="btn-close" 
+                  onClick={() => setShowUnfollowModal({show: false, user: null})}
+                  disabled={followLoading === showUnfollowModal.user.id}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <p>Are you sure you want to unfollow {showUnfollowModal.user.username}? You won't see their updates in your feed anymore.</p>
+              </div>
+              <div className="modal-footer">
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  onClick={() => setShowUnfollowModal({show: false, user: null})}
+                  disabled={followLoading === showUnfollowModal.user.id}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-danger" 
+                  onClick={handleUnfollow}
+                  disabled={followLoading === showUnfollowModal.user.id}
+                >
+                  {followLoading === showUnfollowModal.user.id ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Unfollowing...
+                    </>
+                  ) : (
+                    'Unfollow'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

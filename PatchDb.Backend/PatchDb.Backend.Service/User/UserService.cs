@@ -166,6 +166,7 @@ public class UserService : IUserService
         }
 
         var users = await query
+            .Where(p => p.Id != requesterUserId) // Exclude requester
             .Skip(request.Skip)
             .Take(request.Take)
             .ToListAsync();

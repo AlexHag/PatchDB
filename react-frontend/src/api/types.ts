@@ -26,6 +26,26 @@ export interface UserResponse {
     logoUrl: string;
   };
   universityProgram?: string;
+  followingCount: number;
+  followersCount: number;
+  created: string;
+}
+
+export interface PublicUserResponse {
+  id: string;
+  role: 'Unknown' | 'User' | 'PatchMaker' | 'Moderator' | 'Admin';
+  username: string;
+  bio?: string;
+  profilePictureUrl?: string;
+  university?: {
+    code: string;
+    name: string;
+    logoUrl: string;
+  };
+  universityProgram?: string;
+  followingCount: number;
+  followersCount: number;
+  isFollowing: boolean;
   created: string;
 }
 
