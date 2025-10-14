@@ -49,7 +49,7 @@ const LogoutIcon = () => (
 );
 
 const Navigation: React.FC<NavigationProps> = () => {
-  const { username, user, logout } = useAuth();
+  const { username, user, logout, userId } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -199,7 +199,7 @@ const Navigation: React.FC<NavigationProps> = () => {
               )}
 
               <Link 
-                to="/profile" 
+                to={`/user/${userId}`}
                 className="mobile-nav-link"
                 onClick={() => setIsMenuOpen(false)}
               >

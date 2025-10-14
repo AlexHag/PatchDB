@@ -1,10 +1,13 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../components/hooks/useAuth';
 
 interface MobileFooterProps {}
 
 const MobileFooter: React.FC<MobileFooterProps> = () => {
   const location = useLocation();
+
+  const { userId } = useAuth();
 
   // Helper function to check if current route matches
   const isActive = (path: string) => {
@@ -92,8 +95,8 @@ const MobileFooter: React.FC<MobileFooterProps> = () => {
 
         {/* Profile */}
         <Link 
-          to="/profile" 
-          className={`mobile-footer-item ${isActive('/profile') ? 'active' : ''}`}
+          to={`/user/${userId}`}  
+          className={`mobile-footer-item ${isActive(`/user/${userId}`) || isActive("/profile") ? 'active' : ''}`}
         >
           <span className="mobile-footer-icon">
             <ProfileIcon />
