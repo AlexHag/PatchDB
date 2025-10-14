@@ -14,6 +14,7 @@ import ReviewQueue from './pages/ReviewQueue';
 import BrowsePatches from './pages/BrowsePatches';
 import PublicProfile from './pages/PublicProfile';
 import SearchUsers from './pages/SearchUsers';
+import FollowersFollowing from './pages/FollowersFollowing';
 import Search from './pages/Search';
 import More from './pages/More';
 import MobileFooter from './components/MobileFooter';
@@ -126,6 +127,12 @@ const App: React.FC = () => {
           <Route path="/user/:userId" element={
             <ProtectedRoute>
               <PublicProfile />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/user/:userId/followers-following" element={
+            <ProtectedRoute>
+              <FollowersFollowing />
             </ProtectedRoute>
           } />
           

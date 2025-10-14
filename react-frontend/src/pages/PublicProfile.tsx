@@ -223,14 +223,26 @@ const PublicProfile: React.FC = () => {
                           <div className="fw-bold h6 h-md-5 mb-0">{userPatches.patches.length}</div>
                           <div className="text-muted" style={{ fontSize: '0.8rem' }}>patches</div>
                         </div>
-                        <div>
-                          <div className="fw-bold h6 h-md-5 mb-0">{user.followersCount}</div>
-                          <div className="text-muted" style={{ fontSize: '0.8rem' }}>followers</div>
-                        </div>
-                        <div>
-                          <div className="fw-bold h6 h-md-5 mb-0">{user.followingCount}</div>
-                          <div className="text-muted" style={{ fontSize: '0.8rem' }}>following</div>
-                        </div>
+                        <Link 
+                          to={`/user/${userId}/followers-following`} 
+                          className="text-decoration-none text-dark"
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <div>
+                            <div className="fw-bold h6 h-md-5 mb-0">{user.followersCount}</div>
+                            <div className="text-muted" style={{ fontSize: '0.8rem' }}>followers</div>
+                          </div>
+                        </Link>
+                        <Link 
+                          to={`/user/${userId}/followers-following`} 
+                          className="text-decoration-none text-dark"
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <div>
+                            <div className="fw-bold h6 h-md-5 mb-0">{user.followingCount}</div>
+                            <div className="text-muted" style={{ fontSize: '0.8rem' }}>following</div>
+                          </div>
+                        </Link>
                       </div>
 
                       {/* Bio Section - Mobile responsive */}

@@ -400,3 +400,28 @@ export async function unfollowUser(userId: string): Promise<PublicUserResponse> 
 
   return await response.json();
 }
+
+// Followers and Following functions
+export async function getUserFollowers(userId: string, skip = 0, take = 20): Promise<PaginationResponse<PublicUserResponse>> {
+  const response = await fetch(`${API_BASE_URL}/user/${userId}/followers?skip=${skip}&take=${take}`, {
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
+
+export async function getUserFollowing(userId: string, skip = 0, take = 20): Promise<PaginationResponse<PublicUserResponse>> {
+  const response = await fetch(`${API_BASE_URL}/user/${userId}/following?skip=${skip}&take=${take}`, {
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return await response.json();
+}
