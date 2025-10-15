@@ -90,6 +90,7 @@ public class ModelMapper : IModelMapper
             UniversitySection = patch.UniversitySection,
             ReleaseDate = patch.ReleaseDate,
             PatchSubmissionId = patch.PatchSubmissionId,
+            SubmittedByUserId = patch.SubmittedByUserId,
             Created = patch.Created,
             Updated = patch.Updated,
         };

@@ -88,6 +88,7 @@ export interface PatchResponse {
   universitySection?: string;
   releaseDate?: string;
   patchSubmissionId: string;
+  submittedByUserId: string;
   created: string;
   updated?: string;
 }

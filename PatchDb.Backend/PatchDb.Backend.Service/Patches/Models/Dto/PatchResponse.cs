@@ -32,6 +32,9 @@ public class PatchResponse
     [JsonProperty("patchSubmissionId")]
     public Guid PatchSubmissionId { get; set; }
 
+    [JsonProperty("submittedByUserId")]
+    public Guid SubmittedByUserId { get; set; }
+
     [JsonProperty("created")]
     public DateTime Created { get; set; }
 

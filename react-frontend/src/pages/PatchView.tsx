@@ -49,6 +49,14 @@ const PatchView: React.FC = () => {
     loadPatch();
   }, [patchNumber]);
 
+  const canEdit = () => {
+    if (!user || !patch) return false;
+
+    if (user.role === 'Admin' || user.role === 'Moderator') return true;
+
+    return patch.submittedByUserId === user.id;
+  }
+
   if (loading) {
     return (
       <div className="bg-light min-vh-100">
@@ -163,7 +171,16 @@ const PatchView: React.FC = () => {
           <div className="col-12 col-lg-6 mb-4">
             <div className="card h-100">
               <div className="card-body">
-                <h3 className="h5 mb-3" style={{color: '#e67e22'}}>📋 Patch Details</h3>
+                <div className="d-flex justify-content-between align-items-center">
+                  <h3 className="h5 mb-3" style={{color: '#e67e22'}}>📋 Patch Details</h3>
+                  {canEdit() && <button 
+                    className="btn btn-outline-primary btn-sm"
+                    onClick={() => navigate(`/submit-patch/${patch.patchSubmissionId}`)}
+                  >
+                    ✏️ Edit
+                  </button>}
+                </div>
+                
                 
                 <div className="row g-3">
                   {patch.patchMaker && (
@@ -243,16 +260,6 @@ const PatchView: React.FC = () => {
                     >
                       🎒 View Collection
                     </button>
-
-                    {user && ['Admin', 'Moderator', 'PatchMaker'].includes(user.role) && (
-                      <button 
-                        className="btn btn-dark flex-fill"
-                        onClick={() => navigate(`/submit-patch/${patch.patchSubmissionId}`)}
-                      >
-                        📝 View Patch Submission
-                      </button>
-                    )}
-
                   </div>
                 </div>
               </div>

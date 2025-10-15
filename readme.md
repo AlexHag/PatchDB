@@ -182,7 +182,7 @@ dotnet run > output.log 2>&1 &
 ## Patch submittion
 - Upload
 - Update
-- Get pending
+- Get unpublished
 
 ## User patches
 - Get patches

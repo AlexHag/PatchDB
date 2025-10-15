@@ -13,6 +13,7 @@ public class PatchEntity
     public DateTime? ReleaseDate { get; set; }
 
     public Guid PatchSubmissionId { get; set; }
+    public Guid SubmittedByUserId { get; set; }
 
     public DateTime Created { get; set; }
     public DateTime? Updated { get; set; }

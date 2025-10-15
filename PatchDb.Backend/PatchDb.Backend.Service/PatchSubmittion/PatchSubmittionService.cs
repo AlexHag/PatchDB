@@ -180,6 +180,7 @@ public class PatchSubmittionService : IPatchSubmittionService
                         UniversitySection = patchSubmittion.UniversitySection,
                         ReleaseDate = patchSubmittion.ReleaseDate,
                         PatchSubmissionId = patchSubmittion.Id,
+                        SubmittedByUserId = patchSubmittion.UploadedByUserId,
                         Created = DateTime.UtcNow
                     };
 
