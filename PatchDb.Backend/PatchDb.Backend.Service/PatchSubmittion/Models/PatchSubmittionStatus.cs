@@ -9,14 +9,14 @@ public enum PatchSubmittionStatus
     Unknown = 0,
 
     /// <summary>
-    ///     The submitted patch is pending information about the patch to be provided or a review from a moderator
+    ///     The submitted patch is unpublished, usually means more information about the patch is required.
     /// </summary>
-    Pending = 10,
+    Unpublished = 10,
 
     /// <summary>
-    ///     The submitted patch was accepted and added to the patch index
+    ///     The submitted patch was published and added to the patch index
     /// </summary>
-    Accepted = 20,
+    Published = 20,
 
     /// <summary>
     ///     The submitted patch was rejected

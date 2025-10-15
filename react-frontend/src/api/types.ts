@@ -186,7 +186,7 @@ export interface PatchSubmittionResponse {
   universitySection?: string;
   releaseDate?: string;
   imageUrl: string;
-  status: string;
+  status: PatchSubmissionStatus;
   uploadedByUserId: string;
   lastUpdatedByUserId?: string;
   created: string;
@@ -201,17 +201,15 @@ export interface UpdatePatchSubmissionRequest {
   universityCode?: string;
   universitySection?: string;
   releaseDate?: string;
-  status?: string;
+  status?: PatchSubmissionStatus;
 }
 
-// Patch submission status enum
 export enum PatchSubmissionStatus {
-  Unknown = 0,
-  Pending = 10,
-  Accepted = 20,
-  Rejected = 30,
-  Duplicate = 40,
-  Deleted = 50
+  Unpublished = 'Unpublished',
+  Published = 'Published',
+  Rejected = 'Rejected',
+  Duplicate = 'Duplicate',
+  Deleted = 'Deleted'
 }
 
 // Patch search types

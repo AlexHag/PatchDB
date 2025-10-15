@@ -19,7 +19,7 @@ public interface IPatchSubmittionService
 {
     Task<PatchSubmittionResponse> UploadPatch(Guid userId, UploadPatchRequest request);
     Task<PatchSubmittionResponse> UpdatePatch(Guid userId, UpdatePatchRequest request);
-    Task<PaginationResponse<PatchSubmittionResponse>> GetPendingSubmittions(int skip, int take);
+    Task<PaginationResponse<PatchSubmittionResponse>> GetUnpublishedSubmissions(int skip, int take);
     Task<PatchSubmittionResponse> GetPatchSubmittion(Guid patchSubmittionId);
 }
 
@@ -76,7 +76,7 @@ public class PatchSubmittionService : IPatchSubmittionService
             UniversityCode = request.UniversityCode,
             UniversitySection = request.UniversitySection,
             ReleaseDate = request.ReleaseDate,
-            Status = PatchSubmittionStatus.Pending,
+            Status = PatchSubmittionStatus.Unpublished,
             UploadedByUserId = userId,
             Created = DateTime.UtcNow
         };
@@ -140,7 +140,7 @@ public class PatchSubmittionService : IPatchSubmittionService
         {
             var patch = await _dbContext.Patches.FindAsync(patchSubmittion.PatchNumber.Value) ?? throw new InternalServerErrorApiException("Patch not found");
 
-            if (patchSubmittion.Status == PatchSubmittionStatus.Accepted)
+            if (patchSubmittion.Status == PatchSubmittionStatus.Published)
             {
                 patch.Name = patchSubmittion.Name;
                 patch.Description = patchSubmittion.Description;
@@ -159,7 +159,7 @@ public class PatchSubmittionService : IPatchSubmittionService
 
             await _dbContext.SaveChangesAsync();
         }
-        else if (patchSubmittion.Status == PatchSubmittionStatus.Accepted)
+        else if (patchSubmittion.Status == PatchSubmittionStatus.Published)
         {
             if (string.IsNullOrEmpty(patchSubmittion.Name))
             {
@@ -202,11 +202,11 @@ public class PatchSubmittionService : IPatchSubmittionService
 
             try
             {
-                await AddAcceptedPatchSubmissionToUserPatches(patchSubmittion);
+                await AddPublishedPatchSubmissionToUserPatches(patchSubmittion);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to add accepted patch submission {Id} to user patches...", patchSubmittion.Id);
+                _logger.LogError(ex, "Failed to add published patch submission {Id} to user patches...", patchSubmittion.Id);
             }
         }
         else
@@ -217,11 +217,11 @@ public class PatchSubmittionService : IPatchSubmittionService
         return _mapper.ToPatchSubmittionResponse(patchSubmittion);
     }
 
-    private async Task AddAcceptedPatchSubmissionToUserPatches(PatchSubmittionEntity entity)
+    private async Task AddPublishedPatchSubmissionToUserPatches(PatchSubmittionEntity entity)
     {
         if (!entity.PatchNumber.HasValue)
         {
-            _logger.LogError("Patch submission {Id} does not have a patch number after being accepted...", entity.Id);
+            _logger.LogError("Patch submission {Id} does not have a patch number after being published...", entity.Id);
             throw new InternalServerErrorApiException("Oops something went wrong...");
         }
 
@@ -253,36 +253,33 @@ public class PatchSubmittionService : IPatchSubmittionService
             return;
         }
 
-        if (patchSubmittion.Status == PatchSubmittionStatus.Deleted)
-        {
-            throw new NotFoundApiException("Patch submittion not found");
-        }
-
         if (patchSubmittion.UploadedByUserId != user.Id)
         {
             throw new UnauthorizedApiException("You can only update your own patch submittions");
         }
 
-        if (patchSubmittion.Status != PatchSubmittionStatus.Pending && patchSubmittion.Status != PatchSubmittionStatus.Accepted)
+        // TODO: Decide rules for how regular users can update the status
+
+        if (patchSubmittion.Status == PatchSubmittionStatus.Rejected || patchSubmittion.Status == PatchSubmittionStatus.Duplicate)
         {
             throw new BadRequestApiException("You cannot update this patch");
         }
 
-        if (request.Status.HasValue && request.Status.Value != PatchSubmittionStatus.Deleted && request.Status.Value != patchSubmittion.Status)
-        {
-            throw new BadRequestApiException("You cannot update this patch");
-        }
+        // if (request.Status.HasValue && request.Status.Value != PatchSubmittionStatus.Deleted && request.Status.Value != patchSubmittion.Status)
+        // {
+        //     throw new BadRequestApiException("You cannot update this patch");
+        // }
     }
 
 
-    public async Task<PaginationResponse<PatchSubmittionResponse>> GetPendingSubmittions(int skip, int take)
+    public async Task<PaginationResponse<PatchSubmittionResponse>> GetUnpublishedSubmissions(int skip, int take)
     {
         skip = Math.Max(0, skip);
         take = Math.Clamp(take, 1, 50);
 
         var patches = await _dbContext.PatchSubmittions
             .OrderByDescending(p => p.ReleaseDate)
-            .Where(p => p.Status == PatchSubmittionStatus.Pending)
+            .Where(p => p.Status == PatchSubmittionStatus.Unpublished)
             .Skip(skip)
             .Take(take)
             .ToListAsync();
@@ -290,7 +287,7 @@ public class PatchSubmittionService : IPatchSubmittionService
         var response = new PaginationResponse<PatchSubmittionResponse>
         {
             Items = patches.Select(_mapper.ToPatchSubmittionResponse).ToList(),
-            Count = await _dbContext.PatchSubmittions.CountAsync(p => p.Status == PatchSubmittionStatus.Pending)
+            Count = await _dbContext.PatchSubmittions.CountAsync(p => p.Status == PatchSubmittionStatus.Unpublished)
         };
 
         return response;

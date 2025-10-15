@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../components/hooks/useAuth';
 import Navigation from '../components/Navigation';
-import { getPendingPatchSubmissions } from '../api/patchdb';
+import { getUnpublishedPatchSubmissions } from '../api/patchdb';
 import type { PaginationResponse, PatchSubmittionResponse } from '../api/types';
 
 const ReviewQueue: React.FC = () => {
@@ -28,12 +28,12 @@ const ReviewQueue: React.FC = () => {
       setError('');
       
       const skip = (page - 1) * itemsPerPage;
-      const data = await getPendingPatchSubmissions(skip, itemsPerPage);
+      const data = await getUnpublishedPatchSubmissions(skip, itemsPerPage);
       setSubmissions(data);
       setCurrentPage(page);
     } catch (error) {
-      console.error('Error loading pending submissions:', error);
-      setError('Failed to load pending submissions: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      console.error('Error loading unpublished submissions:', error);
+      setError('Failed to load unpublished submissions: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setLoading(false);
     }
@@ -84,13 +84,13 @@ const ReviewQueue: React.FC = () => {
             <h2 className="h3 mb-1" style={{background: 'linear-gradient(135deg, #2c3e50, #e67e22)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>
               🔍 Review Queue
             </h2>
-            <p className="text-muted mb-3">Review and manage pending patch submissions</p>
+            <p className="text-muted mb-3">Review and manage unpublished patch submissions</p>
             
             {/* Stats */}
             <div className="d-flex align-items-center mb-3">
               <div className="stat-card me-3">
                 <div className="stat-number">{submissions.count}</div>
-                <div className="stat-label">Pending Submissions</div>
+                <div className="stat-label">Unpublished Submissions</div>
               </div>
               {loading && (
                 <div className="spinner-border spinner-border-sm text-dark" role="status">
@@ -117,7 +117,7 @@ const ReviewQueue: React.FC = () => {
               <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
             </svg>
             <h3 className="h4" style={{color: '#2c3e50'}}>🎉 All Caught Up!</h3>
-            <p className="text-muted mb-3">There are no pending patch submissions to review right now.</p>
+            <p className="text-muted mb-3">There are no unpublished patch submissions to review right now.</p>
           </div>
         )}
 

@@ -13,7 +13,7 @@ public class PatchSubmittionResponse
     public Guid PatchSubmittionId { get; set; }
 
     /// <summary>
-    ///     The patch number if the submittion is accepted
+    ///     The patch number if the submittion is published
     /// </summary>
     [JsonProperty("patchNumber")]
     public int? PatchNumber { get; set; }

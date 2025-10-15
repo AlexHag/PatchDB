@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/hooks/useAuth';
 import Navigation from '../components/Navigation';
@@ -8,6 +8,7 @@ import type {
   UpdatePatchSubmissionRequest, 
   UniversityModel
 } from '../api/types';
+import { PatchSubmissionStatus } from '../api/types';
 
 const PatchSubmissionView: React.FC = () => {
   const { patchSubmittionId } = useParams<{ patchSubmittionId: string }>();
@@ -33,6 +34,8 @@ const PatchSubmissionView: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Auth check
   useEffect(() => {
@@ -77,6 +80,20 @@ const PatchSubmissionView: React.FC = () => {
     loadData();
   }, [patchSubmittionId, navigate]);
 
+  // Handle clicking outside dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showDropdown]);
+
   const showError = (message: string) => {
     setError(message);
     setShowSuccess(false);
@@ -95,36 +112,59 @@ const PatchSubmissionView: React.FC = () => {
     }, 4000);
   };
 
-  const getStatusBadgeClass = (status: string) => {
+  const getStatusBadgeClass = (status: PatchSubmissionStatus) => {
     switch (status) {
-      case 'Pending': return 'bg-warning text-dark';
-      case 'Accepted': return 'bg-success';
-      case 'Rejected': return 'bg-danger';
-      case 'Duplicate': return 'bg-secondary';
-      case 'Deleted': return 'bg-dark';
+      case PatchSubmissionStatus.Unpublished: return 'bg-secondary text-white';
+      case PatchSubmissionStatus.Published: return 'bg-success';
+      case PatchSubmissionStatus.Rejected: return 'bg-danger';
+      case PatchSubmissionStatus.Duplicate: return 'bg-secondary';
+      case PatchSubmissionStatus.Deleted: return 'bg-dark';
       default: return 'bg-light text-dark';
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: PatchSubmissionStatus) => {
     switch (status) {
-      case 'Pending': return '⏳';
-      case 'Accepted': return '✅';
-      case 'Rejected': return '❌';
-      case 'Duplicate': return '🔄';
-      case 'Deleted': return '🗑️';
+      case PatchSubmissionStatus.Unpublished: return '📄';
+      case PatchSubmissionStatus.Published: return '✅';
+      case PatchSubmissionStatus.Rejected: return '❌';
+      case PatchSubmissionStatus.Duplicate: return '🔄';
+      case PatchSubmissionStatus.Deleted: return '🗑️';
       default: return '❓';
     }
   };
 
-  const canUpdateStatus = (targetStatus: string) => {
-    if (!user) return false;
+  const canEdit = () => {
+    if (!user || !submission) return false;
     
-    if (user.role === 'PatchMaker') {
-      return targetStatus === 'Deleted';
-    }
+    // User can edit if they own the submission OR they are Admin/Moderator
+    return submission.uploadedByUserId === user.id || 
+           user.role === 'Admin' || 
+           user.role === 'Moderator';
+  };
+
+  const canUpdateStatus = (targetStatus: PatchSubmissionStatus) => {
+    if (!user || !submission) return false;
+
+    return true;
+
+    // TODO: Fix this
     
-    return user.role === 'Admin' || user.role === 'Moderator';
+    // Check if user owns the submission
+    // const isOwner = submission.uploadedByUserId === user.id;
+    // const isModerator = user.role === 'Admin' || user.role === 'Moderator';
+    
+    // // if (isOwner) {
+    // //   // Owners can only delete their submissions
+    // //   return targetStatus === PatchSubmissionStatus.Deleted;
+    // // }
+    
+    // if (isModerator) {
+    //   // Moderators and admins can change any status
+    //   return true;
+    // }
+    
+    // return false;
   };
 
   const handleUpdateInfo = async () => {
@@ -155,7 +195,7 @@ const PatchSubmissionView: React.FC = () => {
     }
   };
 
-  const handleStatusUpdate = async (newStatus: string) => {
+  const handleStatusUpdate = async (newStatus: PatchSubmissionStatus) => {
     if (!submission || !canUpdateStatus(newStatus)) return;
     
     const confirmMessage = `Are you sure you want to update the status to ${newStatus}?`;
@@ -251,6 +291,7 @@ const PatchSubmissionView: React.FC = () => {
                 <small className="text-muted">ID: {submission.patchSubmittionId}</small>
               </div>
               <span className={`badge ${getStatusBadgeClass(submission.status)} fs-6`}>
+                {/* {getStatusIcon(submission.status)} {getStatusDisplayName(submission.status)} */}
                 {getStatusIcon(submission.status)} {submission.status}
               </span>
             </div>
@@ -259,8 +300,86 @@ const PatchSubmissionView: React.FC = () => {
               {/* Image and Basic Info */}
               <div className="col-md-6 mb-4">
                 <div className="card h-100">
-                  <div className="card-header">
+                  <div className="card-header d-flex justify-content-between align-items-center">
                     <h5 className="mb-0">📸 Patch Image</h5>
+                    {canEdit() && (
+                      <div className="position-relative" ref={dropdownRef}>
+                        <button 
+                          className="btn btn-sm btn-outline-secondary"
+                          onClick={() => setShowDropdown(!showDropdown)}
+                          style={{ border: 'none', background: 'transparent' }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="5" r="2"/>
+                            <circle cx="12" cy="12" r="2"/>
+                            <circle cx="12" cy="19" r="2"/>
+                          </svg>
+                        </button>
+                        {showDropdown && (
+                          <div className="dropdown-menu show position-absolute" style={{ right: 0, top: '100%', minWidth: '200px', zIndex: 1000 }}>
+                            {submission.status !== PatchSubmissionStatus.Published && canUpdateStatus(PatchSubmissionStatus.Published) && (
+                              <button 
+                                className="dropdown-item"
+                                onClick={() => {
+                                  handleStatusUpdate(PatchSubmissionStatus.Published);
+                                  setShowDropdown(false);
+                                }}
+                              >
+                                ✅ Publish
+                              </button>
+                            )}
+                            {submission.status !== PatchSubmissionStatus.Unpublished && canUpdateStatus(PatchSubmissionStatus.Unpublished) && (
+                              <button 
+                                className="dropdown-item"
+                                onClick={() => {
+                                  handleStatusUpdate(PatchSubmissionStatus.Unpublished);
+                                  setShowDropdown(false);
+                                }}
+                              >
+                                📄 Unpublish
+                              </button>
+                            )}
+                            {submission.status !== PatchSubmissionStatus.Deleted && canUpdateStatus(PatchSubmissionStatus.Deleted) && (
+                              <button 
+                                className="dropdown-item"
+                                onClick={() => {
+                                  handleStatusUpdate(PatchSubmissionStatus.Deleted);
+                                  setShowDropdown(false);
+                                }}
+                              >
+                                🗑️ Delete
+                              </button>
+                            )}
+                            {(user?.role === 'Admin' || user?.role === 'Moderator') && (
+                              <>
+                                {submission.status !== PatchSubmissionStatus.Rejected && (
+                                  <button 
+                                    className="dropdown-item"
+                                    onClick={() => {
+                                      handleStatusUpdate(PatchSubmissionStatus.Rejected);
+                                      setShowDropdown(false);
+                                    }}
+                                  >
+                                    ❌ Reject this patch
+                                  </button>
+                                )}
+                                {submission.status !== PatchSubmissionStatus.Duplicate && (
+                                  <button 
+                                    className="dropdown-item"
+                                    onClick={() => {
+                                      handleStatusUpdate(PatchSubmissionStatus.Duplicate);
+                                      setShowDropdown(false);
+                                    }}
+                                  >
+                                    🔄 Mark as duplicate
+                                  </button>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className="card-body text-center">
                     <img 
@@ -294,7 +413,7 @@ const PatchSubmissionView: React.FC = () => {
                 <div className="card h-100">
                   <div className="card-header d-flex justify-content-between align-items-center">
                     <h5 className="mb-0">📝 Patch Details</h5>
-                    {!editing && (
+                    {!editing && canEdit() && (
                       <button 
                         className="btn btn-outline-primary btn-sm"
                         onClick={() => setEditing(true)}
@@ -441,78 +560,43 @@ const PatchSubmissionView: React.FC = () => {
               </div>
             </div>
 
-            {/* Status Update Buttons */}
-            <div className="card">
-              <div className="card-header">
-                <h5 className="mb-0">🔄 Status Management</h5>
-              </div>
-              <div className="card-body">
-                 <div className="row g-2">
-                   {/* Pending */}
-                   <div className="col-6 col-md-3">
-                     <button 
-                       className={`btn w-100 ${submission.status === 'Pending' ? 'btn-warning' : 'btn-outline-warning'}`}
-                       onClick={() => handleStatusUpdate('Pending')}
-                       disabled={!canUpdateStatus('Pending') || updating || submission.status === 'Pending'}
-                     >
-                       ⏳ Pending
-                     </button>
-                   </div>
-
-                   {/* Accepted */}
-                   <div className="col-6 col-md-3">
-                     <button 
-                       className={`btn w-100 ${submission.status === 'Accepted' ? 'btn-success' : 'btn-outline-success'}`}
-                       onClick={() => handleStatusUpdate('Accepted')}
-                       disabled={!canUpdateStatus('Accepted') || updating || submission.status === 'Accepted'}
-                     >
-                       ✅ Accepted
-                     </button>
-                   </div>
-
-                   {/* Rejected */}
-                   <div className="col-6 col-md-3">
-                     <button 
-                       className={`btn w-100 ${submission.status === 'Rejected' ? 'btn-danger' : 'btn-outline-danger'}`}
-                       onClick={() => handleStatusUpdate('Rejected')}
-                       disabled={!canUpdateStatus('Rejected') || updating || submission.status === 'Rejected'}
-                     >
-                       ❌ Rejected
-                     </button>
-                   </div>
-
-                   {/* Duplicate */}
-                   <div className="col-6 col-md-3">
-                     <button 
-                       className={`btn w-100 ${submission.status === 'Duplicate' ? 'btn-secondary' : 'btn-outline-secondary'}`}
-                       onClick={() => handleStatusUpdate('Duplicate')}
-                       disabled={!canUpdateStatus('Duplicate') || updating || submission.status === 'Duplicate'}
-                     >
-                       🔄 Duplicate
-                     </button>
-                   </div>
-
-                   {/* Deleted */}
-                   <div className="col-12 col-md-6 mx-auto mt-2">
-                     <button 
-                       className={`btn w-100 ${submission.status === 'Deleted' ? 'btn-dark' : 'btn-outline-dark'}`}
-                       onClick={() => handleStatusUpdate('Deleted')}
-                       disabled={!canUpdateStatus('Deleted') || updating || submission.status === 'Deleted'}
-                     >
-                       🗑️ Delete
-                     </button>
-                   </div>
-                 </div>
-
-                {user?.role === 'PatchMaker' && (
-                  <div className="alert alert-info mt-3 mb-0">
-                    <small>
-                      <strong>Note:</strong> As a PatchMaker, you can only delete your own submissions.
-                    </small>
+            {/* Name Required Tip Card */}
+            {(!submission.name || submission.name.trim() === '') && canEdit() && (
+              <div className="card mb-4">
+                <div className="card-body">
+                  <div className="alert alert-info mb-0">
+                    <h6 className="alert-heading">💡 Publishing Tip</h6>
+                    <p className="mb-0">A patch name is required to publish this patch. Please add a name in the patch details above.</p>
                   </div>
-                )}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Action Buttons */}
+            {canEdit() && (
+              <div className="card">
+                <div className="card-body text-center">
+                  {submission.status === PatchSubmissionStatus.Unpublished && canUpdateStatus(PatchSubmissionStatus.Published) && (
+                    <button 
+                      className="btn btn-success btn-lg"
+                      onClick={() => handleStatusUpdate(PatchSubmissionStatus.Published)}
+                      disabled={updating || !submission.name || submission.name.trim() === ''}
+                    >
+                      ✅ Publish Patch
+                    </button>
+                  )}
+                  {submission.status === PatchSubmissionStatus.Published && canUpdateStatus(PatchSubmissionStatus.Deleted) && (
+                    <button 
+                      className="btn btn-outline-danger btn-lg"
+                      onClick={() => handleStatusUpdate(PatchSubmissionStatus.Deleted)}
+                      disabled={updating}
+                    >
+                      🗑️ Delete Patch
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Success Messages */}
             {success && (

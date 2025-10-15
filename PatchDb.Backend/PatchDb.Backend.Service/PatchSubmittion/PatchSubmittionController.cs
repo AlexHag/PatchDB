@@ -28,10 +28,10 @@ public class PatchSubmittionController : ControllerBase
     public async Task<ActionResult<PatchResponse>> Update([FromBody] UpdatePatchRequest request)
         => Ok(await _patchSubmittionService.UpdatePatch(User.UserId(), request));
 
-    [HttpGet("pending")]
+    [HttpGet("unpublished")]
     [Authorize]
-    public async Task<ActionResult<PaginationResponse<PatchSubmittionResponse>>> GetPendingSubmittions([FromQuery] int skip = 0, [FromQuery] int take = 20)
-        => Ok(await _patchSubmittionService.GetPendingSubmittions(skip, take));
+    public async Task<ActionResult<PaginationResponse<PatchSubmittionResponse>>> GetUnpublishedSubmissions([FromQuery] int skip = 0, [FromQuery] int take = 20)
+        => Ok(await _patchSubmittionService.GetUnpublishedSubmissions(skip, take));
 
     [HttpGet("{patchSubmittionId}")]
     [Authorize]

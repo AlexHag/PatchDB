@@ -9,7 +9,7 @@ public class PatchSubmittionEntity
     public Guid Id { get; set; }
 
     /// <summary>
-    ///     The patch number if the submittion is accepted
+    ///     The patch number if the submittion is published
     /// </summary>
     public int? PatchNumber { get; set; }
 
@@ -31,7 +31,7 @@ public class PatchSubmittionEntity
     public DateTime? ReleaseDate { get; set; }
 
     /// <summary>
-    ///     Status of the patch submittion. (Pending, Accepted, Rejected, Duplicate, Deleted)
+    ///     Status of the patch submittion. (Unpublished, Published, Rejected, Duplicate, Deleted)
     /// </summary>
     public PatchSubmittionStatus Status { get; set; }
 
