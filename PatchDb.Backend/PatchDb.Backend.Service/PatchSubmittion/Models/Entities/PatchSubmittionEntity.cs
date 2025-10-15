@@ -13,6 +13,12 @@ public class PatchSubmittionEntity
     /// </summary>
     public int? PatchNumber { get; set; }
 
+    /// <summary>
+    ///     If user uploaded an image of a patch that was not found in our database, they can choose to submit it as a new patch to our database.
+    ///     This can be null if the user submits a new patch directly without going through the upload process.
+    /// </summary>
+    public Guid? UserPatchUploadId { get; set; }
+
     public required string FilePath { get; set; }
 
     public string? Name { get; set; }

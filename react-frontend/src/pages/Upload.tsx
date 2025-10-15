@@ -133,8 +133,11 @@ const Upload: React.FC = () => {
       // Step 2: Send fileId to backend for processing
       const result = await uploadPatchWithFileId(fileId);
       
-      // Store upload result for matches page
-      sessionStorage.setItem('patchUploadResult', JSON.stringify(result));
+      // Store upload result for matches page with fileId
+      sessionStorage.setItem('patchUploadResult', JSON.stringify({
+        ...result,
+        originalFileId: fileId
+      }));
       
       // Redirect to matches page
       navigate('/matches');

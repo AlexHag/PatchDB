@@ -38,13 +38,7 @@ const PatchSubmissionView: React.FC = () => {
   useEffect(() => {
     const userId = requireAuth();
     if (!userId || !user) return;
-    
-    // Check if user has required role
-    const allowedRoles = ['Admin', 'Moderator', 'PatchMaker'];
-    if (!allowedRoles.includes(user.role)) {
-      navigate('/dashboard');
-      return;
-    }
+
   }, [requireAuth, user, navigate]);
 
   // Load data

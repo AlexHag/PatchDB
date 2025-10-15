@@ -146,18 +146,32 @@ const Matches: React.FC = () => {
                   <h3 className="h4" style={{color: '#e67e22'}}>🤔 Hmm, This One's New to Us!</h3>
                   <p className="text-muted mb-4">
                     We couldn't find this patch in our collection yet! 
-                    This might be a brand new patch or perhaps the photo needs a different angle.
                   </p>
-                  <p className="text-muted small mb-4">
-                    <strong>💡 Pro tip:</strong> Our team is always adding new patches to the database. 
-                    If you think this should be included, our moderators will take a look during their next review!
-                  </p>
-                  <button 
-                    className="btn btn-outline-dark" 
-                    onClick={() => navigate('/upload')}
-                  >
-                    🔄 Try Another Photo
-                  </button>
+                  <div className="d-flex flex-column align-items-center gap-3">
+                    <button 
+                      className="btn btn-dark w-100" 
+                      style={{ maxWidth: 350 }}
+                      onClick={() => {
+                      // Store upload result for submit patch page
+                      sessionStorage.setItem('submitPatchData', JSON.stringify({
+                        fileId: (uploadResult as any).originalFileId || '',
+                        userPatchUploadId: uploadResult.upload.userPatchUploadId,
+                        imageUrl: uploadResult.upload.imageUrl,
+                        preUploaded: true
+                      }));
+                      navigate('/submit-patch');
+                      }}
+                    >
+                      ✨ Submit This Patch to Our Database
+                    </button>
+                    <button 
+                      className="btn btn-outline-dark w-100" 
+                      style={{ maxWidth: 350 }}
+                      onClick={() => navigate('/upload')}
+                    >
+                      🔄 Try Another Photo
+                    </button>
+                    </div>
                 </div>
               </div>
             )}

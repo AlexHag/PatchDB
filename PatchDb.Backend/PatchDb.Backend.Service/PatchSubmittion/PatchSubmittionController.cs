@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using PatchDb.Backend.Core.Authentication;
 using PatchDb.Backend.Service.Patches.Models.Dto;
 using PatchDb.Backend.Service.PatchSubmittion.Models.Dto;
-using PatchDb.Backend.Service.User.Models;
 using Platform.Core.Application.Persistence;
 
 namespace PatchDb.Backend.Service.PatchSubmittion;
@@ -20,12 +19,12 @@ public class PatchSubmittionController : ControllerBase
     }
 
     [HttpPost("upload")]
-    [Authorize(Roles = $"{nameof(UserRole.PatchMaker)},{nameof(UserRole.Moderator)},{nameof(UserRole.Admin)}")]
+    [Authorize]
     public async Task<ActionResult<PatchResponse>> Upload([FromBody] UploadPatchRequest request)
         => Ok(await _patchSubmittionService.UploadPatch(User.UserId(), request));
 
     [HttpPatch("update")]
-    [Authorize(Roles = $"{nameof(UserRole.PatchMaker)},{nameof(UserRole.Moderator)},{nameof(UserRole.Admin)}")]
+    [Authorize]
     public async Task<ActionResult<PatchResponse>> Update([FromBody] UpdatePatchRequest request)
         => Ok(await _patchSubmittionService.UpdatePatch(User.UserId(), request));
 

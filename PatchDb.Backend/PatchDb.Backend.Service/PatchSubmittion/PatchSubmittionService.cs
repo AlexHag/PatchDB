@@ -9,6 +9,8 @@ using PatchDb.Backend.Service.PatchSubmittion.Models.Entities;
 using PatchDb.Backend.Service.Universities;
 using PatchDb.Backend.Service.User.Models;
 using PatchDb.Backend.Service.User.Models.Entities;
+using PatchDb.Backend.Service.UserPatches;
+using PatchDb.Backend.Service.UserPatches.Models.Entities;
 using Platform.Core.Application.Persistence;
 
 namespace PatchDb.Backend.Service.PatchSubmittion;
@@ -27,6 +29,8 @@ public class PatchSubmittionService : IPatchSubmittionService
     private readonly IS3FileService _s3FileService;
     private readonly IPatchIndexApi _patchIndexApi;
     private readonly IUniversityService _universityService;
+    private readonly IUserPatchService _userPatchService;
+    private readonly ILogger _logger;
     private readonly IModelMapper _mapper;
 
     public PatchSubmittionService(
@@ -34,12 +38,16 @@ public class PatchSubmittionService : IPatchSubmittionService
         IS3FileService s3FileService,
         IPatchIndexApi patchIndexApi,
         IUniversityService universityService,
+        IUserPatchService userPatchService,
+        ILogger logger,
         IModelMapper mapper)
     {
         _dbContext = dbContext;
         _s3FileService = s3FileService;
         _patchIndexApi = patchIndexApi;
         _universityService = universityService;
+        _userPatchService = userPatchService;
+        _logger = logger;
         _mapper = mapper;
     }
 
@@ -60,6 +68,7 @@ public class PatchSubmittionService : IPatchSubmittionService
         var entity = new PatchSubmittionEntity
         {
             Id = Guid.NewGuid(),
+            UserPatchUploadId = request.UserPatchUploadId,
             FilePath = path,
             Name = request.Name,
             Description = request.Description,
@@ -190,6 +199,15 @@ public class PatchSubmittionService : IPatchSubmittionService
                     throw;
                 }
             }
+
+            try
+            {
+                await AddAcceptedPatchSubmissionToUserPatches(patchSubmittion);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to add accepted patch submission {Id} to user patches...", patchSubmittion.Id);
+            }
         }
         else
         {
@@ -198,7 +216,36 @@ public class PatchSubmittionService : IPatchSubmittionService
 
         return _mapper.ToPatchSubmittionResponse(patchSubmittion);
     }
-    
+
+    private async Task AddAcceptedPatchSubmissionToUserPatches(PatchSubmittionEntity entity)
+    {
+        if (!entity.PatchNumber.HasValue)
+        {
+            _logger.LogError("Patch submission {Id} does not have a patch number after being accepted...", entity.Id);
+            throw new InternalServerErrorApiException("Oops something went wrong...");
+        }
+
+        if (entity.UserPatchUploadId.HasValue)
+        {
+            await _userPatchService.UpdatePatchUploadMatch(entity.UploadedByUserId, entity.UserPatchUploadId.Value, entity.PatchNumber.Value);
+        }
+        else
+        {
+            var userPatchUploadEntity = new UserPatchUploadEntity
+            {
+                Id = Guid.NewGuid(),
+                UserId = entity.UploadedByUserId,
+                FilePath = entity.FilePath,
+                Created = entity.Created
+            };
+
+            await _dbContext.UserPatchUploads.AddAsync(userPatchUploadEntity);
+            await _dbContext.SaveChangesAsync();
+
+            await _userPatchService.UpdatePatchUploadMatch(entity.UploadedByUserId, userPatchUploadEntity.Id, entity.PatchNumber.Value);
+        }
+    }
+
     private void ValidateCanUpdatePatch(UpdatePatchRequest request, UserEntity user, PatchSubmittionEntity patchSubmittion)
     {
         if (user.Role == UserRole.Admin || user.Role == UserRole.Moderator)
@@ -209,11 +256,6 @@ public class PatchSubmittionService : IPatchSubmittionService
         if (patchSubmittion.Status == PatchSubmittionStatus.Deleted)
         {
             throw new NotFoundApiException("Patch submittion not found");
-        }
-
-        if (user.Role != UserRole.PatchMaker)
-        {
-            throw new UnauthorizedApiException("Only patch makers, moderators and admins can update patch submittions");
         }
 
         if (patchSubmittion.UploadedByUserId != user.Id)

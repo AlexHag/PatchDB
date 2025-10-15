@@ -19,6 +19,14 @@ const SubmitPatch: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState('');
   const [dragOver, setDragOver] = useState(false);
   
+  // Pre-uploaded image state
+  const [preUploadedData, setPreUploadedData] = useState<{
+    fileId: string;
+    userPatchUploadId: string;
+    imageUrl: string;
+    preUploaded: boolean;
+  } | null>(null);
+  
   // Form state
   const [patchName, setPatchName] = useState('');
   const [description, setDescription] = useState('');
@@ -44,15 +52,9 @@ const SubmitPatch: React.FC = () => {
     const userId = requireAuth();
     if (!userId || !user) return;
     
-    // Check if user has required role
-    const allowedRoles = ['Admin', 'Moderator', 'PatchMaker'];
-    if (!allowedRoles.includes(user.role)) {
-      navigate('/dashboard');
-      return;
-    }
   }, [requireAuth, user, navigate]);
 
-  // Load universities
+  // Load universities and check for pre-uploaded data
   useEffect(() => {
     const loadUniversities = async () => {
       try {
@@ -65,6 +67,22 @@ const SubmitPatch: React.FC = () => {
         setLoadingUniversities(false);
       }
     };
+
+    // Check for pre-uploaded patch data
+    const submitPatchData = sessionStorage.getItem('submitPatchData');
+    if (submitPatchData) {
+      try {
+        const data = JSON.parse(submitPatchData);
+        setPreUploadedData(data);
+        setShowPreview(true);
+        setPreviewUrl(data.imageUrl);
+        setShowForm(true);
+        // Clear the session storage data since we've consumed it
+        sessionStorage.removeItem('submitPatchData');
+      } catch (error) {
+        console.error('Failed to parse submit patch data:', error);
+      }
+    }
 
     loadUniversities();
   }, []);
@@ -108,6 +126,7 @@ const SubmitPatch: React.FC = () => {
 
   const clearImage = () => {
     setSelectedFile(null);
+    setPreUploadedData(null);
     setShowPreview(false);
     setPreviewUrl('');
     setShowForm(false);
@@ -166,7 +185,7 @@ const SubmitPatch: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedFile) {
+    if (!selectedFile && !preUploadedData) {
       showError('Please select an image first.');
       return;
     }
@@ -174,21 +193,29 @@ const SubmitPatch: React.FC = () => {
     try {
       setLoading(true);
 
-      // Resize image if needed
-      let fileToUpload = selectedFile;
-      if (selectedFile.size > 2 * 1024 * 1024) { // If larger than 2MB, resize
-        fileToUpload = await resizeImage(selectedFile, 1200, 900, 0.8);
+      let fileId: string;
+      
+      if (preUploadedData) {
+        // Use pre-uploaded file data
+        fileId = preUploadedData.fileId;
+      } else {
+        // Resize image if needed
+        let fileToUpload = selectedFile!;
+        if (selectedFile!.size > 2 * 1024 * 1024) { // If larger than 2MB, resize
+          fileToUpload = await resizeImage(selectedFile!, 1200, 900, 0.8);
+        }
+
+        // Step 1: Upload file to S3 and get fileId
+        fileId = await uploadFileWithValidation(fileToUpload, {
+          maxSizeMB: 10,
+          allowedTypes: ['image/']
+        });
       }
 
-      // Step 1: Upload file to S3 and get fileId
-      const fileId = await uploadFileWithValidation(fileToUpload, {
-        maxSizeMB: 10,
-        allowedTypes: ['image/']
-      });
-      
       // Step 2: Submit patch with form data
       const request: UploadPatchRequest = {
         fileId,
+        userPatchUploadId: preUploadedData?.userPatchUploadId,
         name: patchName.trim() || undefined,
         description: description.trim() || undefined,
         patchMaker: patchMaker.trim() || undefined,
@@ -250,12 +277,14 @@ const SubmitPatch: React.FC = () => {
                 <h2 className="h4 mb-1" style={{background: 'linear-gradient(135deg, #8e44ad, #e67e22)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>
                   ✨ Submit New Patch
                 </h2>
-                <small className="text-muted">Add a new patch to the database with detailed information</small>
+                <small className="text-muted">
+                  {preUploadedData ? 'Complete the patch details to submit to our database' : 'Add a new patch to the database with detailed information'}
+                </small>
               </div>
               <div className="card-body">
                 
-                {/* Upload Methods */}
-                {!showCamera && !showPreview && (
+                {/* Upload Methods - hidden when pre-uploaded */}
+                {!showCamera && !showPreview && !preUploadedData && (
                   <div className="row mb-4">
                     <div className="col-12 col-sm-6 mb-3">
                       <button 
@@ -318,6 +347,17 @@ const SubmitPatch: React.FC = () => {
                 {/* Image Preview and Form */}
                 {showPreview && (
                   <div>
+                    {/* {preUploadedData && (
+                      <div className="alert alert-info mb-3">
+                        <div className="d-flex align-items-center">
+                          <svg className="me-2" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                          </svg>
+                          <strong>Using your uploaded image</strong>
+                          <span className="text-muted ms-2">• Complete the form below to submit this patch to our database</span>
+                        </div>
+                      </div>
+                    )} */}
                     <div className="text-center mb-3">
                       <img 
                         src={previewUrl}
@@ -427,9 +467,16 @@ const SubmitPatch: React.FC = () => {
                         </div>
                     
                         <div className="d-flex gap-2 justify-content-center">
-                          <button type="button" className="btn btn-outline-secondary" onClick={clearImage}>
-                            🔄 Choose Different Image
-                          </button>
+                          {!preUploadedData && (
+                            <button type="button" className="btn btn-outline-secondary" onClick={clearImage}>
+                              🔄 Choose Different Image
+                            </button>
+                          )}
+                          {preUploadedData && (
+                            <button type="button" className="btn btn-outline-secondary" onClick={() => navigate('/matches')}>
+                              ← Back to Matches
+                            </button>
+                          )}
                           <button 
                             type="submit"
                             className="btn btn-dark" 
@@ -446,8 +493,8 @@ const SubmitPatch: React.FC = () => {
                   </div>
                 )}
 
-                {/* Drag & Drop Area */}
-                {!showCamera && !showPreview && (
+                {/* Drag & Drop Area - hidden when pre-uploaded */}
+                {!showCamera && !showPreview && !preUploadedData && (
                   <div 
                     className={`upload-area mb-3 ${dragOver ? 'dragover' : ''}`}
                     onDragEnter={handleDragEnter}

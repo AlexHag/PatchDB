@@ -163,6 +163,7 @@ export interface UniversityAndProgramModel extends UniversityModel {
 // Patch submission types
 export interface UploadPatchRequest {
   fileId: string;
+  userPatchUploadId?: string;
   name?: string;
   description?: string;
   patchMaker?: string;

@@ -7,6 +7,9 @@ public class UploadPatchRequest
     [JsonProperty("fileId")]
     public Guid FileId { get; set; }
 
+    [JsonProperty("userPatchUploadId")]
+    public Guid? UserPatchUploadId { get; set; }
+
     [JsonProperty("name")]
     public string? Name { get; set; }
 
