@@ -136,35 +136,27 @@ const PatchSubmissionView: React.FC = () => {
 
   const canEdit = () => {
     if (!user || !submission) return false;
-    
-    // User can edit if they own the submission OR they are Admin/Moderator
-    return submission.uploadedByUserId === user.id || 
-           user.role === 'Admin' || 
-           user.role === 'Moderator';
+
+    if (user.role === 'Admin' || user.role === 'Moderator') return true;
+
+    if (submission.uploadedByUserId !== user.id) return false;
+
+    if (submission.status === PatchSubmissionStatus.Rejected || submission.status === PatchSubmissionStatus.Duplicate) return false;
+
+    return true;
   };
 
   const canUpdateStatus = (targetStatus: PatchSubmissionStatus) => {
     if (!user || !submission) return false;
 
-    return true;
+    if (submission.status === targetStatus) return false; // No change
 
-    // TODO: Fix this
-    
-    // Check if user owns the submission
-    // const isOwner = submission.uploadedByUserId === user.id;
-    // const isModerator = user.role === 'Admin' || user.role === 'Moderator';
-    
-    // // if (isOwner) {
-    // //   // Owners can only delete their submissions
-    // //   return targetStatus === PatchSubmissionStatus.Deleted;
-    // // }
-    
-    // if (isModerator) {
-    //   // Moderators and admins can change any status
-    //   return true;
-    // }
-    
-    // return false;
+    if (targetStatus == PatchSubmissionStatus.Rejected || targetStatus == PatchSubmissionStatus.Duplicate)
+    {
+      return user?.role === 'Admin' || user?.role === 'Moderator';
+    }
+
+    return true;
   };
 
   const handleUpdateInfo = async () => {
@@ -197,8 +189,13 @@ const PatchSubmissionView: React.FC = () => {
 
   const handleStatusUpdate = async (newStatus: PatchSubmissionStatus) => {
     if (!submission || !canUpdateStatus(newStatus)) return;
+
+    if (newStatus === PatchSubmissionStatus.Published && (!patchName || patchName.trim() === '')) {
+      window.alert('A name is required to publish this patch.');
+      return;
+    }
     
-    const confirmMessage = `Are you sure you want to update the status to ${newStatus}?`;
+    const confirmMessage = `Are you sure you want to to ${newStatus} this patch?`;
     if (!window.confirm(confirmMessage)) return;
     
     try {
@@ -286,15 +283,24 @@ const PatchSubmissionView: React.FC = () => {
             <div className="d-flex justify-content-between align-items-center mb-4">
               <div>
                 <h2 className="h4 mb-1" style={{background: 'linear-gradient(135deg, #8e44ad, #e67e22)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>
-                  🔍 Patch Submission Details
+                  🔍 Patch Submission
                 </h2>
-                <small className="text-muted">ID: {submission.patchSubmittionId}</small>
               </div>
               <span className={`badge ${getStatusBadgeClass(submission.status)} fs-6`}>
-                {/* {getStatusIcon(submission.status)} {getStatusDisplayName(submission.status)} */}
                 {getStatusIcon(submission.status)} {submission.status}
               </span>
             </div>
+
+            {/* Name Required Tip Card */}
+            {(!submission.name || submission.name.trim() === '') && canEdit() && (
+              <div className="card mb-4">
+                <div className="card-body">
+                  <div className="alert alert-info mb-0">
+                    <h6 className="alert-heading">💡 A name is required to submit this patch</h6>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="row">
               {/* Image and Basic Info */}
@@ -317,7 +323,7 @@ const PatchSubmissionView: React.FC = () => {
                         </button>
                         {showDropdown && (
                           <div className="dropdown-menu show position-absolute" style={{ right: 0, top: '100%', minWidth: '200px', zIndex: 1000 }}>
-                            {submission.status !== PatchSubmissionStatus.Published && canUpdateStatus(PatchSubmissionStatus.Published) && (
+                            {canUpdateStatus(PatchSubmissionStatus.Published) && (
                               <button 
                                 className="dropdown-item"
                                 onClick={() => {
@@ -328,7 +334,7 @@ const PatchSubmissionView: React.FC = () => {
                                 ✅ Publish
                               </button>
                             )}
-                            {submission.status !== PatchSubmissionStatus.Unpublished && canUpdateStatus(PatchSubmissionStatus.Unpublished) && (
+                            {canUpdateStatus(PatchSubmissionStatus.Unpublished) && (
                               <button 
                                 className="dropdown-item"
                                 onClick={() => {
@@ -339,7 +345,7 @@ const PatchSubmissionView: React.FC = () => {
                                 📄 Unpublish
                               </button>
                             )}
-                            {submission.status !== PatchSubmissionStatus.Deleted && canUpdateStatus(PatchSubmissionStatus.Deleted) && (
+                            {canUpdateStatus(PatchSubmissionStatus.Deleted) && (
                               <button 
                                 className="dropdown-item"
                                 onClick={() => {
@@ -350,31 +356,27 @@ const PatchSubmissionView: React.FC = () => {
                                 🗑️ Delete
                               </button>
                             )}
-                            {(user?.role === 'Admin' || user?.role === 'Moderator') && (
-                              <>
-                                {submission.status !== PatchSubmissionStatus.Rejected && (
-                                  <button 
-                                    className="dropdown-item"
-                                    onClick={() => {
-                                      handleStatusUpdate(PatchSubmissionStatus.Rejected);
-                                      setShowDropdown(false);
-                                    }}
-                                  >
-                                    ❌ Reject this patch
-                                  </button>
-                                )}
-                                {submission.status !== PatchSubmissionStatus.Duplicate && (
-                                  <button 
-                                    className="dropdown-item"
-                                    onClick={() => {
-                                      handleStatusUpdate(PatchSubmissionStatus.Duplicate);
-                                      setShowDropdown(false);
-                                    }}
-                                  >
-                                    🔄 Mark as duplicate
-                                  </button>
-                                )}
-                              </>
+                            {canUpdateStatus(PatchSubmissionStatus.Rejected) && (
+                            <button 
+                                className="dropdown-item"
+                                onClick={() => {
+                                  handleStatusUpdate(PatchSubmissionStatus.Rejected);
+                                  setShowDropdown(false);
+                                }}
+                              >
+                                ❌ Reject this patch
+                            </button>
+                            )}
+                            {canUpdateStatus(PatchSubmissionStatus.Duplicate) && (
+                            <button 
+                              className="dropdown-item"
+                              onClick={() => {
+                                handleStatusUpdate(PatchSubmissionStatus.Duplicate);
+                                setShowDropdown(false);
+                              }}
+                            >
+                              🔄 Mark as duplicate
+                            </button>
                             )}
                           </div>
                         )}
@@ -560,18 +562,6 @@ const PatchSubmissionView: React.FC = () => {
               </div>
             </div>
 
-            {/* Name Required Tip Card */}
-            {(!submission.name || submission.name.trim() === '') && canEdit() && (
-              <div className="card mb-4">
-                <div className="card-body">
-                  <div className="alert alert-info mb-0">
-                    <h6 className="alert-heading">💡 Publishing Tip</h6>
-                    <p className="mb-0">A patch name is required to publish this patch. Please add a name in the patch details above.</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Action Buttons */}
             {canEdit() && (
               <div className="card">
@@ -580,7 +570,7 @@ const PatchSubmissionView: React.FC = () => {
                     <button 
                       className="btn btn-success btn-lg"
                       onClick={() => handleStatusUpdate(PatchSubmissionStatus.Published)}
-                      disabled={updating || !submission.name || submission.name.trim() === ''}
+                      disabled={updating}
                     >
                       ✅ Publish Patch
                     </button>
