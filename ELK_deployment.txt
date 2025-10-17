@@ -1,0 +1,20 @@
+Image:
+    docker.elastic.co/elasticsearch/elasticsearch:7.17.5
+Environment Variables
+    PORT=9200
+    discovery.type=single-node
+    ES_JAVA_OPTS=-Xms512m -Xmx2048m
+    xpack.security.enabled=true
+    ELASTIC_USERNAME=elastic
+    ELASTIC_PASSWORD=MyP@ssw0rd!123
+    network.host=0.0.0.0
+
+Image:
+    docker.elastic.co/kibana/kibana:7.17.5
+Environment Variables:
+    PORT=5601
+    SERVER_HOST=0.0.0.0
+    ELASTICSEARCH_HOSTS=http://<elasticsearch-internal-address>:9200
+    ELASTICSEARCH_USERNAME=elastic
+    ELASTICSEARCH_PASSWORD=MyP@ssw0rd!123
+    XPACK_SECURITY_ENABLED=true

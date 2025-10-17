@@ -2,12 +2,11 @@ using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using PatchDb.Backend.Core.Authentication;
 using PatchDb.Backend.Core.Exceptions;
 using System.Text.Json.Serialization;
+using PatchDb.Backend.Core.Elastic;
 
 namespace PatchDb.Backend.Core;
 
@@ -16,7 +15,8 @@ public static class WebApplicationServiceExtensions
     public static WebApplicationBuilder ConfigureBuilder(this WebApplicationBuilder builder, string name = "PatchDB")
     {
         builder.Configuration.AddUserSecrets(Assembly.GetCallingAssembly());
-        builder.AddLogging();
+        builder.AddLoggingToElastic();
+
         // builder.AddCryptography();
         builder.AddJwtAuthentication();
         // builder.AddMtlsAuthentication();
@@ -88,18 +88,6 @@ public static class WebApplicationServiceExtensions
                     new string[]{}
                 }
             });
-        });
-
-        return builder;
-    }
-
-    private static WebApplicationBuilder AddLogging(this WebApplicationBuilder builder)
-    {
-        builder.Services.AddLogging(p => p.AddConsole());
-        builder.Services.AddSingleton<ILogger>(p => 
-        {
-            var factory = p.GetRequiredService<ILoggerFactory>();
-            return factory.CreateLogger("PatchDB");
         });
 
         return builder;

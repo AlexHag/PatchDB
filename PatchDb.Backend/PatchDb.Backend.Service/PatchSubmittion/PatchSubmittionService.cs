@@ -207,7 +207,7 @@ public class PatchSubmittionService : IPatchSubmittionService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to add published patch submission {Id} to user patches...", patchSubmittion.Id);
+                _logger.Error(ex, "Failed to add published patch submission {Id} to user patches...", patchSubmittion.Id);
             }
         }
         else
@@ -222,7 +222,7 @@ public class PatchSubmittionService : IPatchSubmittionService
     {
         if (!entity.PatchNumber.HasValue)
         {
-            _logger.LogError("Patch submission {Id} does not have a patch number after being published...", entity.Id);
+            _logger.Error("Patch submission {Id} does not have a patch number after being published...", entity.Id);
             throw new InternalServerErrorApiException("Oops something went wrong...");
         }
 

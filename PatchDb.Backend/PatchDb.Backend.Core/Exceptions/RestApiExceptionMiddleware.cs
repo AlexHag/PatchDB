@@ -1,9 +1,7 @@
-
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace PatchDb.Backend.Core.Exceptions;
 
@@ -47,7 +45,7 @@ public class RestApiExceptionMiddleware
                 errorId = "unhandled-internal-server-error-id";
             }
 
-            _logger.LogError(ex, "Exception: {Exception}, Context: {Context}, Code: {Code}, ErrorResponse: {ErrorResponse}, ErrorId: {ErrorId}",
+            _logger.Error(ex, "Exception: {Exception}, Context: {Context}, Code: {Code}, ErrorResponse: {ErrorResponse}, ErrorId: {ErrorId}",
                 ex, context, code, errorResponse, errorId);
 
             var result = JsonSerializer.Serialize(new

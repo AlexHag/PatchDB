@@ -1,0 +1,40 @@
+version: '2.2'
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.5
+    container_name: es01
+    environment:
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx2048m"
+      - "ELASTIC_USERNAME=elastic"
+      - "ELASTIC_PASSWORD=MyP@ssw0rd!123"
+      - "xpack.security.enabled=true"
+      - "network.host=0.0.0.0"
+    volumes:
+      - data01:/c/elk/data
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.5
+    environment:
+      - "SERVER_HOST=0.0.0.0"
+      - "ELASTICSEARCH_HOSTS=http://es01:9200"
+      - "XPACK_SECURITY_ENABLED=true"
+      - "ELASTICSEARCH_USERNAME=elastic"
+      - "ELASTICSEARCH_PASSWORD=MyP@ssw0rd!123"
+    ports:
+      - 5601:5601
+    networks:
+      - elastic
+    depends_on:
+      - es01
+volumes:
+  data01:
+    driver: local
+
+networks:
+  elastic:
+    driver: bridge
