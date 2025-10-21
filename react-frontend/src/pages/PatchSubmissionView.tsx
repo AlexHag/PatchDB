@@ -4,19 +4,19 @@ import { useAuth } from '../components/hooks/useAuth';
 import Navigation from '../components/Navigation';
 import { getPatchSubmission, updatePatchSubmission, getUniversities } from '../api/patchdb';
 import type { 
-  PatchSubmittionResponse,
+  PatchSubmissionResponse,
   UpdatePatchSubmissionRequest, 
   UniversityModel
 } from '../api/types';
 import { PatchSubmissionStatus } from '../api/types';
 
 const PatchSubmissionView: React.FC = () => {
-  const { patchSubmittionId } = useParams<{ patchSubmittionId: string }>();
+  const { patchSubmissionId } = useParams<{ patchSubmissionId: string }>();
   const { user, requireAuth } = useAuth();
   const navigate = useNavigate();
   
   // Data state
-  const [submission, setSubmission] = useState<PatchSubmittionResponse | null>(null);
+  const [submission, setSubmission] = useState<PatchSubmissionResponse | null>(null);
   const [universities, setUniversities] = useState<UniversityModel[]>([]);
   
   // Form state
@@ -47,7 +47,7 @@ const PatchSubmissionView: React.FC = () => {
   // Load data
   useEffect(() => {
     const loadData = async () => {
-      if (!patchSubmittionId) {
+      if (!patchSubmissionId) {
         navigate('/dashboard');
         return;
       }
@@ -55,7 +55,7 @@ const PatchSubmissionView: React.FC = () => {
       try {
         setLoading(true);
         const [patchData, universityData] = await Promise.all([
-          getPatchSubmission(patchSubmittionId),
+          getPatchSubmission(patchSubmissionId),
           getUniversities()
         ]);
         
@@ -78,7 +78,7 @@ const PatchSubmissionView: React.FC = () => {
     };
 
     loadData();
-  }, [patchSubmittionId, navigate]);
+  }, [patchSubmissionId, navigate]);
 
   // Handle clicking outside dropdown to close it
   useEffect(() => {
@@ -166,7 +166,7 @@ const PatchSubmissionView: React.FC = () => {
       setUpdating(true);
       
       const request: UpdatePatchSubmissionRequest = {
-        id: submission.patchSubmittionId,
+        id: submission.patchSubmissionId,
         name: patchName.trim() || undefined,
         description: description.trim() || undefined,
         patchMaker: patchMaker.trim() || undefined,
@@ -202,7 +202,7 @@ const PatchSubmissionView: React.FC = () => {
       setUpdating(true);
       
       const request: UpdatePatchSubmissionRequest = {
-        id: submission.patchSubmittionId,
+        id: submission.patchSubmissionId,
         name: patchName.trim() || undefined,
         description: description.trim() || undefined,
         patchMaker: patchMaker.trim() || undefined,

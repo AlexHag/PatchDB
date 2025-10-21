@@ -100,7 +100,7 @@ const App: React.FC = () => {
             </ProtectedRoute>
           } />
           
-          <Route path="/submit-patch/:patchSubmittionId" element={
+          <Route path="/submit-patch/:patchSubmissionId" element={
             <ProtectedRoute>
               <PatchSubmissionView />
             </ProtectedRoute>

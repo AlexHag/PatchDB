@@ -3,9 +3,9 @@ using PatchDb.Backend.Core.Exceptions;
 using PatchDb.Backend.Service.FileService;
 using PatchDb.Backend.Service.Patches.Models.Entities;
 using PatchDb.Backend.Service.PatchIndexApi;
-using PatchDb.Backend.Service.PatchSubmittion.Models;
-using PatchDb.Backend.Service.PatchSubmittion.Models.Dto;
-using PatchDb.Backend.Service.PatchSubmittion.Models.Entities;
+using PatchDb.Backend.Service.PatchSubmission.Models;
+using PatchDb.Backend.Service.PatchSubmission.Models.Dto;
+using PatchDb.Backend.Service.PatchSubmission.Models.Entities;
 using PatchDb.Backend.Service.Universities;
 using PatchDb.Backend.Service.User.Models;
 using PatchDb.Backend.Service.User.Models.Entities;
@@ -13,17 +13,17 @@ using PatchDb.Backend.Service.UserPatches;
 using PatchDb.Backend.Service.UserPatches.Models.Entities;
 using Platform.Core.Application.Persistence;
 
-namespace PatchDb.Backend.Service.PatchSubmittion;
+namespace PatchDb.Backend.Service.PatchSubmission;
 
-public interface IPatchSubmittionService
+public interface IPatchSubmissionService
 {
-    Task<PatchSubmittionResponse> UploadPatch(Guid userId, UploadPatchRequest request);
-    Task<PatchSubmittionResponse> UpdatePatch(Guid userId, UpdatePatchRequest request);
-    Task<PaginationResponse<PatchSubmittionResponse>> GetUnpublishedSubmissions(int skip, int take);
-    Task<PatchSubmittionResponse> GetPatchSubmittion(Guid patchSubmittionId);
+    Task<PatchSubmissionResponse> UploadPatch(Guid userId, UploadPatchRequest request);
+    Task<PatchSubmissionResponse> UpdatePatch(Guid userId, UpdatePatchRequest request);
+    Task<PaginationResponse<PatchSubmissionResponse>> GetUnpublishedSubmissions(int skip, int take);
+    Task<PatchSubmissionResponse> GetPatchSubmission(Guid patchSubmissionId);
 }
 
-public class PatchSubmittionService : IPatchSubmittionService
+public class PatchSubmissionService : IPatchSubmissionService
 {
     private readonly ServiceDbContext _dbContext;
     private readonly IS3FileService _s3FileService;
@@ -33,7 +33,7 @@ public class PatchSubmittionService : IPatchSubmittionService
     private readonly ILogger _logger;
     private readonly IModelMapper _mapper;
 
-    public PatchSubmittionService(
+    public PatchSubmissionService(
         ServiceDbContext dbContext,
         IS3FileService s3FileService,
         IPatchIndexApi patchIndexApi,
@@ -51,7 +51,7 @@ public class PatchSubmittionService : IPatchSubmittionService
         _mapper = mapper;
     }
 
-    public async Task<PatchSubmittionResponse> UploadPatch(Guid userId, UploadPatchRequest request)
+    public async Task<PatchSubmissionResponse> UploadPatch(Guid userId, UploadPatchRequest request)
     {
         var path = $"{userId}/{request.FileId}";
 
@@ -65,7 +65,7 @@ public class PatchSubmittionService : IPatchSubmittionService
             throw new BadRequestApiException("Invalid university code");
         }
 
-        var entity = new PatchSubmittionEntity
+        var entity = new PatchSubmissionEntity
         {
             Id = Guid.NewGuid(),
             UserPatchUploadId = request.UserPatchUploadId,
@@ -76,37 +76,37 @@ public class PatchSubmittionService : IPatchSubmittionService
             UniversityCode = request.UniversityCode,
             UniversitySection = request.UniversitySection,
             ReleaseDate = request.ReleaseDate,
-            Status = PatchSubmittionStatus.Unpublished,
+            Status = PatchSubmissionStatus.Unpublished,
             UploadedByUserId = userId,
             Created = DateTime.UtcNow
         };
 
-        _dbContext.PatchSubmittions.Add(entity);
+        _dbContext.PatchSubmissions.Add(entity);
         await _dbContext.SaveChangesAsync();
 
-        return _mapper.ToPatchSubmittionResponse(entity);
+        return _mapper.ToPatchSubmissionResponse(entity);
     }
 
-    public async Task<PatchSubmittionResponse> UpdatePatch(Guid userId, UpdatePatchRequest request)
+    public async Task<PatchSubmissionResponse> UpdatePatch(Guid userId, UpdatePatchRequest request)
     {
-        var patchSubmittion = await _dbContext.PatchSubmittions.FindAsync(request.Id) ?? throw new NotFoundApiException("Patch submittion not found");
+        var patchSubmission = await _dbContext.PatchSubmissions.FindAsync(request.Id) ?? throw new NotFoundApiException("Patch submission not found");
         var user = await _dbContext.Users.FindAsync(userId) ?? throw new UnauthorizedApiException("User not found");
 
-        ValidateCanUpdatePatch(request, user, patchSubmittion);
+        ValidateCanUpdatePatch(request, user, patchSubmission);
 
         if (!string.IsNullOrWhiteSpace(request.Name))
         {
-            patchSubmittion.Name = request.Name;
+            patchSubmission.Name = request.Name;
         }
 
         if (!string.IsNullOrWhiteSpace(request.Description))
         {
-            patchSubmittion.Description = request.Description;
+            patchSubmission.Description = request.Description;
         }
 
         if (!string.IsNullOrWhiteSpace(request.PatchMaker))
         {
-            patchSubmittion.PatchMaker = request.PatchMaker;
+            patchSubmission.PatchMaker = request.PatchMaker;
         }
 
         if (!string.IsNullOrWhiteSpace(request.UniversityCode))
@@ -116,52 +116,52 @@ public class PatchSubmittionService : IPatchSubmittionService
                 throw new BadRequestApiException("Invalid university code");
             }
 
-            patchSubmittion.UniversityCode = request.UniversityCode;
+            patchSubmission.UniversityCode = request.UniversityCode;
         }
 
         if (!string.IsNullOrWhiteSpace(request.UniversitySection))
         {
-            patchSubmittion.UniversitySection = request.UniversitySection;
+            patchSubmission.UniversitySection = request.UniversitySection;
         }
 
         if (request.ReleaseDate.HasValue)
         {
-            patchSubmittion.ReleaseDate = request.ReleaseDate.Value;
+            patchSubmission.ReleaseDate = request.ReleaseDate.Value;
         }
 
         if (request.Status.HasValue)
         {
-            patchSubmittion.Status = request.Status.Value;
+            patchSubmission.Status = request.Status.Value;
         }
 
-        patchSubmittion.LastUpdatedByUserId = userId;
+        patchSubmission.LastUpdatedByUserId = userId;
 
-        if (patchSubmittion.PatchNumber.HasValue)
+        if (patchSubmission.PatchNumber.HasValue)
         {
-            var patch = await _dbContext.Patches.FindAsync(patchSubmittion.PatchNumber.Value) ?? throw new InternalServerErrorApiException("Patch not found");
+            var patch = await _dbContext.Patches.FindAsync(patchSubmission.PatchNumber.Value) ?? throw new InternalServerErrorApiException("Patch not found");
 
-            if (patchSubmittion.Status == PatchSubmittionStatus.Published)
+            if (patchSubmission.Status == PatchSubmissionStatus.Published)
             {
-                patch.Name = patchSubmittion.Name;
-                patch.Description = patchSubmittion.Description;
-                patch.PatchMaker = patchSubmittion.PatchMaker;
-                patch.UniversityCode = patchSubmittion.UniversityCode;
-                patch.UniversitySection = patchSubmittion.UniversitySection;
-                patch.ReleaseDate = patchSubmittion.ReleaseDate;
+                patch.Name = patchSubmission.Name;
+                patch.Description = patchSubmission.Description;
+                patch.PatchMaker = patchSubmission.PatchMaker;
+                patch.UniversityCode = patchSubmission.UniversityCode;
+                patch.UniversitySection = patchSubmission.UniversitySection;
+                patch.ReleaseDate = patchSubmission.ReleaseDate;
                 patch.Updated = DateTime.UtcNow;
             }
             else
             {
                 _dbContext.Patches.Remove(patch);
-                await _patchIndexApi.DeleteFromIndex(patchSubmittion.PatchNumber.Value);
-                patchSubmittion.PatchNumber = null;
+                await _patchIndexApi.DeleteFromIndex(patchSubmission.PatchNumber.Value);
+                patchSubmission.PatchNumber = null;
             }
 
             await _dbContext.SaveChangesAsync();
         }
-        else if (patchSubmittion.Status == PatchSubmittionStatus.Published)
+        else if (patchSubmission.Status == PatchSubmissionStatus.Published)
         {
-            if (string.IsNullOrEmpty(patchSubmittion.Name))
+            if (string.IsNullOrEmpty(patchSubmission.Name))
             {
                 throw new BadRequestApiException("Patch name is required to accept this");
             }
@@ -172,15 +172,15 @@ public class PatchSubmittionService : IPatchSubmittionService
                 {
                     var patch = new PatchEntity
                     {
-                        FilePath = patchSubmittion.FilePath,
-                        Name = patchSubmittion.Name,
-                        Description = patchSubmittion.Description,
-                        PatchMaker = patchSubmittion.PatchMaker,
-                        UniversityCode = patchSubmittion.UniversityCode,
-                        UniversitySection = patchSubmittion.UniversitySection,
-                        ReleaseDate = patchSubmittion.ReleaseDate,
-                        PatchSubmissionId = patchSubmittion.Id,
-                        SubmittedByUserId = patchSubmittion.UploadedByUserId,
+                        FilePath = patchSubmission.FilePath,
+                        Name = patchSubmission.Name,
+                        Description = patchSubmission.Description,
+                        PatchMaker = patchSubmission.PatchMaker,
+                        UniversityCode = patchSubmission.UniversityCode,
+                        UniversitySection = patchSubmission.UniversitySection,
+                        ReleaseDate = patchSubmission.ReleaseDate,
+                        PatchSubmissionId = patchSubmission.Id,
+                        SubmittedByUserId = patchSubmission.UploadedByUserId,
                         Created = DateTime.UtcNow
                     };
 
@@ -189,7 +189,7 @@ public class PatchSubmittionService : IPatchSubmittionService
 
                     await _patchIndexApi.IndexPatch(patch.PatchNumber!.Value, patch.FilePath);
 
-                    patchSubmittion.PatchNumber = patch.PatchNumber;
+                    patchSubmission.PatchNumber = patch.PatchNumber;
                     await _dbContext.SaveChangesAsync();
 
                     await transaction.CommitAsync();
@@ -203,11 +203,11 @@ public class PatchSubmittionService : IPatchSubmittionService
 
             try
             {
-                await AddPublishedPatchSubmissionToUserPatches(patchSubmittion);
+                await AddPublishedPatchSubmissionToUserPatches(patchSubmission);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed to add published patch submission {Id} to user patches...", patchSubmittion.Id);
+                _logger.Error(ex, "Failed to add published patch submission {Id} to user patches...", patchSubmission.Id);
             }
         }
         else
@@ -215,10 +215,10 @@ public class PatchSubmittionService : IPatchSubmittionService
             await _dbContext.SaveChangesAsync();
         }
 
-        return _mapper.ToPatchSubmittionResponse(patchSubmittion);
+        return _mapper.ToPatchSubmissionResponse(patchSubmission);
     }
 
-    private async Task AddPublishedPatchSubmissionToUserPatches(PatchSubmittionEntity entity)
+    private async Task AddPublishedPatchSubmissionToUserPatches(PatchSubmissionEntity entity)
     {
         if (!entity.PatchNumber.HasValue)
         {
@@ -247,56 +247,56 @@ public class PatchSubmittionService : IPatchSubmittionService
         }
     }
 
-    private void ValidateCanUpdatePatch(UpdatePatchRequest request, UserEntity user, PatchSubmittionEntity patchSubmittion)
+    private void ValidateCanUpdatePatch(UpdatePatchRequest request, UserEntity user, PatchSubmissionEntity patchSubmission)
     {
         if (user.Role == UserRole.Admin || user.Role == UserRole.Moderator)
         {
             return;
         }
 
-        if (patchSubmittion.UploadedByUserId != user.Id)
+        if (patchSubmission.UploadedByUserId != user.Id)
         {
-            throw new UnauthorizedApiException("You can only update your own patch submittions");
+            throw new UnauthorizedApiException("You can only update your own patch submissions");
         }
 
         // TODO: Decide rules for how regular users can update the status
 
-        if (patchSubmittion.Status == PatchSubmittionStatus.Rejected || patchSubmittion.Status == PatchSubmittionStatus.Duplicate)
+        if (patchSubmission.Status == PatchSubmissionStatus.Rejected || patchSubmission.Status == PatchSubmissionStatus.Duplicate)
         {
             throw new BadRequestApiException("You cannot update this patch");
         }
 
-        // if (request.Status.HasValue && request.Status.Value != PatchSubmittionStatus.Deleted && request.Status.Value != patchSubmittion.Status)
+        // if (request.Status.HasValue && request.Status.Value != PatchSubmissionStatus.Deleted && request.Status.Value != patchSubmission.Status)
         // {
         //     throw new BadRequestApiException("You cannot update this patch");
         // }
     }
 
 
-    public async Task<PaginationResponse<PatchSubmittionResponse>> GetUnpublishedSubmissions(int skip, int take)
+    public async Task<PaginationResponse<PatchSubmissionResponse>> GetUnpublishedSubmissions(int skip, int take)
     {
         skip = Math.Max(0, skip);
         take = Math.Clamp(take, 1, 50);
 
-        var patches = await _dbContext.PatchSubmittions
+        var patches = await _dbContext.PatchSubmissions
             .OrderByDescending(p => p.ReleaseDate)
-            .Where(p => p.Status == PatchSubmittionStatus.Unpublished)
+            .Where(p => p.Status == PatchSubmissionStatus.Unpublished)
             .Skip(skip)
             .Take(take)
             .ToListAsync();
 
-        var response = new PaginationResponse<PatchSubmittionResponse>
+        var response = new PaginationResponse<PatchSubmissionResponse>
         {
-            Items = patches.Select(_mapper.ToPatchSubmittionResponse).ToList(),
-            Count = await _dbContext.PatchSubmittions.CountAsync(p => p.Status == PatchSubmittionStatus.Unpublished)
+            Items = patches.Select(_mapper.ToPatchSubmissionResponse).ToList(),
+            Count = await _dbContext.PatchSubmissions.CountAsync(p => p.Status == PatchSubmissionStatus.Unpublished)
         };
 
         return response;
     }
 
-    public async Task<PatchSubmittionResponse> GetPatchSubmittion(Guid patchSubmittionId)
+    public async Task<PatchSubmissionResponse> GetPatchSubmission(Guid patchSubmissionId)
     {
-        var patchSubmittion = await _dbContext.PatchSubmittions.FindAsync(patchSubmittionId) ?? throw new NotFoundApiException("Patch submittion not found");
-        return _mapper.ToPatchSubmittionResponse(patchSubmittion);
+        var patchSubmission = await _dbContext.PatchSubmissions.FindAsync(patchSubmissionId) ?? throw new NotFoundApiException("Patch submission not found");
+        return _mapper.ToPatchSubmissionResponse(patchSubmission);
     }
 }

@@ -1,8 +1,8 @@
 using PatchDb.Backend.Service.FileService;
 using PatchDb.Backend.Service.Patches.Models.Dto;
 using PatchDb.Backend.Service.Patches.Models.Entities;
-using PatchDb.Backend.Service.PatchSubmittion.Models.Dto;
-using PatchDb.Backend.Service.PatchSubmittion.Models.Entities;
+using PatchDb.Backend.Service.PatchSubmission.Models.Dto;
+using PatchDb.Backend.Service.PatchSubmission.Models.Entities;
 using PatchDb.Backend.Service.Universities;
 using PatchDb.Backend.Service.User.Models.Dto;
 using PatchDb.Backend.Service.User.Models.Entities;
@@ -21,7 +21,7 @@ public interface IModelMapper
     PatchResponse ToPatchResponse(PatchEntity patch);
 
     // ---- Patch Submission Mappings ---------------------------------------------------------------------------------
-    PatchSubmittionResponse ToPatchSubmittionResponse(PatchSubmittionEntity entity);
+    PatchSubmissionResponse ToPatchSubmissionResponse(PatchSubmissionEntity entity);
 
     // ---- User Patch Mappings ---------------------------------------------------------------------------------------
     NewMatchingPatchesModel ToNewMatchingPatchesModel(PatchEntity patch, decimal similarity);
@@ -96,10 +96,10 @@ public class ModelMapper : IModelMapper
         };
 
     // ---- Patch Submission Mappings ---------------------------------------------------------------------------------
-    public PatchSubmittionResponse ToPatchSubmittionResponse(PatchSubmittionEntity entity)
-        => new PatchSubmittionResponse
+    public PatchSubmissionResponse ToPatchSubmissionResponse(PatchSubmissionEntity entity)
+        => new PatchSubmissionResponse
         {
-            PatchSubmittionId = entity.Id,
+            PatchSubmissionId = entity.Id,
             PatchNumber = entity.PatchNumber,
             Name = entity.Name,
             Description = entity.Description,

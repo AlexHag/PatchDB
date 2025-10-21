@@ -1,10 +1,10 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace PatchDb.Backend.Service.PatchSubmittion.Models;
+namespace PatchDb.Backend.Service.PatchSubmission.Models;
 
 [JsonConverter(typeof(StringEnumConverter))]
-public enum PatchSubmittionStatus
+public enum PatchSubmissionStatus
 {
     Unknown = 0,
 

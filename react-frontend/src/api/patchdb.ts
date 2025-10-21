@@ -16,7 +16,7 @@ import type {
   UniversityAndProgramModel,
   UniversityModel,
   UploadPatchRequest,
-  PatchSubmittionResponse,
+  PatchSubmissionResponse,
   UpdatePatchSubmissionRequest,
   PatchResponse,
   PaginationResponse,
@@ -241,8 +241,8 @@ export async function getUniversities(): Promise<UniversityModel[]> {
 }
 
 // Patch submission functions
-export async function submitPatch(request: UploadPatchRequest): Promise<PatchSubmittionResponse> {
-  const response = await fetch(`${API_BASE_URL}/patch-submittion/upload`, {
+export async function submitPatch(request: UploadPatchRequest): Promise<PatchSubmissionResponse> {
+  const response = await fetch(`${API_BASE_URL}/patch-submission/upload`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(request)
@@ -255,8 +255,8 @@ export async function submitPatch(request: UploadPatchRequest): Promise<PatchSub
   return await response.json();
 }
 
-export async function getPatchSubmission(patchSubmittionId: string): Promise<PatchSubmittionResponse> {
-  const response = await fetch(`${API_BASE_URL}/patch-submittion/${patchSubmittionId}`, {
+export async function getPatchSubmission(patchSubmissionId: string): Promise<PatchSubmissionResponse> {
+  const response = await fetch(`${API_BASE_URL}/patch-submission/${patchSubmissionId}`, {
     headers: getAuthHeaders()
   });
 
@@ -267,8 +267,8 @@ export async function getPatchSubmission(patchSubmittionId: string): Promise<Pat
   return await response.json();
 }
 
-export async function updatePatchSubmission(request: UpdatePatchSubmissionRequest): Promise<PatchSubmittionResponse> {
-  const response = await fetch(`${API_BASE_URL}/patch-submittion/update`, {
+export async function updatePatchSubmission(request: UpdatePatchSubmissionRequest): Promise<PatchSubmissionResponse> {
+  const response = await fetch(`${API_BASE_URL}/patch-submission/update`, {
     method: 'PATCH',
     headers: getAuthHeaders(),
     body: JSON.stringify(request)
@@ -295,8 +295,8 @@ export async function getPatchDetail(patchNumber: number): Promise<PatchResponse
 }
 
 // Admin/Moderator functions
-export async function getUnpublishedPatchSubmissions(skip = 0, take = 20): Promise<PaginationResponse<PatchSubmittionResponse>> {
-  const response = await fetch(`${API_BASE_URL}/patch-submittion/unpublished?skip=${skip}&take=${take}`, {
+export async function getUnpublishedPatchSubmissions(skip = 0, take = 20): Promise<PaginationResponse<PatchSubmissionResponse>> {
+  const response = await fetch(`${API_BASE_URL}/patch-submission/unpublished?skip=${skip}&take=${take}`, {
     headers: getAuthHeaders()
   });
 

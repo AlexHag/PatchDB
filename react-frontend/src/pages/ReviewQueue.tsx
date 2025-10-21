@@ -3,12 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../components/hooks/useAuth';
 import Navigation from '../components/Navigation';
 import { getUnpublishedPatchSubmissions } from '../api/patchdb';
-import type { PaginationResponse, PatchSubmittionResponse } from '../api/types';
+import type { PaginationResponse, PatchSubmissionResponse } from '../api/types';
 
 const ReviewQueue: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [submissions, setSubmissions] = useState<PaginationResponse<PatchSubmittionResponse>>({ count: 0, items: [] });
+  const [submissions, setSubmissions] = useState<PaginationResponse<PatchSubmissionResponse>>({ count: 0, items: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -125,21 +125,21 @@ const ReviewQueue: React.FC = () => {
         {submissions.items.length > 0 && (
           <>
             <div className="row g-2 g-md-3">
-              {submissions.items.map((submission: PatchSubmittionResponse) => (
-                <div key={submission.patchSubmittionId} className="col-6 mb-3">
+              {submissions.items.map((submission: PatchSubmissionResponse) => (
+                <div key={submission.patchSubmissionId} className="col-6 mb-3">
                   <div className="card h-100 patch-submission-card">
                     <div className="card-body p-0">
                       <div className="row g-0">
                         {/* Patch Image */}
                         <div className="col-12">
                           <Link 
-                            to={`/submit-patch/${submission.patchSubmittionId}`}
+                            to={`/submit-patch/${submission.patchSubmissionId}`}
                             className="d-block text-decoration-none"
                           >
                             <div className="position-relative patch-image-container" style={{ aspectRatio: '4/3', minHeight: '140px' }}>
                               <img 
                                 src={submission.imageUrl} 
-                                alt={submission.name || `Submission #${submission.patchSubmittionId.slice(0, 8)}`} 
+                                alt={submission.name || `Submission #${submission.patchSubmissionId.slice(0, 8)}`} 
                                 loading="lazy"
                                 className="w-100 h-100 object-fit-cover rounded-top-3"
                               />
@@ -167,11 +167,11 @@ const ReviewQueue: React.FC = () => {
                             <div className="mb-3">
                               <h3 className="h6 mb-2" style={{color: '#2c3e50', fontSize: '0.9rem'}}>
                                 <Link 
-                                  to={`/submit-patch/${submission.patchSubmittionId}`}
+                                  to={`/submit-patch/${submission.patchSubmissionId}`}
                                   className="text-decoration-none"
                                   style={{color: 'inherit'}}
                                 >
-                                  {submission.name || `Submission #${submission.patchSubmittionId.slice(0, 8)}`}
+                                  {submission.name || `Submission #${submission.patchSubmissionId.slice(0, 8)}`}
                                 </Link>
                               </h3>
                               
@@ -233,7 +233,7 @@ const ReviewQueue: React.FC = () => {
                             {/* Action Button */}
                             <div className="mt-2 mt-md-3 pt-2 border-top">
                               <Link 
-                                to={`/submit-patch/${submission.patchSubmittionId}`}
+                                to={`/submit-patch/${submission.patchSubmissionId}`}
                                 className="btn btn-outline-dark btn-sm w-100"
                                 style={{fontSize: '0.75rem'}}
                               >

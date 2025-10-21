@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PatchDb.Backend.Service.Following.Models.Entities;
 using PatchDb.Backend.Service.Patches.Models.Entities;
-using PatchDb.Backend.Service.PatchSubmittion.Models.Entities;
+using PatchDb.Backend.Service.PatchSubmission.Models.Entities;
 using PatchDb.Backend.Service.User.Models.Entities;
 using PatchDb.Backend.Service.UserPatches.Models.Entities;
 
@@ -10,7 +10,7 @@ namespace PatchDb.Backend.Service;
 public class ServiceDbContext : DbContext
 {
     public DbSet<UserEntity> Users { get; set; }
-    public DbSet<PatchSubmittionEntity> PatchSubmittions { get; set; }
+    public DbSet<PatchSubmissionEntity> PatchSubmissions { get; set; }
     public DbSet<PatchEntity> Patches { get; set; }
 
     public DbSet<UserPatchEntity> UserPatches { get; set; }

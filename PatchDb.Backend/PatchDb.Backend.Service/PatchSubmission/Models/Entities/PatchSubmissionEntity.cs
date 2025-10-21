@@ -1,7 +1,7 @@
 
-namespace PatchDb.Backend.Service.PatchSubmittion.Models.Entities;
+namespace PatchDb.Backend.Service.PatchSubmission.Models.Entities;
 
-public class PatchSubmittionEntity
+public class PatchSubmissionEntity
 {
     /// <summary>
     ///     Primary key
@@ -9,7 +9,7 @@ public class PatchSubmittionEntity
     public Guid Id { get; set; }
 
     /// <summary>
-    ///     The patch number if the submittion is published
+    ///     The patch number if the submission is published
     /// </summary>
     public int? PatchNumber { get; set; }
 
@@ -31,9 +31,9 @@ public class PatchSubmittionEntity
     public DateTime? ReleaseDate { get; set; }
 
     /// <summary>
-    ///     Status of the patch submittion. (Unpublished, Published, Rejected, Duplicate, Deleted)
+    ///     Status of the patch submission. (Unpublished, Published, Rejected, Duplicate, Deleted)
     /// </summary>
-    public PatchSubmittionStatus Status { get; set; }
+    public PatchSubmissionStatus Status { get; set; }
 
     public Guid UploadedByUserId { get; set; }
     public Guid? LastUpdatedByUserId { get; set; }

@@ -1,14 +1,14 @@
 using Newtonsoft.Json;
 
-namespace PatchDb.Backend.Service.PatchSubmittion.Models.Dto;
+namespace PatchDb.Backend.Service.PatchSubmission.Models.Dto;
 
-public class UpdatePatchRequest
+public class UploadPatchRequest
 {
-    /// <summary>
-    ///     Id of the patch submittion
-    /// </summary>
-    [JsonProperty("id")]
-    public Guid Id { get; set; }
+    [JsonProperty("fileId")]
+    public Guid FileId { get; set; }
+
+    [JsonProperty("userPatchUploadId")]
+    public Guid? UserPatchUploadId { get; set; }
 
     [JsonProperty("name")]
     public string? Name { get; set; }
@@ -27,7 +27,4 @@ public class UpdatePatchRequest
 
     [JsonProperty("releaseDate")]
     public DateTime? ReleaseDate { get; set; }
-
-    [JsonProperty("status")]
-    public PatchSubmittionStatus? Status { get; set; }
 }

@@ -173,8 +173,8 @@ export interface UploadPatchRequest {
   releaseDate?: string;
 }
 
-export interface PatchSubmittionResponse {
-  patchSubmittionId: string;
+export interface PatchSubmissionResponse {
+  patchSubmissionId: string;
   patchNumber?: number;
   name?: string;
   description?: string;

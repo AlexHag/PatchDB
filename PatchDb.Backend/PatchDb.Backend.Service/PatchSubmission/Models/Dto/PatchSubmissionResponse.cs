@@ -2,18 +2,18 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using PatchDb.Backend.Service.Universities;
 
-namespace PatchDb.Backend.Service.PatchSubmittion.Models.Dto;
+namespace PatchDb.Backend.Service.PatchSubmission.Models.Dto;
 
-public class PatchSubmittionResponse
+public class PatchSubmissionResponse
 {
     /// <summary>
     ///     Primary key
     /// </summary>
     [JsonProperty("id")]
-    public Guid PatchSubmittionId { get; set; }
+    public Guid PatchSubmissionId { get; set; }
 
     /// <summary>
-    ///     The patch number if the submittion is published
+    ///     The patch number if the submission is published
     /// </summary>
     [JsonProperty("patchNumber")]
     public int? PatchNumber { get; set; }
@@ -44,7 +44,7 @@ public class PatchSubmittionResponse
 
     [JsonProperty("status")]
     [JsonConverter(typeof(StringEnumConverter))]
-    public PatchSubmittionStatus Status { get; set; }
+    public PatchSubmissionStatus Status { get; set; }
 
     /// <summary>
     ///     UserId of the person who submitted the patch

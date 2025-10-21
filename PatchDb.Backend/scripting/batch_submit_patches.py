@@ -53,7 +53,7 @@ class BatchSubmitPatches:
             "name": name
         }
 
-        res = requests.post(f"{BASE_URL}/api/patch-submittion/upload", json=req, headers={"Authorization": f"Bearer {self.token}"})
+        res = requests.post(f"{BASE_URL}/api/patch-submission/upload", json=req, headers={"Authorization": f"Bearer {self.token}"})
 
         if res.status_code != 200:
             raise Exception(f"Failed to submit patch: {res.status_code} {res.text}")

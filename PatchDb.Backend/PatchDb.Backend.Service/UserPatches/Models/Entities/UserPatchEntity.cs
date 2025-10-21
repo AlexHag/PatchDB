@@ -1,5 +1,5 @@
 using PatchDb.Backend.Service.Patches.Models.Entities;
-using PatchDb.Backend.Service.PatchSubmittion.Models.Entities;
+using PatchDb.Backend.Service.PatchSubmission.Models.Entities;
 
 namespace PatchDb.Backend.Service.UserPatches.Models.Entities;
 
