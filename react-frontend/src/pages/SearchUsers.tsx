@@ -4,7 +4,7 @@ import { StandardPage } from '../components/PageLayout';
 import { UserCard } from '../components/common/UserCard';
 import { SearchFilters, FilterInput, UniversitySelector } from '../components/common/SearchFilters';
 import { NoUsersFoundState, StartSearchingState } from '../components/EmptyState';
-import { LoadingPage, LoadingSpinner, LoadingButton } from '../components/Loading';
+import { LoadingSpinner, LoadingButton } from '../components/Loading';
 import { ErrorAlert } from '../components/Alert';
 import { useAuth } from '../components/hooks/useAuth';
 import { searchUsers, getUniversities, followUser, unfollowUser } from '../api/patchdb';

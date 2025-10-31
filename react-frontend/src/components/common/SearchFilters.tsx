@@ -153,7 +153,6 @@ export const UniversitySelector: React.FC<UniversitySelectorProps> = ({
   selectedCode,
   onSelect,
   placeholder = 'All Universities',
-  className = 'col-md-6'
 }) => (
   <FilterSelect
     label="University"
