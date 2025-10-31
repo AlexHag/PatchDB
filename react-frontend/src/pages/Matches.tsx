@@ -279,6 +279,33 @@ const Matches: React.FC = () => {
               </div>
             )}
 
+            {/* Submit as New Patch Option */}
+            {hasAnyMatches && (
+              <div className="card mb-4">
+                <div className="card-body text-center py-4">
+                  <h4 className="h5 mb-2" style={{color: '#dc3545'}}>🚫 None of These Match?</h4>
+                  <p className="text-muted mb-3">
+                    If our suggestions don't match your patch, you can submit it as a new patch to our database.
+                  </p>
+                  <button 
+                    className="btn btn-outline-danger" 
+                    onClick={() => {
+                      // Store upload result for submit patch page
+                      sessionStorage.setItem('submitPatchData', JSON.stringify({
+                        fileId: (uploadResult as any).originalFileId || '',
+                        userPatchUploadId: uploadResult.upload.userPatchUploadId,
+                        imageUrl: uploadResult.upload.imageUrl,
+                        preUploaded: true
+                      }));
+                      navigate('/submit-patch');
+                    }}
+                  >
+                    ➕ Submit as New Patch
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Action Button */}
             {hasAnyMatches && (
               <div className="card">
