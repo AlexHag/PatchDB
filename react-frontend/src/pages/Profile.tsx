@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import Navigation from '../components/Navigation';
+import { ProfilePageLayout } from '../components/PageLayout';
+import { LoadingCenter, LoadingButton } from '../components/Loading';
+import { ErrorAlert, SuccessAlert } from '../components/Alert';
+import { RoleBadge } from '../components/common/RoleBadge';
 import { useAuth } from '../components/hooks/useAuth';
 import { updateUserData } from '../api/auth';
 import { 
@@ -169,14 +172,6 @@ const Profile: React.FC = () => {
     return selectedUni?.programs || [];
   };
 
-  const getRoleBadgeColor = (role: string): string => {
-    switch (role) {
-      case 'Admin': return 'danger';
-      case 'Moderator': return 'warning';
-      case 'PatchMaker': return 'info';
-      default: return 'secondary';
-    }
-  };
 
   const clearMessages = () => {
     setError('');
@@ -185,36 +180,22 @@ const Profile: React.FC = () => {
 
   if (loading) {
     return (
-      <>
-        <Navigation />
-        <div className="container-fluid p-3">
-          <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '60vh' }}>
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
-        </div>
-      </>
+      <ProfilePageLayout>
+        <LoadingCenter message="Loading profile..." />
+      </ProfilePageLayout>
     );
   }
 
   if (!user) {
     return (
-      <>
-        <Navigation />
-        <div className="container-fluid p-3">
-          <div className="alert alert-danger">Failed to load user data</div>
-        </div>
-      </>
+      <ProfilePageLayout>
+        <ErrorAlert message="Failed to load user data" />
+      </ProfilePageLayout>
     );
   }
 
   return (
-    <>
-      <Navigation />
-      <div className="container-fluid p-3" style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-        <div className="row justify-content-center">
-          <div className="col-12 col-lg-8 col-xl-6">
+    <ProfilePageLayout>
             {/* Header */}
             <div className="d-flex align-items-center justify-content-between mb-4">
               <h2 className="mb-0">
@@ -230,19 +211,8 @@ const Profile: React.FC = () => {
             </div>
 
             {/* Alert Messages */}
-            {error && (
-              <div className="alert alert-danger alert-dismissible" role="alert">
-                <strong>Error:</strong> {error}
-                <button type="button" className="btn-close" onClick={clearMessages}></button>
-              </div>
-            )}
-            
-            {success && (
-              <div className="alert alert-success alert-dismissible" role="alert">
-                <strong>Success:</strong> {success}
-                <button type="button" className="btn-close" onClick={clearMessages}></button>
-              </div>
-            )}
+            {error && <ErrorAlert message={error} onDismiss={clearMessages} />}
+            {success && <SuccessAlert message={success} onDismiss={clearMessages} />}
 
             {/* Profile Header Card - Social Media Style */}
             <div className="card mb-4 shadow-sm">
@@ -317,11 +287,7 @@ const Profile: React.FC = () => {
                     {/* Username & Role Row */}
                     <div className="d-flex align-items-center flex-wrap mb-2">
                       <h3 className="mb-0 me-3">{user.username}</h3>
-                      {user.role && user.role !== 'User' && (
-                        <span className={`badge bg-${getRoleBadgeColor(user.role)} me-2`}>
-                          {user.role}
-                        </span>
-                      )}
+                      <RoleBadge role={user.role} className="me-2" />
                     </div>
 
                     {/* Member Since */}
@@ -382,23 +348,24 @@ const Profile: React.FC = () => {
                             <small className="text-muted">
                               {bioText.length}/160 characters
                             </small>
-                            <div className="d-flex gap-2">
-                              <button 
-                                className="btn btn-success btn-sm"
-                                onClick={handleBioUpdate}
-                              >
-                                💾 Save
-                              </button>
-                              <button 
-                                className="btn btn-secondary btn-sm"
-                                onClick={() => {
-                                  setEditingBio(false);
-                                  setBioText(user.bio || '');
-                                }}
-                              >
-                                ❌ Cancel
-                              </button>
-                            </div>
+                              <div className="d-flex gap-2">
+                                <LoadingButton
+                                  className="btn btn-success btn-sm"
+                                  onClick={handleBioUpdate}
+                                  loading={false}
+                                >
+                                  💾 Save
+                                </LoadingButton>
+                                <button 
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() => {
+                                    setEditingBio(false);
+                                    setBioText(user.bio || '');
+                                  }}
+                                >
+                                  ❌ Cancel
+                                </button>
+                              </div>
                           </div>
                         </div>
                       ) : (
@@ -484,12 +451,13 @@ const Profile: React.FC = () => {
                     )}
 
                     <div className="d-flex gap-2">
-                      <button 
-                        className="btn btn-success btn-sm"
+                      <LoadingButton
+                        className="btn btn-success btn-sm" 
                         onClick={handleUniversityUpdate}
+                        loading={false}
                       >
                         💾 Save
-                      </button>
+                      </LoadingButton>
                       <button 
                         className="btn btn-secondary btn-sm"
                         onClick={() => {
@@ -571,15 +539,16 @@ const Profile: React.FC = () => {
                         placeholder="your.email@example.com"
                       />
                       <div className="d-flex gap-2">
-                        <button 
+                        <LoadingButton
                           className="btn btn-success btn-sm"
                           onClick={() => {
                             setEditingEmail(false);
                             setSuccess('Email update feature coming soon!');
                           }}
+                          loading={false}
                         >
                           💾 Save
-                        </button>
+                        </LoadingButton>
                         <button 
                           className="btn btn-secondary btn-sm"
                           onClick={() => {
@@ -622,15 +591,16 @@ const Profile: React.FC = () => {
                         placeholder="+1 (555) 123-4567"
                       />
                       <div className="d-flex gap-2">
-                        <button 
+                        <LoadingButton
                           className="btn btn-success btn-sm"
                           onClick={() => {
                             setEditingPhone(false);
                             setSuccess('Phone number update feature coming soon!');
                           }}
+                          loading={false}
                         >
                           💾 Save
-                        </button>
+                        </LoadingButton>
                         <button 
                           className="btn btn-secondary btn-sm"
                           onClick={() => {
@@ -650,11 +620,7 @@ const Profile: React.FC = () => {
                 </div>
               </div>
             </div>
-
-          </div>
-        </div>
-      </div>
-    </>
+    </ProfilePageLayout>
   );
 };
 

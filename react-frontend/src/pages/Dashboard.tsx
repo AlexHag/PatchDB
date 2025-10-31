@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/hooks/useAuth';
-import Navigation from '../components/Navigation';
+import { StandardPage } from '../components/PageLayout';
+import { PatchCard } from '../components/PatchCard';
+import { NoCollectionState } from '../components/EmptyState';
+import { LoadingPage, LoadingOverlay } from '../components/Loading';
+import { ErrorAlert, SuccessAlert } from '../components/Alert';
+import { ImageIcon } from '../components/Icons';
 import { 
   getUserPatches
 } from '../api/patchdb';
@@ -49,223 +54,71 @@ const Dashboard: React.FC = () => {
   }, [userPatches]);
 
   if (loading && userPatches.patches.length === 0) {
-    return (
-      <div className="bg-light min-vh-100">
-        <Navigation />
-        <div className="container mt-4">
-          <div className="text-center py-5">
-            <div className="spinner-border text-dark" role="status">
-              <span className="visually-hidden">Loading...</span>
+    return <LoadingPage message="Loading your patch collection..." />;
+  }
+
+  return (
+    <StandardPage
+      title="🎒 Your Patch Collection"
+      subtitle="Track your university adventures through the patches you've collected!"
+    >
+      {/* User Stats */}
+      <div className="row mb-4">
+        <div className="col-6 col-md-4 mb-3">
+          <div className="stat-card">
+            <div className="stat-number">{stats.uniquePatches}</div>
+            <div className="stat-label">Unique Patches</div>
+          </div>
+        </div>
+        <div className="col-6 col-md-4 mb-3">
+          <div className="stat-card">
+            <div className="stat-number">{stats.totalPatches}</div>
+            <div className="stat-label">Total Patches</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <h3 className="h4 mb-3" style={{color: '#2c3e50'}}>
+            ⚡ Quick Actions
+          </h3>
+        </div>
+        <div className="col-12 col-md-6 col-lg-4 mb-3 mx-auto">
+          <div className="card h-100">
+            <div className="card-body d-flex flex-column text-center">
+              <div className="mb-3">
+                <ImageIcon size={48} className="mb-2" />
+              </div>
+              <h4 className="h6 mb-2" style={{color: '#e67e22'}}>📸 Upload a new Patch?</h4>
+              <p className="text-muted mb-3 flex-grow-1">Take a photo or upload an image of your new patch!!</p>
+              <button 
+                className="btn btn-dark" 
+                onClick={() => navigate('/upload')}
+              >
+                🚀 Upload Patch
+              </button>
             </div>
           </div>
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="bg-light min-vh-100">
-      <Navigation />
+      {/* Empty State */}
+      {userPatches.patches.length === 0 && userPatches.unmatchesPatches.length === 0 && (
+        <NoCollectionState onUpload={() => navigate('/upload')} />
+      )}
 
-      <div className="container mt-4">
-        {/* User Stats */}
-        <div className="row mb-4">
-          <div className="col-12">
-            <h2 className="h3 mb-1" style={{background: 'linear-gradient(135deg, #2c3e50, #e67e22)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}>
-              🎒 Your Patch Collection
-            </h2>
-            <p className="text-muted mb-4">Track your university adventures through the patches you've collected!</p>
-          </div>
-          <div className="col-6 col-md-4 mb-3">
-            <div className="stat-card">
-              <div className="stat-number">{stats.uniquePatches}</div>
-              <div className="stat-label">Unique Patches</div>
+      {/* Patch Collection */}
+      {userPatches.patches.length > 0 && (
+        <div className="row g-2 g-md-3">
+          {userPatches.patches.map((patch: UserPatchModel) => (
+            <div key={patch.userPatchId} className="col-6 mb-3">
+              <PatchCard patch={patch} type="user" />
             </div>
-          </div>
-          <div className="col-6 col-md-4 mb-3">
-            <div className="stat-card">
-              <div className="stat-number">{stats.totalPatches}</div>
-              <div className="stat-label">Total Patches</div>
-            </div>
-          </div>
+          ))}
         </div>
-
-        {/* Quick Actions */}
-        <div className="row mb-4">
-          <div className="col-12">
-            <h3 className="h4 mb-3" style={{color: '#2c3e50'}}>
-              ⚡ Quick Actions
-            </h3>
-          </div>
-          <div className="col-12 col-md-6 col-lg-4 mb-3 mx-auto">
-            <div className="card h-100">
-              <div className="card-body d-flex flex-column text-center">
-                <div className="mb-3">
-                  <svg className="mb-2" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-                    <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093L6.52 10.724l-2.005-2.005A.5.5 0 0 0 4.229 8.7l-3.226 3.226A1 1 0 0 1 1.002 13V3a1 1 0 0 1 1-1h12z"/>
-                  </svg>
-                </div>
-                <h4 className="h6 mb-2" style={{color: '#e67e22'}}>📸 Upload a new Patch?</h4>
-                <p className="text-muted mb-3 flex-grow-1">Take a photo or upload an image of your new patch!!</p>
-                <button 
-                  className="btn btn-dark" 
-                  onClick={() => navigate('/upload')}
-                >
-                  🚀 Upload Patch
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Empty State */}
-        {userPatches.patches.length === 0 && userPatches.unmatchesPatches.length === 0 && (
-          <div className="text-center py-5">
-            <svg className="mb-3 text-muted" width="64" height="64" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-              <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093L6.52 10.724l-2.005-2.005A.5.5 0 0 0 4.229 8.7l-3.226 3.226A1 1 0 0 1 1.002 13V3a1 1 0 0 1 1-1h12z"/>
-            </svg>
-            <h3 className="h4" style={{color: '#e67e22'}}>🌟 Your Collection Awaits!</h3>
-            <p className="text-muted mb-3">Start building your patch collection by uploading your first patch!</p>
-            <button 
-              className="btn btn-dark" 
-              onClick={() => navigate('/upload')}
-            >
-              🎯 Add Your First Patch!
-            </button>
-          </div>
-        )}
-
-        {/* Patch Collection */}
-        {userPatches.patches.length > 0 && (
-          <div className="row g-2 g-md-3">
-            {userPatches.patches.map((patch: UserPatchModel) => (
-              <div key={patch.userPatchId} className="col-6 mb-3">
-                <div className="card h-100 patch-collection-card">
-                  <div className="card-body p-0">
-                    <div className="row g-0">
-                      {/* Patch Image */}
-                      <div className="col-12">
-                        <Link 
-                          to={`/patch/${patch.matchingPatch.patchNumber}`}
-                          className="d-block text-decoration-none"
-                        >
-                          <div className="position-relative patch-image-container" style={{ aspectRatio: '4/3', minHeight: '140px' }}>
-                            <img 
-                              src={patch.matchingPatch.imageUrl} 
-                              alt={patch.matchingPatch.name || `Patch #${patch.matchingPatch.patchNumber}`} 
-                              loading="lazy"
-                              className="w-100 h-100 object-fit-cover rounded-top-3"
-                            />
-                            <div className="patch-overlay rounded-top-3">
-                              <div className="patch-overlay-text">
-                                <div className="small">View Details</div>
-                                <div className="small text-primary">→</div>
-                              </div>
-                            </div>
-                            
-                            {/* Favorite Badge */}
-                            {patch.isFavorite && (
-                              <div className="position-absolute top-0 end-0 m-2">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" className="text-warning">
-                                  <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"/>
-                                </svg>
-                              </div>
-                            )}
-                          </div>
-                        </Link>
-                      </div>
-                      
-                      {/* Patch Details */}
-                      <div className="col-12">
-                        <div className="p-3">
-                          {/* Header */}
-                          <div className="mb-3">
-                            <h3 className="h6 mb-2" style={{color: '#2c3e50', fontSize: '0.9rem'}}>
-                              <Link 
-                                to={`/patch/${patch.matchingPatch.patchNumber}`}
-                                className="text-decoration-none"
-                                style={{color: 'inherit'}}
-                              >
-                                {patch.matchingPatch.name || `Patch #${patch.matchingPatch.patchNumber}`}
-                              </Link>
-                            </h3>
-                            
-                            {patch.matchingPatch.description && (
-                              <p className="text-muted mb-2 d-none d-md-block" style={{ 
-                                fontSize: '0.75rem',
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden'
-                              }}>
-                                {patch.matchingPatch.description}
-                              </p>
-                            )}
-                          </div>
-                          
-                          {/* University and Maker Info */}
-                          {patch.matchingPatch.university && (
-                            <div className="d-flex align-items-center mb-2">
-                              {patch.matchingPatch.university.logoUrl && (
-                                <img 
-                                  src={patch.matchingPatch.university.logoUrl} 
-                                  alt={`${patch.matchingPatch.university.name} logo`}
-                                  className="me-1 me-md-2 rounded"
-                                  style={{ width: '20px', height: '20px', objectFit: 'contain' }}
-                                  loading="lazy"
-                                />
-                              )}
-                              <div>
-                                <div className="fw-semibold" style={{color: '#2c3e50', fontSize: '0.75rem'}}>
-                                  {patch.matchingPatch.university.name}
-                                </div>
-                                {patch.matchingPatch.universitySection && (
-                                  <div className="text-muted d-none d-md-block" style={{fontSize: '0.7rem'}}>
-                                    {patch.matchingPatch.universitySection}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                          
-                          {/* Additional Details */}
-                          <div className="text-muted" style={{fontSize: '0.7rem'}}>
-                            {patch.matchingPatch.patchMaker && (
-                              <div className="mb-1 d-none d-md-block">
-                                <strong>Maker:</strong> {patch.matchingPatch.patchMaker}
-                              </div>
-                            )}
-                            <div className="mb-1">
-                              <strong>Acquired:</strong> {new Date(patch.aquiredAt).toLocaleDateString()}
-                            </div>
-                            {patch.matchingPatch.releaseDate && (
-                              <div className="mb-1 d-none d-md-block">
-                                <strong>Released:</strong> {new Date(patch.matchingPatch.releaseDate).getFullYear()}
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Action Button */}
-                          <div className="mt-2 mt-md-3 pt-2 border-top">
-                            <Link 
-                              to={`/patch/${patch.matchingPatch.patchNumber}`}
-                              className="btn btn-outline-dark btn-sm w-100"
-                              style={{fontSize: '0.75rem'}}
-                            >
-                              <span className="d-none d-md-inline">View Details </span>View →
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+      )}
 
         {/* Unmatched Uploads */}
         {/* {userPatches.unmatchesPatches.length > 0 && (
@@ -296,30 +149,13 @@ const Dashboard: React.FC = () => {
           </div>
         )} */}
 
-        {/* Error/Success Messages */}
-        {error && (
-          <div className="alert alert-danger alert-dismissible fade show" role="alert">
-            {error}
-            <button type="button" className="btn-close" onClick={() => setError('')}></button>
-          </div>
-        )}
-        {success && (
-          <div className="alert alert-success alert-dismissible fade show" role="alert">
-            {success}
-            <button type="button" className="btn-close" onClick={() => setSuccess('')}></button>
-          </div>
-        )}
-      </div>
+      {/* Error/Success Messages */}
+      {error && <ErrorAlert message={error} onDismiss={() => setError('')} />}
+      {success && <SuccessAlert message={success} onDismiss={() => setSuccess('')} />}
 
       {/* Loading Overlay */}
-      {loading && (
-        <div className="loading-overlay">
-          <div className="spinner-border text-dark" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      )}
-    </div>
+      <LoadingOverlay show={loading} message="Loading..." />
+    </StandardPage>
   );
 };
 
