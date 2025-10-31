@@ -331,13 +331,12 @@ const BrowsePatches: React.FC = () => {
                                   <div className="small text-primary">→</div>
                                 </div>
                               </div>
-                              
-                              {/* Patch Number Badge */}
-                              <div className="position-absolute top-0 start-0 m-2">
-                                <span className="badge bg-dark">
-                                  #{patch.patchNumber}
-                                </span>
-                              </div>
+                              {patch.hasPatch &&
+                                <div className="position-absolute top-0 start-0 m-2">
+                                  <span className="badge bg-dark">
+                                    You have this Patch!
+                                  </span>
+                                </div>}
                             </div>
                           </Link>
                         </div>

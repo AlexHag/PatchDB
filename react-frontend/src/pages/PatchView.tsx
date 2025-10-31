@@ -141,7 +141,10 @@ const PatchView: React.FC = () => {
               <h1 className="h2 mb-0 me-3" style={{color: '#2c3e50'}}>
                 {patch.name || `Patch #${patch.patchNumber}`}
               </h1>
-              <span className="badge bg-secondary fs-6">#{patch.patchNumber}</span>
+              {patch.hasPatch &&
+                  <span className="badge bg-secondary fs-6">
+                    You have this Patch!
+                  </span>}
             </div>
             {patch.description && (
               <p className="text-muted lead">{patch.description}</p>

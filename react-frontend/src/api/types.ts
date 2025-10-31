@@ -89,6 +89,7 @@ export interface PatchResponse {
   releaseDate?: string;
   patchSubmissionId: string;
   submittedByUserId: string;
+  hasPatch: boolean;
   created: string;
   updated?: string;
 }

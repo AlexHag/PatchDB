@@ -35,6 +35,12 @@ public class PatchResponse
     [JsonProperty("submittedByUserId")]
     public Guid SubmittedByUserId { get; set; }
 
+    /// <summary>
+    ///     Boolean indicating if the user that is looking at this patch owns it.
+    /// </summary>
+    [JsonProperty("hasPatch")]
+    public bool HasPatch { get; set; }
+
     [JsonProperty("created")]
     public DateTime Created { get; set; }
 

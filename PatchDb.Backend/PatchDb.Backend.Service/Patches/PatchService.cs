@@ -7,9 +7,9 @@ namespace PatchDb.Backend.Service.Patches;
 
 public interface IPatchService
 {
-    Task<PaginationResponse<PatchResponse>> GetPatches(int skip, int take);
-    Task<PatchResponse> GetPatch(int patchNumber);
-    Task<PaginationResponse<PatchResponse>> SearchPatches(SearchPatchRequest request);
+    Task<PaginationResponse<PatchResponse>> GetPatches(int skip, int take, Guid requesterUserId);
+    Task<PatchResponse> GetPatch(int patchNumber, Guid requesterUserId);
+    Task<PaginationResponse<PatchResponse>> SearchPatches(SearchPatchRequest request, Guid requesterUserId);
 }
 
 public class PatchService : IPatchService
@@ -25,10 +25,15 @@ public class PatchService : IPatchService
         _mapper = mapper;
     }
 
-    public async Task<PatchResponse> GetPatch(int patchNumber)
-        => _mapper.ToPatchResponse(await _dbContext.Patches.FindAsync(patchNumber) ?? throw new NotFoundApiException("Patch not found"));
+    public async Task<PatchResponse> GetPatch(int patchNumber, Guid requesterUserId)
+    {
+        var response = _mapper.ToPatchResponse(await _dbContext.Patches.FindAsync(patchNumber) ?? throw new NotFoundApiException("Patch not found"));
+        response.HasPatch = await _dbContext.UserPatches.AnyAsync(p => p.UserId == requesterUserId && p.PatchNumber == patchNumber);
 
-    public async Task<PaginationResponse<PatchResponse>> GetPatches(int skip, int take)
+        return response;
+    }
+
+    public async Task<PaginationResponse<PatchResponse>> GetPatches(int skip, int take, Guid requesterUserId)
     {
         skip = Math.Max(0, skip);
         take = Math.Clamp(take, 1, 50);
@@ -38,16 +43,19 @@ public class PatchService : IPatchService
             .Take(take)
             .ToListAsync();
 
+        var items = patches.Select(_mapper.ToPatchResponse).ToList();
+        await FetchWhichPatchesTheUserHas(items, requesterUserId);
+
         var response = new PaginationResponse<PatchResponse>
         {
             Count = await _dbContext.Patches.CountAsync(),
-            Items = patches.Select(_mapper.ToPatchResponse).ToList()
+            Items = items
         };
 
         return response;
     }
 
-    public async Task<PaginationResponse<PatchResponse>> SearchPatches(SearchPatchRequest request)
+    public async Task<PaginationResponse<PatchResponse>> SearchPatches(SearchPatchRequest request, Guid requesterUserId)
     {
         request.Skip = Math.Max(0, request.Skip);
         request.Take = Math.Clamp(request.Take, 1, 50);
@@ -83,13 +91,31 @@ public class PatchService : IPatchService
             .Skip(request.Skip)
             .Take(request.Take)
             .ToListAsync();
-        
+
+        var items = patches.Select(_mapper.ToPatchResponse).ToList();
+        await FetchWhichPatchesTheUserHas(items, requesterUserId);
+
         var response = new PaginationResponse<PatchResponse>
         {
-            Count = await query.CountAsync(),
-            Items = patches.Select(_mapper.ToPatchResponse).ToList()
+            Count = await _dbContext.Patches.CountAsync(),
+            Items = items
         };
 
         return response;
+    }
+
+    private async Task FetchWhichPatchesTheUserHas(List<PatchResponse> items, Guid requesterUserId)
+    {
+        var patchNumbers = items.Select(p => p.PatchNumber).ToList();
+
+        var userPatchNumbers = await _dbContext.UserPatches
+            .Where(up => up.UserId == requesterUserId && patchNumbers.Contains(up.PatchNumber))
+            .Select(up => up.PatchNumber)
+            .ToListAsync();
+
+        foreach (var item in items)
+        {
+            item.HasPatch = userPatchNumbers.Contains(item.PatchNumber);
+        }
     }
 }
