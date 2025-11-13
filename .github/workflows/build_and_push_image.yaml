@@ -1,0 +1,40 @@
+name: Build and Push Image
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - master
+
+env:
+  REGISTRY: ${{ vars.DIGITAL_OCEAN_CR }}
+  IMAGE_NAME: patchdb-backend-service
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITAL_OCEAN_API_KEY }}
+
+      - name: Log in to DigitalOcean Container Registry
+        run: doctl registry login
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+            -f PatchDb.Backend/PatchDb.Backend.Service/Dockerfile \
+            PatchDb.Backend/
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
