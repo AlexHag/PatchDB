@@ -179,7 +179,7 @@ dotnet run > output.log 2>&1 &
 - Get
 - Search
 
-## Patch submittion
+## Patch submission
 - Upload
 - Update
 - Get unpublished

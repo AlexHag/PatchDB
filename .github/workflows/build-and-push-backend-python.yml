@@ -1,4 +1,4 @@
-name: Build and Push Image
+name: Build and Push Python Backend Image
 
 on:
   workflow_dispatch:
@@ -8,13 +8,13 @@ on:
 
 env:
   REGISTRY: ${{ vars.DIGITALOCEAN_CR }}
-  IMAGE_NAME: patchdb-backend-service
+  IMAGE_NAME: patchdb-backend-python
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     environment: prod
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,17 +23,17 @@ jobs:
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_API_KEY }}
-
+        
       - name: Log in to DigitalOcean Container Registry
-        run: doctl registry login
-
+        run: doctl registry login --expiry-seconds 1200
+      
       - name: Build Docker image
         run: |
           docker build \
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
             -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
-            -f PatchDb.Backend/PatchDb.Backend.Service/Dockerfile \
-            PatchDb.Backend/
+            -f PatchDb.Backend/patchdb-py-indexing/Dockerfile \
+            PatchDb.Backend/patchdb-py-indexing
 
       - name: Push Docker image
         run: |

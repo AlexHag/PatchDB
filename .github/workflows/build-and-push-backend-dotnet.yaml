@@ -1,0 +1,41 @@
+name: Build and Push .NET Backend Image
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - master
+
+env:
+  REGISTRY: ${{ vars.DIGITALOCEAN_CR }}
+  IMAGE_NAME: patchdb-backend-dotnet
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    environment: prod
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_API_KEY }}
+
+      - name: Log in to DigitalOcean Container Registry
+        run: doctl registry login --expiry-seconds 1200
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+            -f PatchDb.Backend/PatchDb.Backend.Service/Dockerfile \
+            PatchDb.Backend/
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
