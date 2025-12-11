@@ -1,0 +1,49 @@
+name: Build and Push Frontend
+
+# on:
+#   push:
+#     branches: [ "main" ]
+#     paths:
+#       - 'react-frontend/**'
+
+on:
+  workflow_dispatch:
+
+env:
+  REGISTRY: ${{ vars.DIGITALOCEAN_CR}}
+  IMAGE_NAME: patchdb-frontend
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_API_KEY }}
+      
+      - name: Log in to DigitalOcean Container Registry
+        run: doctl registry login --expiry-seconds 1200
+      
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
+            -f react-frontend/Dockerfile \
+            react-frontend
+      
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+      
+      # - name: Update deployment image
+      #   run: |
+      #     doctl kubernetes cluster kubeconfig save ${{ secrets.CLUSTER_NAME }}
+      #     kubectl set image deployment/frontend frontend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n patchdb
