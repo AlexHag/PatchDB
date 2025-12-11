@@ -1,0 +1,43 @@
+name: Update Backend .NET Configs
+
+# on:
+#   push:
+#     branches: [ "main" ]
+#     paths:
+#       - 'PatchDb.Backend/app-config/**'
+
+on:
+  workflow_dispatch:
+
+env:
+  CLUSTER_NAME: patchdb-k8
+  CLUSTER_NAMESPACE: patchdb
+  CONFIGMAP_NAME: backend-dotnet-config
+
+jobs:
+  update-configs:
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_API_KEY }}
+
+      - name: Save kubeconfig
+        run: doctl kubernetes cluster kubeconfig save ${{ env.CLUSTER_NAME }}
+      
+      - name: Update ConfigMap
+        run: |
+          kubectl create configmap ${{ env.CONFIGMAP_NAME }} \
+            --from-file=PatchDb.Backend/app-config/ \
+            -n ${{ env.CLUSTER_NAMESPACE }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      # - name: Restart Backend Deployment
+      #   run: |
+      #     kubectl rollout restart deployment/backend-dotnet -n ${{ env.CLUSTER_NAMESPACE }}
