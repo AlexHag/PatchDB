@@ -29,9 +29,9 @@ spec:
         - name: certificates
           mountPath: /certificates
           readOnly: true
-        # - name: app-secrets
-        #   mountPath: /app-secrets
-        #   readOnly: true
+        - name: app-secrets
+          mountPath: /app-secrets
+          readOnly: true
         env:
         - name: ASPNETCORE_ENVIRONMENT
           value: "Production"
@@ -54,9 +54,9 @@ spec:
               path: jwt_cert.pem
             - key: jwt_cert.pfx
               path: jwt_cert.pfx
-      # - name: app-secrets
-      #   secret:
-      #     secretName: backend-dotnet-secrets
+      - name: app-secrets
+        secret:
+          secretName: backend-dotnet-secrets
 ---
 apiVersion: v1
 kind: Service
