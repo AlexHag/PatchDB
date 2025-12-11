@@ -1,5 +1,33 @@
 ## TODO: Features
 
+
+
+### TODO: Prio
+
+1. Infrastructure
+- CICD Deploy on push to master
+
+2. User
+- Email / Phone number
+- Change / Reset Password
+
+3. Send Emails...
+
+4. Patch Details
+- When visiting a patch page
+    - See, you own this patch. You own X of these patches, update the number how many you own
+    - See who you follow that own this Patch
+    - See everyone that own this Patch
+    - See who uploaded this Patch
+    - Add this patch to favorite / wishlist
+
+5. Feed
+- See people you follow's new Patches
+- See newly submitted Patches
+- See Patch Events
+
+----
+
 - Authentication
     - Email
     - Password
@@ -78,39 +106,30 @@
 
 # Technical TODO:
 
-- Kubernetes
-    - Container Registry
-    - ArgoCD
-- Microservices or Monolith?
-- Rewrite frontend in react
-- Rewrite backend business logic (non image OCR code) in .NET
+### Done
+
+- Kubernetes - DONE
+- Container Registry - DONE
+- CI/CD - DONE
+- AWS S3 - DONE
+- Configuration / Secrets - DONE
+- HTTPS/TLS Certificates - DONE
+
+### TODO
 - Database
-    - SQLite
+    - ~~SQLite~~
     - MSSQL
+    - PostgreSQL
+    - MySQL
     - MongoDB
-- VPC
-    - Ingress / Egress rules
-    - Private Endpoints
-- Configuration / Secrets Manager
-    - Azure Key Valut
-- CI/CD
-- Terraform / OpenTofu
-- Nginx
-- Azure Blob Storage for images
-    - CDN?
-- Cloudflare
 - Pub/Sub
     - Kafka
-    - RabbitMQ?
-    - Redis?
+    - RabbitMQ
+    - Redis
 - Telemetry
     - Elastic Kibana
     - Datadog
-    - On-call OpsGenie
-- AI/ML OCR
-    - OpenAI Clip
-    - ResNet50 or other
-    - Self hosting compute or API
-        - AWS Rekognition?
-        - GPU instance
-    - Hire a fucking engineer I can't do this shit
+    - Grafana
+- ArgoCD
+- Terraform / OpenTofu
+- Cloudflare
