@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-dotnet
+  namespace: patchdb
+  labels:
+    app: backend-dotnet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-dotnet
+  template:
+    metadata:
+      labels:
+        app: backend-dotnet
+    spec:
+      imagePullSecrets:
+      - name: registry-patchdb-cr
+      containers:
+      - name: backend-dotnet
+        image: registry.digitalocean.com/patchdb-cr/patchdb-backend-dotnet:latest
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: app-config
+          mountPath: /app-config
+          readOnly: true
+        - name: certificates
+          mountPath: /certificates
+          readOnly: true
+        # - name: app-secrets
+        #   mountPath: /app-secrets
+        #   readOnly: true
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+        - name: IS_CONTAINER_ENVIRONMENT
+          value: "1"
+        - name: JWT_CERT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jwt-cert-secret
+              key: JWT_CERT_PASSWORD
+      volumes:
+      - name: app-config
+        configMap:
+          name: backend-dotnet-config
+      - name: certificates
+        secret:
+          secretName: jwt-cert-secret
+          items:
+            - key: jwt_cert.pem
+              path: jwt_cert.pem
+            - key: jwt_cert.pfx
+              path: jwt_cert.pfx
+      # - name: app-secrets
+      #   secret:
+      #     secretName: backend-dotnet-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-dotnet
+  namespace: patchdb
+spec:
+  selector:
+    app: backend-dotnet
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
