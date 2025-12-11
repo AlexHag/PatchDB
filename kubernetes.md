@@ -88,25 +88,39 @@ kubectl create secret generic jwt-cert-secret \
 ### 8. Run the github action pipelines to build and push container images to the repository
 
 - ``.github/build-and-push-backend-dotnet.yaml``
-- ``.github/build-and-push-backend-pything.yaml``
+- ``.github/build-and-push-backend-python.yaml``
+- ``.github/build-and-push-frontend.yaml``
 
 ---
 
 ### 9. Apply the deployments and services
 
 ```
-kubectl apply -f .kubernetes/03-backend-dotnet.yaml
-kubectl apply -f .kubernetes/04-backend-dotnet.yaml
+kubectl apply -f .kubernetes/05-backend-dotnet.yaml
+kubectl apply -f .kubernetes/06-backend-python.yaml
+kubectl apply -f .kubernetes/07-frontend.yaml
 ```
 
----
+### 10. Envoy Gateway
 
-### 10. Frontend
+Install the Envoy Gateway [docs](https://gateway.envoyproxy.io/docs/tasks/quickstart/)
+```
+helm install eg oci://docker.io/envoyproxy/gateway-helm --version v1.6.1 -n envoy-gateway-system --create-namespace
+```
 
-TODO
+Install cert-manager and enable Gateway API support
+```
+helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
+  --version v1.19.2 \
+  --namespace cert-manager \
+  --set config.apiVersion="controller.config.cert-manager.io/v1alpha1" \
+  --set config.kind="ControllerConfiguration" \
+  --set config.enableGatewayAPI=true \
+  --create-namespace
+  --set crds.enabled=true
+```
 
----
-
-### 11. Gateway
-
-TODO
+Apply the GatewayClass, Gateway, HTTPRoute, ClusterIssuer and Certificate
+```
+kubectl apply -f .kubernetes/08-envoy-gateway.yaml
+```
