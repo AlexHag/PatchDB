@@ -10,6 +10,7 @@ on:
   workflow_dispatch:
 
 env:
+  CLUSTER_NAME: patchdb-k8
   REGISTRY: ${{ vars.DIGITALOCEAN_CR}}
   IMAGE_NAME: patchdb-frontend
 
@@ -43,7 +44,7 @@ jobs:
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
       
-      # - name: Update deployment image
-      #   run: |
-      #     doctl kubernetes cluster kubeconfig save ${{ secrets.CLUSTER_NAME }}
-      #     kubectl set image deployment/frontend frontend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n patchdb
+      - name: Update deployment image
+        run: |
+          doctl kubernetes cluster kubeconfig save ${{ env.CLUSTER_NAME }}
+          kubectl set image deployment/${{ env.IMAGE_NAME }} ${{ env.IMAGE_NAME }}=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n patchdb
