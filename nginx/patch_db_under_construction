@@ -2,8 +2,8 @@ server {
     listen 443 ssl;
     listen [::]:443 ssl;
 
-    ssl_certificate     /etc/nginx/ssl/backend.crt;
-    ssl_certificate_key /etc/nginx/ssl/backend.key;
+    ssl_certificate     /etc/letsencrypt/live/patchdb.se/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/patchdb.se/privkey.pem;
     ssl_protocols       TLSv1.2 TLSv1.3;
     ssl_ciphers         HIGH:!aNULL:!MD5;
 
