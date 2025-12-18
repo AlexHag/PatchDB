@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PatchDB - Coming Soon</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --primary-light: #34495e;
+            --secondary-color: #e67e22;
+            --secondary-light: #f39c12;
+            --accent-teal: #1abc9c;
+            --accent-blue: #3498db;
+            --canvas: #fef5e7;
+            --linen: #f8f6f0;
+            --cream: #fdf6e3;
+            --border-color: #ecf0f1;
+            --shadow: 0 0.25rem 0.5rem rgba(52, 73, 94, 0.1);
+            --shadow-hover: 0 0.5rem 1rem rgba(52, 73, 94, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            color: var(--primary-color);
+            line-height: 1.6;
+        }
+
+        .patch-background {
+            background: url('login_background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .patch-background::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, var(--accent-teal) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, var(--accent-blue) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, var(--secondary-light) 0%, transparent 50%);
+            opacity: 0.03;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .card-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .coming-soon-card {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 1rem 3rem rgba(44, 62, 80, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            padding: 3rem 2rem;
+            text-align: center;
+            max-width: 480px;
+            width: 100%;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .brand-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2c3e50, #e67e22);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .brand-subtitle {
+            color: #7f8c8d;
+            font-size: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .construction-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1.5rem;
+            color: var(--secondary-color);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.05);
+                opacity: 0.85;
+            }
+        }
+
+        .coming-soon-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.75rem;
+        }
+
+        .coming-soon-description {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .decorative-line {
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-teal), var(--accent-blue), var(--secondary-color));
+            border-radius: 2px;
+            margin: 0 auto 2rem;
+        }
+
+        .feature-pills {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-pill {
+            background: linear-gradient(135deg, var(--cream) 0%, white 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 2rem;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            border-color: var(--secondary-color);
+        }
+
+        .footer-text {
+            font-size: 0.875rem;
+            color: #95a5a6;
+            margin-top: 1.5rem;
+        }
+
+        .footer-text a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .footer-text a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .coming-soon-card {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+                border-radius: 0.875rem;
+            }
+
+            .brand-title {
+                font-size: 2rem;
+            }
+
+            .coming-soon-title {
+                font-size: 1.5rem;
+            }
+
+            .coming-soon-description {
+                font-size: 1rem;
+            }
+
+            .construction-icon {
+                width: 80px;
+                height: 80px;
+            }
+
+            .feature-pill {
+                font-size: 0.8rem;
+                padding: 0.4rem 1rem;
+            }
+        }
+
+        @media (max-width: 375px) {
+            .coming-soon-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .brand-title {
+                font-size: 1.75rem;
+            }
+
+            .feature-pills {
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="patch-background">
+        <div class="container-fluid">
+            <div class="row justify-content-center min-vh-100 align-items-center card-wrapper">
+                <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 d-flex justify-content-center">
+                    <div class="coming-soon-card">
+                        <!-- Brand Header -->
+                        <h1 class="brand-title">🧵 PatchDB</h1>
+                        <p class="brand-subtitle">Your personal patch collection adventure</p>
+                        
+                        <!-- Decorative Line -->
+                        <div class="decorative-line"></div>
+                        
+                        <!-- Construction Icon -->
+                        <div class="construction-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M22.7,19L13.6,9.9C14.5,7.6 14,4.9 12.1,3C10.1,1 7.1,0.6 4.7,1.7L9,6L6,9L1.6,4.7C0.4,7.1 0.9,10.1 2.9,12.1C4.8,14 7.5,14.5 9.8,13.6L18.9,22.7C19.3,23.1 19.9,23.1 20.3,22.7L22.6,20.4C23.1,20 23.1,19.3 22.7,19Z"/>
+                            </svg>
+                        </div>
+                        
+                        <!-- Coming Soon Message -->
+                        <h2 class="coming-soon-title">Coming Soon</h2>
+                        <p class="coming-soon-description">
+                            We're crafting something special! This page is currently under construction. 
+                            Check back soon to discover new features.
+                        </p>
+                        
+                        <!-- Feature Pills -->
+                        <div class="feature-pills">
+                            <span class="feature-pill">📸 Snap Patches</span>
+                            <span class="feature-pill">🎯 Smart Matching</span>
+                            <span class="feature-pill">🌟 Collections</span>
+                            <span class="feature-pill">🏫 Universities</span>
+                        </div>
+                        
+                        <!-- Footer -->
+                        <p class="footer-text">
+                            Stay tuned for updates!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

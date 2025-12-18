@@ -1,0 +1,23 @@
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+
+    ssl_certificate     /etc/nginx/ssl/backend.crt;
+    ssl_certificate_key /etc/nginx/ssl/backend.key;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    root /var/www/coming_soon;
+    index index.html;
+
+    server_name patchdb.se;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location ~* \.(jpg|jpeg|png|gif|ico|svg|webp)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+}
